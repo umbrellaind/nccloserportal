@@ -34,7 +34,7 @@
       </div>
       <div id="navUserBox" class="hidden flex items-center gap-3">
         <span id="navRoleBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700"></span>
-        <button onclick="logout()" class="text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg transition">Logout</button>
+        <button type="button" onclick="logout()" class="text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg transition">Logout</button>
       </div>
     </div>
   </header>
@@ -56,22 +56,24 @@
         <p class="text-xs text-slate-500 mt-1">Enter your Hospital User ID & Password or Admin Login</p>
       </div>
 
-      <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+      <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID</label>
-          <input id="loginUserId" type="text" required placeholder="e.g. HOSP-101 or ADMIN-UHC"
+          <input id="loginUserId" type="text" autocomplete="off" placeholder="e.g. HOSP-101 or ADMIN-UHC"
+            onkeydown="if(event.key==='Enter') handleLoginSubmit(event)"
             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm font-medium uppercase" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-          <input id="loginPassword" type="password" required placeholder="••••••••"
+          <input id="loginPassword" type="password" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter') handleLoginSubmit(event)"
             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm" />
         </div>
         <div id="loginError" class="hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 p-2.5 rounded-lg"></div>
-        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
+        <button type="button" onclick="handleLoginSubmit(event)" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
           Login to Dashboard →
         </button>
-      </form>
+      </div>
     </div>
   </main>
 
@@ -107,7 +109,7 @@
           <p class="text-xs text-slate-500">All evidence auto-merges into Drive folder: <strong>NC CLOSER</strong></p>
         </div>
         <div class="flex items-center gap-3">
-          <button onclick="refreshAdminData()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl">
+          <button type="button" onclick="refreshAdminData()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl">
             ↻ Refresh
           </button>
           <div class="text-right">
@@ -133,10 +135,10 @@
           </div>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="copyShareMessage()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition">
+          <button type="button" onclick="copyShareMessage()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition">
             📋 Copy Link, ID & Pass for WhatsApp
           </button>
-          <button onclick="document.getElementById('credShareBox').classList.add('hidden')" class="bg-white border border-slate-300 text-slate-600 text-xs font-semibold px-3 py-2.5 rounded-xl">
+          <button type="button" onclick="document.getElementById('credShareBox').classList.add('hidden')" class="bg-white border border-slate-300 text-slate-600 text-xs font-semibold px-3 py-2.5 rounded-xl">
             Dismiss
           </button>
         </div>
@@ -145,10 +147,10 @@
 
     <!-- Admin Navigation Tabs -->
     <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
-      <button id="mainTabAssign" onclick="switchAdminMainTab('assign')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">
+      <button type="button" id="mainTabAssign" onclick="switchAdminMainTab('assign')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">
         1. Assign NCs & Review Proofs
       </button>
-      <button id="mainTabLogins" onclick="switchAdminMainTab('logins')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+      <button type="button" id="mainTabLogins" onclick="switchAdminMainTab('logins')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
         2. Active Hospital Logins & Passwords
       </button>
     </div>
@@ -159,8 +161,8 @@
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <h3 class="font-bold text-slate-900 text-base">Assign Corrective Action Requirements</h3>
           <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-            <button id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">Copy-Paste & Fetch from Sheet</button>
-            <button id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-600">One-by-One Entry</button>
+            <button type="button" id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">Copy-Paste & Fetch from Sheet</button>
+            <button type="button" id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-600">One-by-One Entry</button>
           </div>
         </div>
 
@@ -204,7 +206,7 @@
         </div>
 
         <!-- MODE B: ONE-BY-ONE -->
-        <form id="singleNcForm" onsubmit="submitSingleNC(event)" class="hidden grid grid-cols-1 md:grid-cols-12 gap-3 pt-2">
+        <div id="singleNcForm" class="hidden grid grid-cols-1 md:grid-cols-12 gap-3 pt-2">
           <div class="md:col-span-2">
             <label class="block text-xs font-bold text-slate-700 mb-1">Sr No</label>
             <input id="ncSrInput" type="text" placeholder="1"
@@ -212,7 +214,7 @@
           </div>
           <div class="md:col-span-6">
             <label class="block text-xs font-bold text-slate-700 mb-1">Corrective Action / Required Evidence *</label>
-            <input id="ncActionInput" type="text" required placeholder="e.g. Fire extinguisher refilling tag live photo"
+            <input id="ncActionInput" type="text" placeholder="e.g. Fire extinguisher refilling tag live photo"
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="md:col-span-4">
@@ -221,11 +223,11 @@
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="md:col-span-12 flex justify-end">
-            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow transition">
+            <button type="button" onclick="submitSingleNC(event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow transition">
               + Add Item & Generate Login
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       <!-- All NCs Review List -->
@@ -273,15 +275,15 @@
           <span id="modalNcTag" class="text-[11px] font-bold text-amber-400 uppercase"></span>
           <h3 class="font-bold text-sm sm:text-base">Add Photos / Scans / PDFs (Auto-Merges into 1 PDF)</h3>
         </div>
-        <button onclick="closeEvidenceModal()" class="text-slate-300 hover:text-white text-xl font-bold px-2">&times;</button>
+        <button type="button" onclick="closeEvidenceModal()" class="text-slate-300 hover:text-white text-xl font-bold px-2">&times;</button>
       </div>
 
       <div class="p-4 sm:p-5 space-y-4">
         <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl text-xs font-bold">
-          <button id="modeCamBtn" onclick="setCaptureMode('camera')" class="py-2 rounded-lg bg-white text-slate-900 shadow-sm">
+          <button type="button" id="modeCamBtn" onclick="setCaptureMode('camera')" class="py-2 rounded-lg bg-white text-slate-900 shadow-sm">
             📸 Live Camera (Photo / Scan)
           </button>
-          <button id="modeFileBtn" onclick="setCaptureMode('file')" class="py-2 rounded-lg text-slate-600">
+          <button type="button" id="modeFileBtn" onclick="setCaptureMode('file')" class="py-2 rounded-lg text-slate-600">
             📁 Add Existing Photo / PDF
           </button>
         </div>
@@ -360,7 +362,7 @@
     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-5 space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="font-bold text-slate-900 text-base">Unable to Provide / देने में असमर्थ</h3>
-        <button onclick="document.getElementById('unableModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+        <button type="button" onclick="document.getElementById('unableModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
       <p class="text-xs text-slate-600">
         Please write the reason why this evidence cannot be provided right now (कृपया कारण लिखें कि यह दस्तावेज़/साक्ष्य अभी क्यों उपलब्ध नहीं हो पा रहा है):
@@ -368,8 +370,8 @@
       <textarea id="unableReasonInput" rows="3" placeholder="e.g. Renewal applied at CMO office, receipt pending / नवीनीकरण हेतु आवेदन किया गया है..."
         class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-red-500 outline-none"></textarea>
       <div class="flex justify-end gap-2">
-        <button onclick="document.getElementById('unableModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
-        <button onclick="submitUnableResponse()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow">Submit Response</button>
+        <button type="button" onclick="document.getElementById('unableModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
+        <button type="button" onclick="submitUnableResponse()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow">Submit Response</button>
       </div>
     </div>
   </div>
@@ -377,7 +379,7 @@
   <canvas id="workCanvas" class="hidden"></canvas>
 
 <script>
-  const STORAGE_KEY = "nc_closer_session_v2";
+  const STORAGE_KEY = "nc_closer_session_v3";
   let session = { role: null, userId: "", password: "", hospital: null, ncs: [], adminData: { hospitals: [], ncs: [], inputSheetUrl: "" } };
   let activeNc = null;
   let cameraStream = null;
@@ -400,7 +402,7 @@
     }
   });
 
-function callApi(payload, msg = "Syncing with NC CLOSER...") {
+  function callApi(payload, msg = "Syncing with NC CLOSER...") {
     if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
       alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
       return Promise.resolve(null);
@@ -463,36 +465,14 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
     });
   }
 
-    // All other actions use 100% CORS-Free JSONP
-    return new Promise((resolve) => {
-      const cbName = "ncCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-      const jsonStr = JSON.stringify(payload);
-      const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
-        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-
-      const script = document.createElement("script");
-      window[cbName] = function(data) {
-        delete window[cbName];
-        script.remove();
-        document.getElementById("globalLoader").classList.add("hidden");
-        resolve(data);
-      };
-      script.onerror = function() {
-        delete window[cbName];
-        script.remove();
-        document.getElementById("globalLoader").classList.add("hidden");
-        alert("Connection Error: Unable to reach Apps Script URL. Check SCRIPT_URL.");
-        resolve(null);
-      };
-      script.src = `${SCRIPT_URL}?payload=${b64}&callback=${cbName}`;
-      document.body.appendChild(script);
-    });
-  }
-
   async function handleLoginSubmit(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     const uid = document.getElementById("loginUserId").value.trim().toUpperCase();
     const pass = document.getElementById("loginPassword").value.trim();
+    if (!uid || !pass) {
+      alert("Please enter both User ID and Password.");
+      return;
+    }
     await performLogin(uid, pass, false);
   }
 
@@ -599,11 +579,11 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
             </div>
             ${canRespond ? `
               <div class="flex flex-wrap gap-2">
-                <button onclick='openUnableModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
+                <button type="button" onclick='openUnableModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
                   class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 transition">
                   Unable to Provide / देने में असमर्थ
                 </button>
-                <button onclick='openEvidenceModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
+                <button type="button" onclick='openEvidenceModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
                   class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition">
                   📸 Capture / Upload Proof
                 </button>
@@ -1034,9 +1014,12 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
   }
 
   async function submitSingleNC(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     const target = getSelectedHospitalTarget();
     if (!target) return alert("Please select or enter a Hospital Name first.");
+
+    const actionText = document.getElementById("ncActionInput").value.trim();
+    if (!actionText) return alert("Please enter Corrective Action / Required Evidence.");
 
     const res = await callApi({
       action: "addNC",
@@ -1045,7 +1028,7 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
       hospitalName: target.hospitalName,
       city: target.city,
       srNo: document.getElementById("ncSrInput").value.trim(),
-      correctiveAction: document.getElementById("ncActionInput").value.trim(),
+      correctiveAction: actionText,
       adminNote: document.getElementById("ncSimpleNoteInput").value.trim()
     }, "Saving Item & Creating Folder inside NC CLOSER...");
 
@@ -1110,7 +1093,7 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
 
           <div class="flex items-start gap-2">
             <p class="text-xs sm:text-sm font-semibold text-slate-800">${nc.correctiveAction}</p>
-            <button onclick='editSimplifiedNote("${nc.userId}", "${nc.ncId}", ${JSON.stringify(nc.adminNote || "")})'
+            <button type="button" onclick='editSimplifiedNote("${nc.userId}", "${nc.ncId}", ${JSON.stringify(nc.adminNote || "")})'
               title="Add or edit simplified guidance note"
               class="shrink-0 w-6 h-6 rounded-full bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 font-extrabold text-xs flex items-center justify-center border border-slate-300">
               +
@@ -1125,10 +1108,10 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
         <div class="flex flex-wrap items-center gap-2 shrink-0">
           ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View Merged PDF</a>` : ''}
           ${(nc.status === 'Submitted' || nc.status === 'Unable to Provide') ? `
-            <button onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
-            <button onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg">✕ Reject</button>
+            <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
+            <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg">✕ Reject</button>
           ` : ''}
-          <button onclick="deleteNC('${nc.userId}', '${nc.ncId}')" title="Delete Item" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>
+          <button type="button" onclick="deleteNC('${nc.userId}', '${nc.ncId}')" title="Delete Item" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>
         </div>
       </div>
     `).join("");
@@ -1208,7 +1191,7 @@ function callApi(payload, msg = "Syncing with NC CLOSER...") {
             <p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>
             <p class="text-[11px] text-emerald-600 font-semibold mt-1">Completion: ${pct}% (${done}/${hospNcs.length} Approved)</p>
           </div>
-          <button onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
+          <button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
             class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg shrink-0">
             📋 Copy Login
           </button>
