@@ -400,7 +400,7 @@
     }
   });
 
-  function callApi(payload, msg = "Syncing with NC CLOSER...") {
+function callApi(payload, msg = "Syncing with NC CLOSER...") {
     if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
       alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
       return Promise.resolve(null);
@@ -408,7 +408,7 @@
     document.getElementById("loaderText").innerText = msg;
     document.getElementById("globalLoader").classList.remove("hidden");
 
-    // PDF Upload uses POST + JSONP refresh
+    // 1. PDF Upload uses POST + fetch refresh
     if (payload.action === "uploadProof") {
       return fetch(SCRIPT_URL, {
         method: "POST",
@@ -424,6 +424,44 @@
         return null;
       });
     }
+
+    // 2. Primary: Standard CORS-Enabled GET fetch (Never blocked by mobile browsers/trackers)
+    const jsonStr = JSON.stringify(payload);
+    const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+    return fetch(`${SCRIPT_URL}?payload=${b64}`, {
+      method: "GET",
+      redirect: "follow"
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("globalLoader").classList.add("hidden");
+      return data;
+    })
+    .catch(() => {
+      // 3. Automatic Fallback to JSONP if standard fetch fails
+      return new Promise((resolve) => {
+        const cbName = "ncCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+        const script = document.createElement("script");
+        window[cbName] = function(data) {
+          delete window[cbName];
+          script.remove();
+          document.getElementById("globalLoader").classList.add("hidden");
+          resolve(data);
+        };
+        script.onerror = function() {
+          delete window[cbName];
+          script.remove();
+          document.getElementById("globalLoader").classList.add("hidden");
+          alert("Network Error: Please open link in Google Chrome with active internet.");
+          resolve(null);
+        };
+        script.src = `${SCRIPT_URL}?payload=${b64}&callback=${cbName}`;
+        document.body.appendChild(script);
+      });
+    });
+  }
 
     // All other actions use 100% CORS-Free JSONP
     return new Promise((resolve) => {
