@@ -18,7 +18,7 @@
 
 <script>
   // =========================================================================
-  // YAHAN APNA NAYA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
+  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby12EBhrXxlwjRt6ESCk9fWwNfufQRiA5HFmFOOuNqtoe6BLIjgmx1Sbm3UtIPE-xD5/exec";
   // =========================================================================
 </script>
@@ -402,6 +402,7 @@
     }
   });
 
+  // CORS-Free API Handler (GET + WebSafe Base64 for JSON, POST no-cors + GET verify for PDF upload)
   async function callApi(payload, msg = "Syncing with NC CLOSER...") {
     if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
       alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
@@ -410,16 +411,22 @@
     document.getElementById("loaderText").innerText = msg;
     document.getElementById("globalLoader").classList.remove("hidden");
     try {
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        redirect: "follow",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload)
-      });
-      const text = await res.text();
-      return JSON.parse(text);
+      if (payload.action === "uploadProof") {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify(payload)
+        });
+        // Wait 1.5s for Drive file save, then fetch refreshed NCs via CORS-safe GET
+        await new Promise(r => setTimeout(r, 1500));
+        return await callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Upload...");
+      }
+
+      const jsonStr = JSON.stringify(payload);
+      const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
+        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      const res = await fetch(SCRIPT_URL + "?payload=" + b64, { method: "GET" });
+      return await res.json();
     } catch (err) {
       alert("Network Error: " + err.message);
       return null;
@@ -795,30 +802,23 @@
       const pageCount = mergedPdf.getPageCount();
       const mergedBase64 = await mergedPdf.saveAsBase64({ dataUri: true });
 
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        redirect: "follow",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify({
-          action: "uploadProof",
-          userId: session.userId,
-          password: session.password,
-          ncId: activeNc.ncId,
-          srNo: activeNc.srNo,
-          gps: currentCoords,
-          pageCount: pageCount,
-          fileBase64: mergedBase64
-        })
-      }).then(r => r.text()).then(t => JSON.parse(t));
+      const res = await callApi({
+        action: "uploadProof",
+        userId: session.userId,
+        password: session.password,
+        ncId: activeNc.ncId,
+        srNo: activeNc.srNo,
+        gps: currentCoords,
+        pageCount: pageCount,
+        fileBase64: mergedBase64
+      }, "Uploading Merged PDF...");
 
       if (res && res.status === "ok") {
         session.ncs = res.ncs;
         closeEvidenceModal();
         renderHospitalDashboard();
       } else {
-        alert(res.message || "Upload failed.");
+        alert((res && res.message) || "Upload failed.");
       }
     } catch (err) {
       alert("Error merging PDF: " + err.message);
