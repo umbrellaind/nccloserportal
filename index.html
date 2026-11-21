@@ -388,6 +388,64 @@
   let evidenceQueue = [];
   let lastShareText = "";
 
+  // =========================================================================
+  // SMART VISUAL FORMATTER FOR NC REQUIREMENTS (Option B)
+  // =========================================================================
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatNcRichText(rawText) {
+    const clean = String(rawText || "").replace(/\r\n/g, "\n").trim();
+    if (!clean) return "";
+
+    const lines = clean.split("\n");
+    let html = `<div class="space-y-2 text-xs sm:text-sm leading-relaxed">`;
+    let prevWasEnglish = false;
+    let dividerInserted = false;
+
+    const hasHindi = str => /[\u0900-\u097F]/.test(str);
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (!line) {
+        html += `<div class="h-1"></div>`;
+        continue;
+      }
+
+      const isHindiLine = hasHindi(line);
+      // Insert subtle divider when switching from English block to Hindi block
+      if (!dividerInserted && prevWasEnglish && isHindiLine) {
+        html += `<div class="border-t border-slate-200 my-2.5 pt-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400"><span>हिंदी विवरण / Hindi Translation</span></div>`;
+        dividerInserted = true;
+      }
+      if (!isHindiLine) prevWasEnglish = true;
+
+      if (line.startsWith("-") || line.startsWith("•") || line.startsWith("*")) {
+        const content = escapeHtml(line.replace(/^[-•*]\s*/, ""));
+        html += `
+          <div class="flex items-start gap-2 pl-2 text-slate-700">
+            <span class="text-red-500 font-bold mt-0.5">•</span>
+            <span>${content}</span>
+          </div>`;
+      } else {
+        // Highlight key requirement lines (like "need 20 GNM staff..." or primary statements)
+        html += `
+          <div class="font-bold text-slate-900 bg-slate-50/90 border-l-2 border-slate-400 px-2.5 py-1 rounded-r">
+            ${escapeHtml(line)}
+          </div>`;
+      }
+    }
+
+    html += `</div>`;
+    return html;
+  }
+
   window.addEventListener("DOMContentLoaded", async () => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -427,7 +485,7 @@
       });
     }
 
-    // 2. Primary: Standard CORS-Enabled GET fetch (Never blocked by mobile browsers/trackers)
+    // 2. Primary: Standard CORS-Enabled GET fetch
     const jsonStr = JSON.stringify(payload);
     const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
       .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -562,16 +620,16 @@
           </div>
 
           <div>
-            <p class="text-sm sm:text-base font-bold text-slate-900">${nc.correctiveAction}</p>
+            ${formatNcRichText(nc.correctiveAction)}
             ${nc.adminNote ? `
-              <div class="mt-2 bg-blue-50 border-l-4 border-blue-500 p-2.5 rounded-r-lg text-xs text-blue-900">
-                <strong>Guidance Note:</strong> ${nc.adminNote}
+              <div class="mt-3 bg-blue-50 border-l-4 border-blue-500 p-2.5 rounded-r-lg text-xs text-blue-900">
+                <strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}
               </div>
             ` : ''}
           </div>
 
-          ${nc.remark ? `<div class="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold p-2.5 rounded-lg">⚠ Admin Remark: ${nc.remark}</div>` : ''}
-          ${nc.status === 'Unable to Provide' && nc.hospitalResponse ? `<div class="bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold p-2.5 rounded-lg">📝 Your Response: ${nc.hospitalResponse}</div>` : ''}
+          ${nc.remark ? `<div class="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold p-2.5 rounded-lg">⚠ Admin Remark: ${escapeHtml(nc.remark)}</div>` : ''}
+          ${nc.status === 'Unable to Provide' && nc.hospitalResponse ? `<div class="bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold p-2.5 rounded-lg">📝 Your Response: ${escapeHtml(nc.hospitalResponse)}</div>` : ''}
 
           <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
             <div>
@@ -804,7 +862,7 @@
       <div class="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-200">
         <div class="flex items-center gap-2 truncate">
           <span>${item.type === 'pdf' ? '📑' : '🖼️'}</span>
-          <span class="font-semibold text-slate-700 truncate">${item.label}</span>
+          <span class="font-semibold text-slate-700 truncate">${escapeHtml(item.label)}</span>
         </div>
         <button type="button" onclick="removeQueueItem(${idx})" class="text-red-600 hover:text-red-800 font-bold px-2">✕</button>
       </div>
@@ -1077,10 +1135,10 @@
     }
 
     container.innerHTML = list.map(nc => `
-      <div class="border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="space-y-1 flex-1">
+      <div class="border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div class="space-y-2 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="font-bold text-sm text-slate-900">${nc.hospitalName}</span>
+            <span class="font-bold text-sm text-slate-900">${escapeHtml(nc.hospitalName)}</span>
             <span class="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded">${nc.userId}</span>
             <span class="font-mono text-[11px] bg-slate-900 text-white px-2 py-0.5 rounded">Sr. ${nc.srNo || nc.ncId}</span>
             <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
@@ -1092,7 +1150,7 @@
           </div>
 
           <div class="flex items-start gap-2">
-            <p class="text-xs sm:text-sm font-semibold text-slate-800">${nc.correctiveAction}</p>
+            <div class="flex-1">${formatNcRichText(nc.correctiveAction)}</div>
             <button type="button" onclick='editSimplifiedNote("${nc.userId}", "${nc.ncId}", ${JSON.stringify(nc.adminNote || "")})'
               title="Add or edit simplified guidance note"
               class="shrink-0 w-6 h-6 rounded-full bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 font-extrabold text-xs flex items-center justify-center border border-slate-300">
@@ -1100,8 +1158,8 @@
             </button>
           </div>
 
-          ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Simplified Note:</strong> ${nc.adminNote}</p>` : ''}
-          ${nc.status === 'Unable to Provide' ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${nc.hospitalResponse}</p>` : ''}
+          ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Simplified Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ''}
+          ${nc.status === 'Unable to Provide' ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ''}
           ${nc.gps && nc.status !== 'Unable to Provide' ? `<p class="text-[11px] text-slate-400">📍 ${nc.gps} • ${nc.submittedAt}</p>` : ''}
         </div>
 
@@ -1187,7 +1245,7 @@
       return `
         <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3">
           <div>
-            <h4 class="font-bold text-sm text-slate-900">${h.hospitalName}</h4>
+            <h4 class="font-bold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
             <p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>
             <p class="text-[11px] text-emerald-600 font-semibold mt-1">Completion: ${pct}% (${done}/${hospNcs.length} Approved)</p>
           </div>
