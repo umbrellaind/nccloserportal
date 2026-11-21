@@ -19,7 +19,7 @@
 <script>
   // =========================================================================
   // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby12EBhrXxlwjRt6ESCk9fWwNfufQRiA5HFmFOOuNqtoe6BLIjgmx1Sbm3UtIPE-xD5/exec";
+  const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
   // =========================================================================
 </script>
 
@@ -402,37 +402,56 @@
     }
   });
 
-  // CORS-Free API Handler (GET + WebSafe Base64 for JSON, POST no-cors + GET verify for PDF upload)
-  async function callApi(payload, msg = "Syncing with NC CLOSER...") {
+  // 100% CORS-Proof JSONP API Handler
+  function callApi(payload, msg = "Syncing with NC CLOSER...") {
     if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
       alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
-      return null;
+      return Promise.resolve(null);
     }
     document.getElementById("loaderText").innerText = msg;
     document.getElementById("globalLoader").classList.remove("hidden");
-    try {
-      if (payload.action === "uploadProof") {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify(payload)
-        });
-        // Wait 1.5s for Drive file save, then fetch refreshed NCs via CORS-safe GET
-        await new Promise(r => setTimeout(r, 1500));
-        return await callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Upload...");
-      }
 
+    // PDF upload uses POST (no-cors) + JSONP refresh
+    if (payload.action === "uploadProof") {
+      return fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload)
+      }).then(() => {
+        return new Promise(r => setTimeout(r, 1800));
+      }).then(() => {
+        return callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Uploaded PDF...");
+      }).catch(err => {
+        document.getElementById("globalLoader").classList.add("hidden");
+        alert("Upload Error: " + err.message);
+        return null;
+      });
+    }
+
+    // All other actions use JSONP (bypasses all browser CORS rules)
+    return new Promise((resolve) => {
+      const cbName = "ncCb_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
       const jsonStr = JSON.stringify(payload);
       const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
         .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-      const res = await fetch(SCRIPT_URL + "?payload=" + b64, { method: "GET" });
-      return await res.json();
-    } catch (err) {
-      alert("Network Error: " + err.message);
-      return null;
-    } finally {
-      document.getElementById("globalLoader").classList.add("hidden");
-    }
+
+      const script = document.createElement("script");
+      window[cbName] = function(data) {
+        delete window[cbName];
+        script.remove();
+        document.getElementById("globalLoader").classList.add("hidden");
+        resolve(data);
+      };
+      script.onerror = function() {
+        delete window[cbName];
+        script.remove();
+        document.getElementById("globalLoader").classList.add("hidden");
+        alert("Connection Error: Unable to reach Apps Script URL. Check SCRIPT_URL.");
+        resolve(null);
+      };
+      script.src = `${SCRIPT_URL}?payload=${b64}&callback=${cbName}`;
+      document.body.appendChild(script);
+    });
   }
 
   async function handleLoginSubmit(e) {
