@@ -18,7 +18,7 @@
 
 <script>
   // =========================================================================
-  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL PASTE KAREIN:
+  // YAHAN APNA NAYA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby12EBhrXxlwjRt6ESCk9fWwNfufQRiA5HFmFOOuNqtoe6BLIjgmx1Sbm3UtIPE-xD5/exec";
   // =========================================================================
 </script>
@@ -100,7 +100,6 @@
 
   <!-- 3. ADMIN DASHBOARD -->
   <section id="adminSection" class="hidden max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
-    <!-- Top Progress & Stats -->
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
@@ -413,9 +412,14 @@
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
         body: JSON.stringify(payload)
       });
-      return await res.json();
+      const text = await res.text();
+      return JSON.parse(text);
     } catch (err) {
       alert("Network Error: " + err.message);
       return null;
@@ -793,6 +797,10 @@
 
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
         body: JSON.stringify({
           action: "uploadProof",
           userId: session.userId,
@@ -803,7 +811,7 @@
           pageCount: pageCount,
           fileBase64: mergedBase64
         })
-      }).then(r => r.json());
+      }).then(r => r.text()).then(t => JSON.parse(t));
 
       if (res && res.status === "ok") {
         session.ncs = res.ncs;
