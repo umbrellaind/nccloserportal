@@ -411,16 +411,21 @@
     document.getElementById("loaderText").innerText = msg;
     document.getElementById("globalLoader").classList.remove("hidden");
 
-    // PDF upload uses POST (no-cors) + JSONP refresh
-    if (payload.action === "uploadProof") {
+// Large payloads (PDF Upload & Excel Bulk Upload) use POST + JSONP refresh to avoid URL length limits
+    if (payload.action === "uploadProof" || payload.action === "bulkAddNC") {
       return fetch(SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
         body: JSON.stringify(payload)
       }).then(() => {
-        return new Promise(r => setTimeout(r, 1800));
-      }).then(() => {
-        return callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Uploaded PDF...");
+        // Wait 1.5 seconds for Apps Script to finish writing rows, then fetch fresh data via JSONP
+        return new Promise(r => setTimeout(r, 1500)).then(() => {
+          if (payload.action === "uploadProof") {
+            return callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Uploaded PDF...");
+          } else {
+            return callApi({ action: "getAdminData", adminUser: session.userId, adminPass: session.password }, "Loading Newly Added NCs...");
+          }
+        });
       }).catch(err => {
         document.getElementById("globalLoader").classList.add("hidden");
         alert("Upload Error: " + err.message);
