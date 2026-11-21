@@ -1008,7 +1008,7 @@
     XLSX.writeFile(wb, "NC_CLOSER_2Column_Template.xlsx");
   }
 
-  function handleBulkFile(e) {
+function handleBulkFile(e) {
     const file = e.target.files[0];
     if (!file) return;
     const target = getSelectedHospitalTarget();
@@ -1046,12 +1046,16 @@
       if (res && res.status === "ok") {
         session.adminData = res.data;
         renderAdminDashboard();
-        showCredentialShareCard(res.credentialCard);
+        const createdHosp = session.adminData.hospitals.find(
+          h => h.hospitalName.toUpperCase() === target.hospitalName.toUpperCase()
+        );
+        if (createdHosp && createdHosp.userId) {
+          showCredentialShareCard(createdHosp);
+        }
       }
     };
     reader.readAsBinaryString(file);
   }
-
   function showCredentialShareCard(hosp) {
     const portalUrl = window.location.href.split("?")[0];
     document.getElementById("shareHospName").innerText = hosp.hospitalName;
