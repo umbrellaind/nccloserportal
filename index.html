@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NC CLOSER — NABH Evidence & Compliance Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -18,7 +17,7 @@
 
 <script>
   // =========================================================================
-  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
+  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL PASTE KAREIN:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby12EBhrXxlwjRt6ESCk9fWwNfufQRiA5HFmFOOuNqtoe6BLIjgmx1Sbm3UtIPE-xD5/exec";
   // =========================================================================
 </script>
@@ -100,6 +99,7 @@
 
   <!-- 3. ADMIN DASHBOARD -->
   <section id="adminSection" class="hidden max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
+    <!-- Top Progress & Stats -->
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
@@ -157,9 +157,9 @@
     <div id="adminAssignView" class="space-y-6">
       <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-900 text-base">Upload Corrective Action Requirements</h3>
+          <h3 class="font-bold text-slate-900 text-base">Assign Corrective Action Requirements</h3>
           <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-            <button id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">2-Column Excel Upload</button>
+            <button id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">Copy-Paste & Fetch from Sheet</button>
             <button id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-600">One-by-One Entry</button>
           </div>
         </div>
@@ -186,22 +186,20 @@
           </div>
         </div>
 
-        <!-- MODE A: SIMPLE 2-COLUMN EXCEL UPLOAD -->
+        <!-- MODE A: COPY-PASTE GOOGLE SHEET & 1-CLICK FETCH -->
         <div id="bulkNcBox" class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 text-center space-y-3">
           <p class="text-xs text-slate-700">
-            Select Hospital above, then upload a simple <strong>2-Column Excel (.xlsx / .csv)</strong>:
-            <br class="sm:hidden" />
-            <code class="bg-white px-2 py-0.5 rounded border font-bold">Sr No</code> &nbsp;|&nbsp;
-            <code class="bg-white px-2 py-0.5 rounded border font-bold">Corrective Action Evidence</code>
+            <strong>Zero Upload Hassle:</strong> Paste your NCs (<code>Sr No</code> in Col A, <code>Corrective Action Evidence</code> in Col B) into the Input Sheet, select Hospital above, and click Fetch!
           </p>
           <div class="flex flex-wrap justify-center gap-3">
-            <button type="button" onclick="downloadSampleExcel()" class="text-xs font-bold bg-white border border-slate-300 hover:bg-slate-100 px-4 py-2 rounded-lg">
-              ⬇ Download 2-Column Sample Excel
+            <a id="openInputSheetLink" href="#" target="_blank"
+              class="text-xs font-bold bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 px-4 py-2.5 rounded-xl shadow-sm inline-flex items-center gap-1.5">
+              📄 Step 1: Open NC Input Sheet (Paste NCs Here) ↗
+            </a>
+            <button type="button" onclick="fetchFromInputSheet()"
+              class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl shadow transition">
+              ⚡ Step 2: Fetch Pasted NCs for Selected Hospital
             </button>
-            <label class="cursor-pointer text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg shadow-sm">
-              📤 Upload Excel for Selected Hospital
-              <input id="bulkFileInput" type="file" accept=".xlsx,.xls,.csv" onchange="handleBulkFile(event)" class="hidden" />
-            </label>
           </div>
         </div>
 
@@ -380,7 +378,7 @@
 
 <script>
   const STORAGE_KEY = "nc_closer_session_v2";
-  let session = { role: null, userId: "", password: "", hospital: null, ncs: [], adminData: { hospitals: [], ncs: [] } };
+  let session = { role: null, userId: "", password: "", hospital: null, ncs: [], adminData: { hospitals: [], ncs: [], inputSheetUrl: "" } };
   let activeNc = null;
   let cameraStream = null;
   let facingMode = "environment";
@@ -402,7 +400,6 @@
     }
   });
 
-  // 100% CORS-Proof JSONP API Handler
   function callApi(payload, msg = "Syncing with NC CLOSER...") {
     if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
       alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
@@ -411,20 +408,15 @@
     document.getElementById("loaderText").innerText = msg;
     document.getElementById("globalLoader").classList.remove("hidden");
 
-// Large payloads (PDF Upload & Excel Bulk Upload) use POST + JSONP refresh to avoid URL length limits
-    if (payload.action === "uploadProof" || payload.action === "bulkAddNC") {
+    // PDF Upload uses POST + JSONP refresh
+    if (payload.action === "uploadProof") {
       return fetch(SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
         body: JSON.stringify(payload)
       }).then(() => {
-        // Wait 1.5 seconds for Apps Script to finish writing rows, then fetch fresh data via JSONP
-        return new Promise(r => setTimeout(r, 1500)).then(() => {
-          if (payload.action === "uploadProof") {
-            return callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Uploaded PDF...");
-          } else {
-            return callApi({ action: "getAdminData", adminUser: session.userId, adminPass: session.password }, "Loading Newly Added NCs...");
-          }
+        return new Promise(r => setTimeout(r, 4000)).then(() => {
+          return callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Uploaded PDF...");
         });
       }).catch(err => {
         document.getElementById("globalLoader").classList.add("hidden");
@@ -433,9 +425,9 @@
       });
     }
 
-    // All other actions use JSONP (bypasses all browser CORS rules)
+    // All other actions use 100% CORS-Free JSONP
     return new Promise((resolve) => {
-      const cbName = "ncCb_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+      const cbName = "ncCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
       const jsonStr = JSON.stringify(payload);
       const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
         .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -921,7 +913,11 @@
   }
 
   function renderAdminDashboard() {
-    const { hospitals, ncs } = session.adminData;
+    const { hospitals, ncs, inputSheetUrl } = session.adminData;
+
+    if (inputSheetUrl) {
+      document.getElementById("openInputSheetLink").href = inputSheetUrl;
+    }
 
     const select = document.getElementById("adminHospSelect");
     const currentSel = select.value;
@@ -972,6 +968,33 @@
     return { hospitalName: sel, city: "" };
   }
 
+  async function fetchFromInputSheet() {
+    const target = getSelectedHospitalTarget();
+    if (!target) {
+      return alert("Please select a Hospital from the dropdown (or choose + ADD NEW HOSPITAL) first!");
+    }
+
+    const res = await callApi({
+      action: "fetchFromInputSheet",
+      adminUser: session.userId,
+      adminPass: session.password,
+      hospitalName: target.hospitalName,
+      city: target.city
+    }, `Fetching NCs from Sheet for ${target.hospitalName}...`);
+
+    if (!res) return;
+    if (res.status !== "ok") {
+      return alert(res.message || "Could not fetch NCs.");
+    }
+
+    session.adminData = res.data;
+    renderAdminDashboard();
+    if (res.credentialCard) {
+      showCredentialShareCard(res.credentialCard);
+    }
+    alert(`✓ Successfully imported ${res.fetchedCount} NCs for ${target.hospitalName}!`);
+  }
+
   async function submitSingleNC(e) {
     e.preventDefault();
     const target = getSelectedHospitalTarget();
@@ -998,64 +1021,6 @@
     }
   }
 
-  function downloadSampleExcel() {
-    const ws = XLSX.utils.json_to_sheet([
-      { "Sr No": 1, "Corrective Action Evidence": "Fire extinguisher refilling tag live photo in OPD corridor" },
-      { "Sr No": 2, "Corrective Action Evidence": "Updated BMW authorization certificate & training attendance register" }
-    ]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "NC_List");
-    XLSX.writeFile(wb, "NC_CLOSER_2Column_Template.xlsx");
-  }
-
-function handleBulkFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const target = getSelectedHospitalTarget();
-    if (!target) {
-      e.target.value = "";
-      return alert("Please select a Hospital from the dropdown (or choose + ADD NEW HOSPITAL) before uploading Excel.");
-    }
-
-    const reader = new FileReader();
-    reader.onload = async evt => {
-      const wb = XLSX.read(evt.target.result, { type: "binary" });
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-      const items = rows.map(r => {
-        const keys = Object.keys(r);
-        const srKey = keys.find(k => k.toLowerCase().includes("sr") || k.toLowerCase().includes("no")) || keys[0];
-        const actKey = keys.find(k => k.toLowerCase().includes("action") || k.toLowerCase().includes("evidence") || k.toLowerCase().includes("corrective")) || keys[1];
-        return {
-          srNo: r[srKey],
-          correctiveAction: r[actKey]
-        };
-      }).filter(x => x.correctiveAction);
-
-      e.target.value = "";
-      if (!items.length) return alert("No valid rows found. Make sure Column 1 is Sr No and Column 2 is Corrective Action Evidence.");
-
-      const res = await callApi({
-        action: "bulkAddNC",
-        adminUser: session.userId,
-        adminPass: session.password,
-        hospitalName: target.hospitalName,
-        city: target.city,
-        items: items
-      }, `Uploading ${items.length} Items for ${target.hospitalName}...`);
-
-      if (res && res.status === "ok") {
-        session.adminData = res.data;
-        renderAdminDashboard();
-        const createdHosp = session.adminData.hospitals.find(
-          h => h.hospitalName.toUpperCase() === target.hospitalName.toUpperCase()
-        );
-        if (createdHosp && createdHosp.userId) {
-          showCredentialShareCard(createdHosp);
-        }
-      }
-    };
-    reader.readAsBinaryString(file);
-  }
   function showCredentialShareCard(hosp) {
     const portalUrl = window.location.href.split("?")[0];
     document.getElementById("shareHospName").innerText = hosp.hospitalName;
