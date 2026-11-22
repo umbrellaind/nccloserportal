@@ -57,13 +57,13 @@
       <div class="text-center mb-6">
         <span class="inline-block px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold tracking-wide uppercase mb-2">Secure Portal Access</span>
         <h2 class="text-2xl font-extrabold text-slate-900">Sign In to NC CLOSER</h2>
-        <p class="text-xs text-slate-500 mt-1">Enter your Hospital User ID & Password or Admin Login</p>
+        <p class="text-xs text-slate-500 mt-1">Hospital Login, Ops Team (Mobile & Pass), or Super Admin</p>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID</label>
-          <input id="loginUserId" type="text" autocomplete="off" placeholder="e.g. HOSP-101 or ADMIN-UHC"
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID or Registered Mobile</label>
+          <input id="loginUserId" type="text" autocomplete="off" placeholder="e.g. HOSP-101, 9889732893, or ADMIN-UHC"
             onkeydown="if(event.key==='Enter') handleLoginSubmit(event)"
             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm font-medium uppercase" />
         </div>
@@ -81,9 +81,8 @@
     </div>
   </main>
 
-  <!-- 2. HOSPITAL DASHBOARD -->
+  <!-- 2. HOSPITAL DASHBOARD (Hospital Self-Upload View) -->
   <section id="hospitalSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
-    <!-- LIVE DEADLINE COUNTDOWN BANNER (Hospital View) -->
     <div id="hospDeadlineBanner" class="hidden rounded-2xl border-2 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <span class="text-[11px] font-extrabold uppercase tracking-wider block">⏳ Submission Target Deadline / अंतिम समय सीमा</span>
@@ -115,14 +114,64 @@
     <div id="hospNcList" class="space-y-4"></div>
   </section>
 
-  <!-- 3. ADMIN DASHBOARD -->
+  <!-- 2B. OPS / CALENDAR DIRECT HOSPITAL VIEW (?hosp=HOSP-101) -->
+  <section id="opsHospitalViewSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
+    <!-- Top Hospital Header + Internal Google Drive Link + Download All CSV -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="opsViewHospId" class="font-mono text-xs font-extrabold bg-red-600 text-white px-2.5 py-0.5 rounded"></span>
+            <span id="opsViewAgentBadge" class="hidden text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full"></span>
+          </div>
+          <h2 id="opsViewHospName" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1"></h2>
+          <p id="opsViewDeadlineText" class="text-xs font-semibold text-slate-500 mt-0.5"></p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div id="opsViewTimerBox" data-countdown="" class="hidden bg-slate-900 text-emerald-300 px-3.5 py-2 rounded-xl font-mono text-xs sm:text-sm font-extrabold">
+            Calculating...
+          </div>
+          <div class="text-right">
+            <div id="opsViewPercent" class="text-2xl font-black text-emerald-600">0%</div>
+            <div id="opsViewSummary" class="text-[11px] font-semibold text-slate-500">0 / 0 Approved</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar: Google Drive Folder (Inside Portal) + Download All NCs + Ops Operator Login -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
+        <div class="flex flex-wrap gap-2">
+          <a id="opsViewDriveBtn" href="#" target="_blank"
+            class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm inline-flex items-center gap-1.5 transition">
+            📁 Open Google Drive Folder (Download PDFs) ↗
+          </a>
+          <button type="button" onclick="downloadOpsHospitalCsv()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm inline-flex items-center gap-1.5 transition">
+            📥 Download All NCs (Excel / CSV)
+          </button>
+        </div>
+
+        <div id="opsAuthStatusBox">
+          <button type="button" onclick="openOpsAuthModal()"
+            class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition">
+            🔐 Ops Operator Login (Approve / Reject)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="opsViewNcList" class="space-y-4"></div>
+  </section>
+
+  <!-- 3. ADMIN / OPS TEAM DASHBOARD -->
   <section id="adminSection" class="hidden max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
     <!-- Top Progress & Stats -->
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
-          <h2 class="text-xl font-extrabold text-slate-900">NC CLOSER — Admin Control Center</h2>
-          <p class="text-xs text-slate-500">All evidence auto-merges into Drive folder: <strong>NC CLOSER</strong></p>
+          <h2 id="adminHeaderTitle" class="text-xl font-extrabold text-slate-900">NC CLOSER — Admin Control Center</h2>
+          <p class="text-xs text-slate-500">Auto-syncs target links to <strong>WORKING TARGETS</strong> & stores PDFs in <strong>NC CLOSER</strong></p>
         </div>
         <div class="flex items-center gap-3">
           <button type="button" onclick="refreshAdminData()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl">
@@ -146,7 +195,7 @@
           <span class="inline-block px-2.5 py-0.5 bg-emerald-600 text-white text-[11px] font-bold rounded-full">✓ SAVED IN "NC CLOSER" & LOGIN READY</span>
           <h3 class="text-lg font-extrabold text-slate-900" id="shareHospName"></h3>
           <div class="text-xs sm:text-sm text-slate-700 space-y-0.5 font-medium">
-            <p><strong>Portal Link:</strong> <span id="sharePortalLink" class="text-blue-700 underline break-all"></span></p>
+            <p><strong>Hospital Login Link:</strong> <span id="sharePortalLink" class="text-blue-700 underline break-all"></span></p>
             <p><strong>User ID:</strong> <span id="shareUserId" class="font-mono font-bold bg-white px-2 py-0.5 rounded border"></span> &nbsp;|&nbsp; <strong>Password:</strong> <span id="sharePass" class="font-mono font-bold bg-white px-2 py-0.5 rounded border"></span></p>
             <p id="shareDeadlineLine" class="hidden text-red-700 font-bold"></p>
           </div>
@@ -168,16 +217,17 @@
     <!-- Admin Navigation Tabs -->
     <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
       <button type="button" id="mainTabAssign" onclick="switchAdminMainTab('assign')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">
-        1. Assign NCs & Review Proofs
+        1. NCs & Evidence Verification
       </button>
       <button type="button" id="mainTabLogins" onclick="switchAdminMainTab('logins')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
-        2. Active Hospital Cards, Timers & Direct Portal
+        2. Hospital Cards, Drive Folders & Timers
       </button>
     </div>
 
     <!-- TAB 1: ASSIGN & REVIEW -->
     <div id="adminAssignView" class="space-y-6">
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <!-- Super Admin Only: Assign New NCs Box -->
+      <div id="superAdminAssignBox" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <h3 class="font-bold text-slate-900 text-base">Assign Corrective Action Requirements</h3>
           <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
@@ -186,11 +236,10 @@
           </div>
         </div>
 
-        <!-- SEARCHABLE HOSPITAL PICKER + TARGET DEADLINE -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div class="md:col-span-7 space-y-1.5">
+          <div class="md:col-span-5 space-y-1.5">
             <label class="block text-xs font-bold text-slate-700">1. Search & Select Hospital *</label>
-            <div class="relative">
+            <div>
               <input id="hospSearchBox" type="text" oninput="filterHospitalDropdown()" placeholder="🔍 Type hospital name to filter list..."
                 class="w-full px-3.5 py-2 rounded-t-xl border border-b-0 border-slate-300 bg-slate-50 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-red-500 outline-none" />
               <select id="adminHospSelect" onchange="toggleNewHospitalInput()"
@@ -199,11 +248,20 @@
             </div>
           </div>
 
-          <div class="md:col-span-5 space-y-1.5">
-            <label class="block text-xs font-bold text-slate-700">2. Target Submission Date & Time (Live Timer)</label>
+          <div class="md:col-span-4 space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700">2. Target Submission Date & Time</label>
             <input id="assignDeadlineInput" type="datetime-local"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-medium" />
-            <p class="text-[10px] text-slate-400">Optional: Starts a live countdown timer on Hospital & Admin cards</p>
+            <p class="text-[10px] text-slate-400">Starts live countdown & pins card in Ops Calendar</p>
+          </div>
+
+          <div class="md:col-span-3 space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700">3. Ops Calendar Agent</label>
+            <select id="assignOpsAgentSelect"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-semibold">
+              <option value="">Auto-Detect from Sheet</option>
+            </select>
+            <p id="detectedAgentHint" class="text-[10px] text-emerald-700 font-bold truncate">Auto-matches from WORKING TARGETS</p>
           </div>
 
           <div id="newHospFields" class="hidden md:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-red-50/60 p-3 rounded-xl border border-red-200">
@@ -220,7 +278,6 @@
           </div>
         </div>
 
-        <!-- MODE A: COPY-PASTE GOOGLE SHEET & 1-CLICK FETCH -->
         <div id="bulkNcBox" class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 text-center space-y-3">
           <p class="text-xs text-slate-700">
             <strong>Zero Upload Hassle:</strong> Paste your NCs (<code>Sr No</code> in Col A, <code>Corrective Action Evidence</code> in Col B) into the Input Sheet, select Hospital & Deadline above, and click Fetch!
@@ -237,7 +294,6 @@
           </div>
         </div>
 
-        <!-- MODE B: ONE-BY-ONE -->
         <div id="singleNcForm" class="hidden grid grid-cols-1 md:grid-cols-12 gap-3 pt-2">
           <div class="md:col-span-2">
             <label class="block text-xs font-bold text-slate-700 mb-1">Sr No</label>
@@ -272,6 +328,10 @@
             <select id="adminFilterHosp" onchange="onFilterHospChange()" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white font-semibold">
               <option value="ALL">All Hospitals</option>
             </select>
+            <a id="filterDriveLinkBtn" href="#" target="_blank"
+              class="hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
+              📁 Drive Folder ↗
+            </a>
             <button id="filterOpenPortalBtn" type="button" onclick="openSelectedFilterHospitalPortal()"
               class="hidden text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg shadow-sm">
               👁 Open Hospital Portal
@@ -291,12 +351,12 @@
       </div>
     </div>
 
-    <!-- TAB 2: ACTIVE HOSPITAL CARDS, TIMERS & DIRECT PORTAL -->
+    <!-- TAB 2: ACTIVE HOSPITAL CARDS, DRIVE FOLDERS & TIMERS -->
     <div id="adminLoginsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Active Hospital Cards, Live Timers & Direct Portal Access</h3>
-          <p class="text-xs text-slate-500">Set/edit deadlines, monitor countdowns, copy credentials, or open any hospital's portal directly</p>
+          <h3 class="font-bold text-slate-900 text-base">Hospital Cards, Google Drive Folders & Live Timers</h3>
+          <p class="text-xs text-slate-500">Access hospital Drive folders, download all NCs, monitor countdowns, or open any hospital portal</p>
         </div>
         <input id="directorySearchInput" type="text" oninput="renderActiveLoginsDirectory()" placeholder="🔍 Search active hospital..."
           class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white outline-none focus:border-red-500" />
@@ -326,7 +386,6 @@
           </button>
         </div>
 
-        <!-- LIVE CAMERA -->
         <div id="cameraViewBox" class="space-y-3">
           <div class="relative bg-black rounded-xl overflow-hidden aspect-[4/3] flex items-center justify-center">
             <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
@@ -355,7 +414,6 @@
           </button>
         </div>
 
-        <!-- FILE / PDF UPLOAD -->
         <div id="fileUploadBox" class="hidden space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
             <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -376,7 +434,6 @@
           </label>
         </div>
 
-        <!-- MERGE QUEUE LIST -->
         <div class="border-t border-slate-200 pt-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-extrabold text-slate-800">Attached Items in Queue (<span id="queueCount">0</span>)</span>
@@ -414,20 +471,52 @@
     </div>
   </div>
 
+  <!-- 6. OPS OPERATOR LOGIN MODAL (For Approve / Reject on ?hosp= View) -->
+  <div id="opsAuthModal" class="hidden fixed inset-0 bg-slate-900/75 z-40 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-5 space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-slate-900 text-base">🔐 Ops Operator Verification</h3>
+        <button type="button" onclick="document.getElementById('opsAuthModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+      <p class="text-xs text-slate-600">
+        Enter your registered Mobile Number & Password (from <strong>USERS_AUTH</strong>) to unlock Approve / Reject buttons:
+      </p>
+      <div class="space-y-3">
+        <input id="opsModalMobile" type="text" placeholder="Registered Mobile Number (e.g. 9889732893)"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
+        <input id="opsModalPass" type="password" placeholder="Password"
+          onkeydown="if(event.key==='Enter') submitOpsModalLogin()"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="document.getElementById('opsAuthModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
+        <button type="button" onclick="submitOpsModalLogin()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow">Unlock Ops Controls</button>
+      </div>
+    </div>
+  </div>
+
   <canvas id="workCanvas" class="hidden"></canvas>
 
 <script>
-  const STORAGE_KEY = "nc_closer_session_v4";
+  const STORAGE_KEY = "nc_closer_session_v6";
+  const OPS_AUTH_KEY = "nc_closer_ops_auth_v1";
+
   let session = {
-    role: null,
+    role: null,        // "admin", "ops_team", "hospital"
+    subRole: "",       // "ADMIN", "OPERATOR", "ASSOCIATE"
+    fullName: "",
     userId: "",
     password: "",
     isAdminImpersonating: false,
     adminCredentials: null,
     hospital: null,
     ncs: [],
-    adminData: { hospitals: [], ncs: [], inputSheetUrl: "" }
+    adminData: { hospitals: [], ncs: [], inputSheetUrl: "", opsAgents: [] }
   };
+
+  let opsPublicViewData = { hospital: null, ncs: [] };
+  let opsUnlockedUser = null; // { loginId, password, fullName, role }
+
   let activeNc = null;
   let cameraStream = null;
   let facingMode = "environment";
@@ -436,7 +525,7 @@
   let lastShareText = "";
 
   // =========================================================================
-  // LIVE COUNTDOWN TIMER ENGINE (Updates every 1 second across Hospital & Admin)
+  // LIVE COUNTDOWN TIMER ENGINE
   // =========================================================================
   setInterval(updateAllCountdowns, 1000);
 
@@ -473,7 +562,7 @@
       const res = computeCountdownText(iso);
       el.innerText = res.text;
       if (res.expired) {
-        el.classList.remove("bg-slate-900", "text-emerald-300", "bg-amber-900");
+        el.classList.remove("bg-slate-900", "text-emerald-300");
         el.classList.add("bg-red-600", "text-white");
       } else {
         el.classList.remove("bg-red-600", "text-white");
@@ -506,7 +595,6 @@
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-
       if (!line) {
         html += `<div class="h-1"></div>`;
         continue;
@@ -538,7 +626,23 @@
     return html;
   }
 
+  // =========================================================================
+  // INITIALIZATION: CHECK ?hosp= DIRECT LINK FIRST, ELSE SAVED SESSION
+  // =========================================================================
   window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const savedOps = localStorage.getItem(OPS_AUTH_KEY);
+      if (savedOps) opsUnlockedUser = JSON.parse(savedOps);
+    } catch (e) {}
+
+    const params = new URLSearchParams(window.location.search);
+    const directHospId = params.get("hosp");
+
+    if (directHospId) {
+      await loadDirectHospitalOpsView(directHospId.trim().toUpperCase());
+      return;
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
@@ -612,12 +716,218 @@
     });
   }
 
+  // =========================================================================
+  // DIRECT CALENDAR LINK VIEW (?hosp=HOSP-101)
+  // =========================================================================
+  async function loadDirectHospitalOpsView(hospId) {
+    const res = await callApi({ action: "getPublicHospitalView", hospId: hospId }, `Loading ${hospId} Compliance Tracker...`);
+    if (!res || res.status !== "ok") {
+      alert((res && res.message) || "Hospital not found.");
+      return;
+    }
+    opsPublicViewData = { hospital: res.hospital, ncs: res.ncs || [] };
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("opsHospitalViewSection").classList.remove("hidden");
+    renderDirectHospitalOpsView();
+  }
+
+  function renderDirectHospitalOpsView() {
+    const { hospital, ncs } = opsPublicViewData;
+    if (!hospital) return;
+
+    document.getElementById("opsViewHospId").innerText = hospital.userId;
+    document.getElementById("opsViewHospName").innerText = hospital.hospitalName + (hospital.city ? ` (${hospital.city})` : "");
+
+    const agBadge = document.getElementById("opsViewAgentBadge");
+    if (hospital.opsAgent) {
+      agBadge.innerText = "Agent: " + hospital.opsAgent;
+      agBadge.classList.remove("hidden");
+    } else {
+      agBadge.classList.add("hidden");
+    }
+
+    const timerBox = document.getElementById("opsViewTimerBox");
+    if (hospital.deadline) {
+      document.getElementById("opsViewDeadlineText").innerText = "⏳ Target Deadline: " + formatDeadlineDisplay(hospital.deadline);
+      timerBox.setAttribute("data-countdown", hospital.deadline);
+      timerBox.classList.remove("hidden");
+      updateAllCountdowns();
+    } else {
+      document.getElementById("opsViewDeadlineText").innerText = "No Deadline Set";
+      timerBox.classList.add("hidden");
+    }
+
+    const driveBtn = document.getElementById("opsViewDriveBtn");
+    if (hospital.driveUrl) {
+      driveBtn.href = hospital.driveUrl;
+      driveBtn.classList.remove("hidden");
+    } else {
+      driveBtn.classList.add("hidden");
+    }
+
+    const total = ncs.length;
+    const approved = ncs.filter(n => n.status === "Approved").length;
+    const pct = total ? Math.round((approved / total) * 100) : 0;
+    document.getElementById("opsViewPercent").innerText = pct + "%";
+    document.getElementById("opsViewSummary").innerText = `${approved} of ${total} Approved`;
+
+    // Ops Operator Auth Status Bar
+    const authBox = document.getElementById("opsAuthStatusBox");
+    const canVerify = opsUnlockedUser && (opsUnlockedUser.role === "OPERATOR" || opsUnlockedUser.role === "ADMIN");
+
+    if (opsUnlockedUser) {
+      authBox.innerHTML = `
+        <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-xl text-xs">
+          <span class="font-bold text-emerald-800">✓ ${escapeHtml(opsUnlockedUser.fullName)} (${opsUnlockedUser.role})</span>
+          <button type="button" onclick="lockOpsControls()" class="text-red-600 font-bold underline ml-1">Lock</button>
+        </div>
+      `;
+    } else {
+      authBox.innerHTML = `
+        <button type="button" onclick="openOpsAuthModal()"
+          class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition">
+          🔐 Ops Operator Login (Approve / Reject)
+        </button>
+      `;
+    }
+
+    const listContainer = document.getElementById("opsViewNcList");
+    if (!total) {
+      listContainer.innerHTML = `<div class="bg-white p-8 rounded-2xl border text-center text-sm text-slate-500">No NCs assigned to this hospital yet.</div>`;
+      return;
+    }
+
+    listContainer.innerHTML = ncs.map(nc => `
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div class="space-y-2 flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-mono text-xs font-extrabold bg-slate-900 text-white px-2.5 py-0.5 rounded">Sr. ${nc.srNo || nc.ncId}</span>
+            <span class="text-xs font-bold text-slate-500">${nc.ncId}</span>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+              nc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
+              nc.status === 'Submitted' ? 'bg-blue-100 text-blue-800' :
+              nc.status === 'Unable to Provide' ? 'bg-purple-100 text-purple-800' :
+              nc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+            }">${nc.status}</span>
+          </div>
+
+          <div>${formatNcRichText(nc.correctiveAction)}</div>
+
+          ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ''}
+          ${nc.status === 'Unable to Provide' ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ''}
+          ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Verification Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ''}
+          ${nc.gps && nc.status !== 'Unable to Provide' ? `<p class="text-[11px] text-slate-400">📍 ${nc.gps} • ${nc.submittedAt}</p>` : ''}
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-2 rounded-xl">📑 View / Download PDF</a>` : `<span class="text-xs text-slate-400">Pending Upload</span>`}
+          ${canVerify && (nc.status === 'Submitted' || nc.status === 'Unable to Provide') ? `
+            <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl shadow-sm">✓ Approve</button>
+            <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl shadow-sm">✕ Reject</button>
+          ` : ''}
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function openOpsAuthModal() {
+    document.getElementById("opsModalMobile").value = "";
+    document.getElementById("opsModalPass").value = "";
+    document.getElementById("opsAuthModal").classList.remove("hidden");
+  }
+
+  async function submitOpsModalLogin() {
+    const loginId = document.getElementById("opsModalMobile").value.trim();
+    const pass = document.getElementById("opsModalPass").value.trim();
+    if (!loginId || !pass) return alert("Please enter Mobile Number and Password.");
+
+    const res = await callApi({ action: "opsAuth", loginId: loginId, password: pass }, "Verifying Ops Operator...");
+    if (!res || res.status !== "ok") {
+      return alert((res && res.message) || "Invalid Credentials.");
+    }
+
+    opsUnlockedUser = {
+      loginId: loginId,
+      password: pass,
+      fullName: res.user.fullName,
+      role: res.user.role
+    };
+    localStorage.setItem(OPS_AUTH_KEY, JSON.stringify(opsUnlockedUser));
+    document.getElementById("opsAuthModal").classList.add("hidden");
+    renderDirectHospitalOpsView();
+  }
+
+  function lockOpsControls() {
+    opsUnlockedUser = null;
+    localStorage.removeItem(OPS_AUTH_KEY);
+    renderDirectHospitalOpsView();
+  }
+
+  async function verifyNCFromOpsView(userId, ncId, decision) {
+    if (!opsUnlockedUser) return openOpsAuthModal();
+    let remark = "";
+    if (decision === "Rejected") {
+      remark = prompt("Enter reason for rejection (Hospital will see this):");
+      if (remark === null) return;
+    }
+    const res = await callApi({
+      action: "verifyNC",
+      adminUser: opsUnlockedUser.loginId,
+      adminPass: opsUnlockedUser.password,
+      userId: userId,
+      ncId: ncId,
+      decision: decision,
+      remark: remark,
+      returnSingleHosp: true
+    }, `Updating to ${decision}...`);
+
+    if (res && res.status === "ok") {
+      opsPublicViewData = { hospital: res.hospital, ncs: res.ncs || [] };
+      renderDirectHospitalOpsView();
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
+  function downloadOpsHospitalCsv() {
+    const { hospital, ncs } = opsPublicViewData;
+    if (!hospital || !ncs.length) return alert("No NCs available to download.");
+
+    const headers = ["NC_ID", "Sr_No", "Hospital_Name", "Status", "Corrective_Action", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
+    const escapeCsv = val => `"${String(val || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+
+    const rows = [headers.join(",")];
+    ncs.forEach(n => {
+      rows.push([
+        escapeCsv(n.ncId),
+        escapeCsv(n.srNo),
+        escapeCsv(n.hospitalName),
+        escapeCsv(n.status),
+        escapeCsv(n.correctiveAction),
+        escapeCsv(n.adminNote),
+        escapeCsv(n.hospitalResponse),
+        escapeCsv(n.submittedAt),
+        escapeCsv(n.proofUrl),
+        escapeCsv(n.remark)
+      ].join(","));
+    });
+
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_NC_Report.csv`;
+    link.click();
+  }
+
+  // =========================================================================
+  // MAIN LOGIN & SESSION ROUTING
+  // =========================================================================
   async function handleLoginSubmit(e) {
     if (e && e.preventDefault) e.preventDefault();
     const uid = document.getElementById("loginUserId").value.trim().toUpperCase();
     const pass = document.getElementById("loginPassword").value.trim();
     if (!uid || !pass) {
-      alert("Please enter both User ID and Password.");
+      alert("Please enter both User ID / Mobile and Password.");
       return;
     }
     await performLogin(uid, pass, false);
@@ -640,6 +950,8 @@
     }
 
     session.role = res.role;
+    session.subRole = res.user ? res.user.role : "";
+    session.fullName = res.user ? res.user.fullName : "";
     session.userId = uid;
     session.password = pass;
     session.isAdminImpersonating = isImpersonate;
@@ -651,10 +963,19 @@
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("navUserBox").classList.remove("hidden");
 
-    if (res.role === "admin") {
-      session.adminCredentials = { userId: uid, password: pass };
+    if (res.role === "admin" || res.role === "ops_team") {
+      const isSuperAdmin = (res.role === "admin");
+      if (isSuperAdmin) {
+        session.adminCredentials = { userId: uid, password: pass };
+        document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
+        document.getElementById("adminHeaderTitle").innerText = "NC CLOSER — Admin Control Center";
+        document.getElementById("superAdminAssignBox").classList.remove("hidden");
+      } else {
+        document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
+        document.getElementById("adminHeaderTitle").innerText = `NC CLOSER — Ops Team Desk (${session.subRole})`;
+        document.getElementById("superAdminAssignBox").classList.add("hidden");
+      }
       document.getElementById("backToAdminBtn").classList.add("hidden");
-      document.getElementById("navRoleBadge").innerText = "ADMIN DESK";
       session.adminData = res.data;
       document.getElementById("hospitalSection").classList.add("hidden");
       document.getElementById("adminSection").classList.remove("hidden");
@@ -674,7 +995,6 @@
     }
   }
 
-  // Direct Admin -> Hospital Portal Switcher
   async function openHospitalPortalAsAdmin(hospUserId) {
     const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
     if (!hosp || !hosp.password) {
@@ -693,7 +1013,7 @@
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
-    location.reload();
+    window.location.href = window.location.href.split("?")[0];
   }
 
   // =========================================================================
@@ -704,7 +1024,6 @@
     document.getElementById("hospNameTitle").innerText = session.hospital.hospitalName;
     document.getElementById("hospCityLabel").innerText = session.hospital.city || "";
 
-    // Deadline Banner & Live Timer
     const banner = document.getElementById("hospDeadlineBanner");
     const timerBox = document.getElementById("hospLiveTimerBox");
     if (session.hospital.deadline) {
@@ -1081,7 +1400,7 @@
   }
 
   // =========================================================================
-  // ADMIN DASHBOARD
+  // ADMIN & OPS TEAM DASHBOARD
   // =========================================================================
   async function refreshAdminData() {
     const res = await callApi({
@@ -1124,7 +1443,6 @@
     }
   }
 
-  // Searchable Hospital Dropdown Filter
   function filterHospitalDropdown() {
     const query = (document.getElementById("hospSearchBox").value || "").trim().toLowerCase();
     const { hospitals } = session.adminData;
@@ -1142,7 +1460,8 @@
     opts += `<option value="__NEW__" class="font-bold text-red-600">+ ADD NEW HOSPITAL (Not in List)</option>`;
     filtered.forEach(h => {
       const tag = h.userId ? ` [${h.userId}]` : "";
-      opts += `<option value="${h.hospitalName.replace(/"/g, '&quot;')}">${h.hospitalName}${h.city ? ' (' + h.city + ')' : ''}${tag}</option>`;
+      const ag = h.opsAgent ? ` • ${h.opsAgent}` : "";
+      opts += `<option value="${h.hospitalName.replace(/"/g, '&quot;')}">${h.hospitalName}${h.city ? ' (' + h.city + ')' : ''}${tag}${ag}</option>`;
     });
     select.innerHTML = opts;
 
@@ -1155,11 +1474,20 @@
   }
 
   function renderAdminDashboard() {
-    const { hospitals, ncs, inputSheetUrl } = session.adminData;
+    const { hospitals, ncs, inputSheetUrl, opsAgents } = session.adminData;
 
     if (inputSheetUrl) {
       document.getElementById("openInputSheetLink").href = inputSheetUrl;
     }
+
+    const agentSel = document.getElementById("assignOpsAgentSelect");
+    const prevAgent = agentSel.value;
+    let aOpts = `<option value="">Auto-Detect from Sheet</option>`;
+    (opsAgents || []).forEach(ag => {
+      aOpts += `<option value="${ag}">${ag}</option>`;
+    });
+    agentSel.innerHTML = aOpts;
+    if (prevAgent) agentSel.value = prevAgent;
 
     filterHospitalDropdown();
 
@@ -1188,11 +1516,23 @@
 
   function onFilterHospChange() {
     const val = document.getElementById("adminFilterHosp").value;
-    const btn = document.getElementById("filterOpenPortalBtn");
+    const portalBtn = document.getElementById("filterOpenPortalBtn");
+    const driveBtn = document.getElementById("filterDriveLinkBtn");
+
     if (val && val !== "ALL") {
-      btn.classList.remove("hidden");
+      const hosp = session.adminData.hospitals.find(h => h.userId === val);
+      if (session.role === "admin") portalBtn.classList.remove("hidden");
+      else portalBtn.classList.add("hidden");
+
+      if (hosp && hosp.driveUrl) {
+        driveBtn.href = hosp.driveUrl;
+        driveBtn.classList.remove("hidden");
+      } else {
+        driveBtn.classList.add("hidden");
+      }
     } else {
-      btn.classList.add("hidden");
+      portalBtn.classList.add("hidden");
+      driveBtn.classList.add("hidden");
     }
     renderAdminTable();
   }
@@ -1205,14 +1545,27 @@
   function toggleNewHospitalInput() {
     const val = document.getElementById("adminHospSelect").value;
     const box = document.getElementById("newHospFields");
+    const hint = document.getElementById("detectedAgentHint");
+    const agentSel = document.getElementById("assignOpsAgentSelect");
+
     if (val === "__NEW__") {
       box.classList.remove("hidden");
+      hint.innerText = "Select Ops Agent above for new hospital";
+      agentSel.value = "";
     } else {
       box.classList.add("hidden");
-      // Pre-fill existing deadline if hospital already has one
       const existing = session.adminData.hospitals.find(h => h.hospitalName === val);
-      if (existing && existing.deadline) {
-        document.getElementById("assignDeadlineInput").value = existing.deadline;
+      if (existing) {
+        if (existing.deadline) {
+          document.getElementById("assignDeadlineInput").value = existing.deadline;
+        }
+        if (existing.opsAgent) {
+          agentSel.value = existing.opsAgent;
+          hint.innerText = "✓ Matched Agent: " + existing.opsAgent;
+        } else {
+          agentSel.value = "";
+          hint.innerText = "Not in WORKING TARGETS (Defaults to UMBRELLA)";
+        }
       }
     }
   }
@@ -1235,6 +1588,8 @@
       return alert("Please select a Hospital from the list (or choose + ADD NEW HOSPITAL) first!");
     }
     const deadlineVal = document.getElementById("assignDeadlineInput").value;
+    const opsAgentVal = document.getElementById("assignOpsAgentSelect").value;
+    const baseUrl = window.location.href.split("?")[0];
 
     const res = await callApi({
       action: "fetchFromInputSheet",
@@ -1242,8 +1597,10 @@
       adminPass: session.password,
       hospitalName: target.hospitalName,
       city: target.city,
-      deadline: deadlineVal
-    }, `Fetching NCs from Sheet for ${target.hospitalName}...`);
+      deadline: deadlineVal,
+      opsAgent: opsAgentVal,
+      baseUrl: baseUrl
+    }, `Fetching NCs & Pinning Link in Ops Calendar...`);
 
     if (!res) return;
     if (res.status !== "ok") {
@@ -1266,6 +1623,8 @@
     const actionText = document.getElementById("ncActionInput").value.trim();
     if (!actionText) return alert("Please enter Corrective Action / Required Evidence.");
     const deadlineVal = document.getElementById("assignDeadlineInput").value;
+    const opsAgentVal = document.getElementById("assignOpsAgentSelect").value;
+    const baseUrl = window.location.href.split("?")[0];
 
     const res = await callApi({
       action: "addNC",
@@ -1274,10 +1633,12 @@
       hospitalName: target.hospitalName,
       city: target.city,
       deadline: deadlineVal,
+      opsAgent: opsAgentVal,
+      baseUrl: baseUrl,
       srNo: document.getElementById("ncSrInput").value.trim(),
       correctiveAction: actionText,
       adminNote: document.getElementById("ncSimpleNoteInput").value.trim()
-    }, "Saving Item & Creating Folder inside NC CLOSER...");
+    }, "Saving Item & Pinning Link in Ops Calendar...");
 
     if (res && res.status === "ok") {
       session.adminData = res.data;
@@ -1291,7 +1652,7 @@
 
   function showCredentialShareCard(hosp) {
     const portalUrl = window.location.href.split("?")[0];
-    document.getElementById("shareHospName").innerText = hosp.hospitalName;
+    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.opsAgent ? ` (Agent: ${hosp.opsAgent})` : "");
     document.getElementById("sharePortalLink").innerText = portalUrl;
     document.getElementById("shareUserId").innerText = hosp.userId;
     document.getElementById("sharePass").innerText = hosp.password;
@@ -1301,7 +1662,7 @@
     let deadlineMsg = "";
     if (hosp.deadline) {
       const fDate = formatDeadlineDisplay(hosp.deadline);
-      dLine.innerText = "⏳ Target Deadline: " + fDate;
+      dLine.innerText = "⏳ Target Deadline: " + fDate + (hosp.opsAgent ? ` (Calendar link pinned under ${hosp.opsAgent})` : "");
       dLine.classList.remove("hidden");
       deadlineMsg = `\nTarget Deadline: *${fDate}*`;
     } else {
@@ -1323,6 +1684,9 @@
     const fStat = document.getElementById("adminFilterStatus").value;
     const q = document.getElementById("adminSearchInput").value.trim().toLowerCase();
 
+    const isSuperAdmin = (session.role === "admin");
+    const canApprove = (session.role === "admin" || session.subRole === "OPERATOR");
+
     const list = session.adminData.ncs.filter(n => {
       if (fHosp !== "ALL" && n.userId !== fHosp) return false;
       if (fStat !== "ALL" && n.status !== fStat) return false;
@@ -1336,7 +1700,9 @@
       return;
     }
 
-    container.innerHTML = list.map(nc => `
+    container.innerHTML = list.map(nc => {
+      const hospObj = session.adminData.hospitals.find(h => h.userId === nc.userId);
+      return `
       <div class="border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div class="space-y-2 flex-1">
           <div class="flex flex-wrap items-center gap-2">
@@ -1349,36 +1715,37 @@
               nc.status === 'Unable to Provide' ? 'bg-purple-100 text-purple-800' :
               nc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
             }">${nc.status}</span>
-            <button type="button" onclick="openHospitalPortalAsAdmin('${nc.userId}')"
-              class="text-[11px] font-bold text-slate-700 hover:text-red-600 underline ml-1">
-              👁 Open Portal
-            </button>
+            ${hospObj && hospObj.driveUrl ? `<a href="${hospObj.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline ml-1">📁 Drive Folder ↗</a>` : ''}
+            ${isSuperAdmin ? `<button type="button" onclick="openHospitalPortalAsAdmin('${nc.userId}')" class="text-[11px] font-bold text-slate-700 hover:text-red-600 underline ml-1">👁 Open Portal</button>` : ''}
           </div>
 
           <div class="flex items-start gap-2">
             <div class="flex-1">${formatNcRichText(nc.correctiveAction)}</div>
-            <button type="button" onclick='editSimplifiedNote("${nc.userId}", "${nc.ncId}", ${JSON.stringify(nc.adminNote || "")})'
-              title="Add or edit simplified guidance note"
-              class="shrink-0 w-6 h-6 rounded-full bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 font-extrabold text-xs flex items-center justify-center border border-slate-300">
-              +
-            </button>
+            ${isSuperAdmin ? `
+              <button type="button" onclick='editSimplifiedNote("${nc.userId}", "${nc.ncId}", ${JSON.stringify(nc.adminNote || "")})'
+                title="Add or edit simplified guidance note"
+                class="shrink-0 w-6 h-6 rounded-full bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 font-extrabold text-xs flex items-center justify-center border border-slate-300">
+                +
+              </button>
+            ` : ''}
           </div>
 
           ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Simplified Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ''}
           ${nc.status === 'Unable to Provide' ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ''}
+          ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ''}
           ${nc.gps && nc.status !== 'Unable to Provide' ? `<p class="text-[11px] text-slate-400">📍 ${nc.gps} • ${nc.submittedAt}</p>` : ''}
         </div>
 
         <div class="flex flex-wrap items-center gap-2 shrink-0">
           ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View Merged PDF</a>` : ''}
-          ${(nc.status === 'Submitted' || nc.status === 'Unable to Provide') ? `
+          ${canApprove && (nc.status === 'Submitted' || nc.status === 'Unable to Provide') ? `
             <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
             <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg">✕ Reject</button>
           ` : ''}
-          <button type="button" onclick="deleteNC('${nc.userId}', '${nc.ncId}')" title="Delete Item" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>
+          ${isSuperAdmin ? `<button type="button" onclick="deleteNC('${nc.userId}', '${nc.ncId}')" title="Delete Item" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>` : ''}
         </div>
       </div>
-    `).join("");
+    `}).join("");
   }
 
   async function editSimplifiedNote(userId, ncId, existingNote) {
@@ -1432,19 +1799,25 @@
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
+    } else if (res && res.message) {
+      alert(res.message);
     }
   }
 
   async function saveCardDeadline(userId) {
     const inputEl = document.getElementById("cardDeadline_" + userId);
+    const agentEl = document.getElementById("cardAgent_" + userId);
     if (!inputEl) return;
+    const baseUrl = window.location.href.split("?")[0];
     const res = await callApi({
       action: "updateDeadline",
       adminUser: session.userId,
       adminPass: session.password,
       userId: userId,
-      deadline: inputEl.value
-    }, "Updating Target Timer...");
+      deadline: inputEl.value,
+      opsAgent: agentEl ? agentEl.value : "",
+      baseUrl: baseUrl
+    }, "Updating Timer & Pinning Link in Ops Calendar...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
@@ -1453,8 +1826,11 @@
 
   function renderActiveLoginsDirectory() {
     const q = (document.getElementById("directorySearchInput")?.value || "").trim().toLowerCase();
+    const { opsAgents } = session.adminData;
+    const isSuperAdmin = (session.role === "admin");
+
     const active = session.adminData.hospitals.filter(h =>
-      h.userId && (!q || h.hospitalName.toLowerCase().includes(q) || h.userId.toLowerCase().includes(q))
+      h.userId && (!q || h.hospitalName.toLowerCase().includes(q) || h.userId.toLowerCase().includes(q) || (h.opsAgent && h.opsAgent.toLowerCase().includes(q)))
     );
     const box = document.getElementById("activeHospListContainer");
     if (!active.length) {
@@ -1467,13 +1843,20 @@
       const done = hospNcs.filter(n => n.status === "Approved").length;
       const pct = hospNcs.length ? Math.round((done / hospNcs.length) * 100) : 0;
 
+      const agentOptions = [`<option value="">Auto Agent</option>`].concat(
+        (opsAgents || []).map(ag => `<option value="${ag}" ${h.opsAgent === ag ? "selected" : ""}>${ag}</option>`)
+      ).join("");
+
       return `
         <div class="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/40 shadow-sm">
           <div class="flex items-start justify-between gap-2">
             <div>
               <h4 class="font-extrabold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
-              <p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>
-              <p class="text-[11px] text-emerald-600 font-bold mt-1">Progress: ${pct}% (${done}/${hospNcs.length} Approved)</p>
+              ${isSuperAdmin ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>` : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`}
+              <p class="text-[11px] text-emerald-600 font-bold mt-1">
+                Progress: ${pct}% (${done}/${hospNcs.length})
+                ${h.opsAgent ? ` &nbsp;•&nbsp; <span class="text-blue-700">Agent: ${h.opsAgent}</span>` : ""}
+              </p>
             </div>
             ${h.deadline ? `
               <div class="text-right shrink-0">
@@ -1485,25 +1868,37 @@
             ` : `<span class="text-[10px] font-semibold bg-slate-200 text-slate-600 px-2 py-1 rounded-lg">No Timer Set</span>`}
           </div>
 
-          <!-- Inline Deadline Setter on Card -->
-          <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
-            <input id="cardDeadline_${h.userId}" type="datetime-local" value="${h.deadline || ''}"
-              class="flex-1 text-xs font-medium text-slate-700 outline-none" />
-            <button type="button" onclick="saveCardDeadline('${h.userId}')"
-              class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-extrabold px-2.5 py-1.5 rounded-lg shrink-0">
-              ⏱ Set Timer
-            </button>
-          </div>
+          ${isSuperAdmin ? `
+            <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
+              <input id="cardDeadline_${h.userId}" type="datetime-local" value="${h.deadline || ''}"
+                class="flex-1 min-w-[140px] text-xs font-medium text-slate-700 outline-none" />
+              <select id="cardAgent_${h.userId}" class="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none">
+                ${agentOptions}
+              </select>
+              <button type="button" onclick="saveCardDeadline('${h.userId}')"
+                class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-extrabold px-2.5 py-1.5 rounded-lg shrink-0">
+                ⏱ Set & Sync
+              </button>
+            </div>
+          ` : ''}
 
           <div class="flex flex-wrap gap-2 pt-1">
-            <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
-              class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-              👁 Open Hospital Portal
-            </button>
-            <button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
-              class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-              📋 Copy Login
-            </button>
+            ${h.driveUrl ? `
+              <a href="${h.driveUrl}" target="_blank"
+                class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                📁 Drive Folder ↗
+              </a>
+            ` : ''}
+            ${isSuperAdmin ? `
+              <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
+                class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                👁 Open Portal
+              </button>
+              <button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
+                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                📋 Copy Login
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
