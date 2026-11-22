@@ -256,7 +256,7 @@
           </div>
 
           <div class="md:col-span-3 space-y-1.5">
-            <label class="block text-xs font-bold text-slate-700">3. Ops Calendar Agent</label>
+            <label class="block text-xs font-bold text-slate-700">3. Ops Calendar Associate</label>
             <select id="assignOpsAgentSelect"
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-semibold">
               <option value="">Auto-Detect from Sheet</option>
@@ -740,7 +740,7 @@
 
     const agBadge = document.getElementById("opsViewAgentBadge");
     if (hospital.opsAgent) {
-      agBadge.innerText = "Agent: " + hospital.opsAgent;
+      agBadge.innerText = "Associate: " + hospital.opsAgent;
       agBadge.classList.remove("hidden");
     } else {
       agBadge.classList.add("hidden");
@@ -1550,7 +1550,7 @@
 
     if (val === "__NEW__") {
       box.classList.remove("hidden");
-      hint.innerText = "Select Ops Agent above for new hospital";
+      hint.innerText = "Select Ops Associate above for new hospital";
       agentSel.value = "";
     } else {
       box.classList.add("hidden");
@@ -1561,7 +1561,7 @@
         }
         if (existing.opsAgent) {
           agentSel.value = existing.opsAgent;
-          hint.innerText = "✓ Matched Agent: " + existing.opsAgent;
+          hint.innerText = "✓ Matched Associate: " + existing.opsAgent;
         } else {
           agentSel.value = "";
           hint.innerText = "Not in WORKING TARGETS (Defaults to UMBRELLA)";
@@ -1652,7 +1652,7 @@
 
   function showCredentialShareCard(hosp) {
     const portalUrl = window.location.href.split("?")[0];
-    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.opsAgent ? ` (Agent: ${hosp.opsAgent})` : "");
+    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.opsAgent ? ` (Associate: ${hosp.opsAgent})` : "");
     document.getElementById("sharePortalLink").innerText = portalUrl;
     document.getElementById("shareUserId").innerText = hosp.userId;
     document.getElementById("sharePass").innerText = hosp.password;
@@ -1843,7 +1843,7 @@
       const done = hospNcs.filter(n => n.status === "Approved").length;
       const pct = hospNcs.length ? Math.round((done / hospNcs.length) * 100) : 0;
 
-      const agentOptions = [`<option value="">Auto Agent</option>`].concat(
+      const agentOptions = [`<option value="">Auto Associate</option>`].concat(
         (opsAgents || []).map(ag => `<option value="${ag}" ${h.opsAgent === ag ? "selected" : ""}>${ag}</option>`)
       ).join("");
 
@@ -1855,7 +1855,7 @@
               ${isSuperAdmin ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>` : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`}
               <p class="text-[11px] text-emerald-600 font-bold mt-1">
                 Progress: ${pct}% (${done}/${hospNcs.length})
-                ${h.opsAgent ? ` &nbsp;•&nbsp; <span class="text-blue-700">Agent: ${h.opsAgent}</span>` : ""}
+                ${h.opsAgent ? ` &nbsp;•&nbsp; <span class="text-blue-700">Associate: ${h.opsAgent}</span>` : ""}
               </p>
             </div>
             ${h.deadline ? `
