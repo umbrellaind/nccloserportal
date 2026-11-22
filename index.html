@@ -411,26 +411,112 @@
       </div>
     </div>
 
-    <!-- TAB 2: HOSPITAL MASTER CARDS, UNASSIGNED & PAYMENT FILTERS -->
-    <div id="adminLoginsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <!-- TAB 2: HOSPITAL MASTER CARDS & EXCEL BULK GRID MODE -->
+    <div id="adminLoginsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4 pb-20">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Hospital Master Cards — Incremental Associate & Payment Setup</h3>
-          <p class="text-xs text-slate-500">Filter unassigned hospitals or pending payment setups, and update any hospital on the spot</p>
+          <h3 class="font-bold text-slate-900 text-base">Hospital Master Directory — Bulk Associate & Payment Setup</h3>
+          <p class="text-xs text-slate-500">Edit multiple hospitals inline (Associate, Stage, Deadline, Total Fee & P1–P4) and click <strong>Save & Sync All</strong> once</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <select id="directoryAssocFilter" onchange="renderActiveLoginsDirectory()" class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white font-semibold">
+          <!-- View Mode Switcher -->
+          <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-extrabold border border-slate-200">
+            <button type="button" id="dirViewGridBtn" onclick="switchDirectoryViewMode('grid')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm">
+              📊 Excel Bulk Grid
+            </button>
+            <button type="button" id="dirViewCardBtn" onclick="switchDirectoryViewMode('card')" class="px-3 py-1.5 rounded-lg text-slate-700">
+              📇 Card View
+            </button>
+          </div>
+          <select id="directoryAssocFilter" onchange="dirPage=1; renderActiveLoginsDirectory()" class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white font-semibold">
             <option value="ALL">All Associates</option>
           </select>
-          <input id="directorySearchInput" type="text" oninput="renderActiveLoginsDirectory()" placeholder="🔍 Search hospital name / ID..."
+          <input id="directorySearchInput" type="text" oninput="dirPage=1; renderActiveLoginsDirectory()" placeholder="🔍 Search hospital name / ID..."
             class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white outline-none focus:border-red-500" />
         </div>
       </div>
 
-      <!-- SMART QUICK-FILTER CHIPS (Unassigned, No Payment Setup, Payment Due, Active) -->
+      <!-- SMART QUICK-FILTER CHIPS -->
       <div id="smartFilterChipsBar" class="flex flex-wrap gap-2 pt-1 pb-2 border-b border-slate-100"></div>
 
-      <div id="activeHospListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <!-- BATCH APPLY TOOLBAR (Super Admin Only) -->
+      <div id="bulkBatchToolbar" class="hidden bg-amber-50/90 border border-amber-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 bg-white px-3 py-1.5 rounded-xl border border-amber-300 cursor-pointer">
+            <input id="bulkSelectAllPageChk" type="checkbox" onchange="toggleSelectAllOnPage(this.checked)" class="w-4 h-4 rounded text-red-600" />
+            <span>Select Page (<span id="selectedHospCountBadge">0</span> Selected)</span>
+          </label>
+          <select id="batchAssocInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
+            <option value="__KEEP__">Associate (No Change)</option>
+            <option value="">-- Clear / Unassign --</option>
+          </select>
+          <select id="batchStageInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
+            <option value="__KEEP__">Stage (No Change)</option>
+            <option value="1. Kickoff Docs">1. Kickoff Docs</option>
+            <option value="2. Desktop NC">2. Desktop NC</option>
+            <option value="3. Audit Prep">3. Audit Prep</option>
+            <option value="4. Onsite NC">4. Onsite NC</option>
+            <option value="5. Final Clearance">5. Final Clearance</option>
+          </select>
+          <input id="batchFeeInput" type="number" placeholder="Total Fee ₹ (Optional)"
+            class="w-36 text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white" />
+          <select id="batchLockInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
+            <option value="__KEEP__">Gate (No Change)</option>
+            <option value="SOFT">SOFT</option>
+            <option value="STRICT">STRICT</option>
+          </select>
+        </div>
+        <button type="button" onclick="applyBatchToSelected()"
+          class="bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-extrabold px-4 py-2 rounded-xl shadow transition">
+          ⚡ Apply to Selected Rows
+        </button>
+      </div>
+
+      <!-- EXCEL BULK GRID CONTAINER -->
+      <div id="excelBulkGridWrapper" class="overflow-x-auto border border-slate-200 rounded-2xl">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead class="bg-slate-900 text-white uppercase text-[10px] tracking-wider">
+            <tr>
+              <th class="p-2.5 w-8 text-center">✓</th>
+              <th class="p-2.5 min-w-[200px]">Hospital Name & Status</th>
+              <th class="p-2.5 min-w-[130px]">Associate</th>
+              <th class="p-2.5 min-w-[145px]">Active Stage</th>
+              <th class="p-2.5 min-w-[160px]">Target Deadline</th>
+              <th class="p-2.5 min-w-[115px] admin-fin-col">Total Fee (₹)</th>
+              <th class="p-2.5 min-w-[175px] admin-fin-col">25% × 4 Paid (P1–P4)</th>
+              <th class="p-2.5 min-w-[95px] admin-fin-col">Gate</th>
+              <th class="p-2.5 text-right">Quick Links</th>
+            </tr>
+          </thead>
+          <tbody id="excelBulkGridBody" class="divide-y divide-slate-200 bg-white"></tbody>
+        </table>
+      </div>
+
+      <!-- CARD VIEW CONTAINER -->
+      <div id="activeHospListContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+      <!-- PAGINATION BAR -->
+      <div id="dirPaginationBar" class="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-slate-600"></div>
+    </div>
+
+    <!-- STICKY FLOATING "SAVE & SYNC ALL" BAR -->
+    <div id="stickyBulkSaveBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-3xl bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-amber-400 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
+        <span class="text-xs sm:text-sm font-extrabold">
+          <span id="dirtyCountText" class="text-amber-300">0</span> Hospital(s) Modified (Unsaved Changes)
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="discardBulkChanges()"
+          class="text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-2 rounded-xl transition">
+          Discard
+        </button>
+        <button type="button" onclick="saveAndSyncAllBulk()"
+          class="text-xs sm:text-sm font-black bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-5 py-2 rounded-xl shadow-lg transition">
+          ✓ Save & Sync All (<span id="dirtyBtnCount">0</span>)
+        </button>
+      </div>
     </div>
   </section>
 
@@ -1643,7 +1729,8 @@
     const res = await callApi({
       action: "getAdminData",
       adminUser: session.userId,
-      adminPass: session.password
+      adminPass: session.password,
+      forceRefresh: true
     }, "Refreshing UDCP Data...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
@@ -2060,72 +2147,177 @@
   }
 
   // =========================================================================
-  // TAB 2: HOSPITAL MASTER CARDS, SMART ATTENTION FILTERS & INCREMENTAL SETUP
+  // TAB 2: EXCEL BULK GRID + INLINE CARDS + BATCH SAVE & SYNC ALL
   // =========================================================================
-  async function saveHospitalCardMeta(userId, hospitalName) {
-    const safeKey = userId || ("NEW_" + hospitalName.replace(/[^A-Za-z0-9]/g, "_"));
-    const deadlineEl = document.getElementById("cardDeadline_" + safeKey);
-    const assocEl = document.getElementById("cardAssoc_" + safeKey);
-    const stageEl = document.getElementById("cardStage_" + safeKey);
-    const baseUrl = window.location.href.split("?")[0];
+  let dirViewMode = "grid"; // "grid" or "card"
+  let dirPage = 1;
+  const DIR_PAGE_SIZE = 30;
+  let dirtyHospitals = {};      // KEY: UPPER_HOSP_NAME -> staged object
+  let selectedHospKeys = {};    // KEY: UPPER_HOSP_NAME -> true
 
-    const res = await callApi({
-      action: "updateHospitalMeta",
-      adminUser: session.userId,
-      adminPass: session.password,
-      userId: userId,
-      hospitalName: hospitalName,
-      deadline: deadlineEl ? deadlineEl.value : "",
-      associate: assocEl ? assocEl.value : "",
-      currentStage: stageEl ? stageEl.value : "",
-      baseUrl: baseUrl
-    }, "Saving Hospital Settings & Syncing Calendar...");
+  function switchDirectoryViewMode(mode) {
+    dirViewMode = mode;
+    if (mode === "grid") {
+      document.getElementById("dirViewGridBtn").className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
+      document.getElementById("dirViewCardBtn").className = "px-3 py-1.5 rounded-lg text-slate-700";
+      document.getElementById("excelBulkGridWrapper").classList.remove("hidden");
+      document.getElementById("activeHospListContainer").classList.add("hidden");
+    } else {
+      document.getElementById("dirViewCardBtn").className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
+      document.getElementById("dirViewGridBtn").className = "px-3 py-1.5 rounded-lg text-slate-700";
+      document.getElementById("activeHospListContainer").classList.remove("hidden");
+      document.getElementById("excelBulkGridWrapper").classList.add("hidden");
+    }
+    renderActiveLoginsDirectory();
+  }
 
-    if (res && res.status === "ok") {
-      session.adminData = res.data;
-      renderAdminDashboard();
+  function getEffectiveHospitalState(h) {
+    const key = h.hospitalName.toUpperCase();
+    const staged = dirtyHospitals[key];
+    if (!staged) return { ...h, isDirty: false };
+    return {
+      ...h,
+      associate: staged.associate !== undefined ? staged.associate : h.associate,
+      currentStage: staged.currentStage !== undefined ? staged.currentStage : h.currentStage,
+      deadline: staged.deadline !== undefined ? staged.deadline : h.deadline,
+      totalFee: staged.totalFee !== undefined ? staged.totalFee : h.totalFee,
+      milestonesPaid: staged.milestonesPaid !== undefined ? staged.milestonesPaid : (h.milestonesPaid || [0, 0, 0, 0]),
+      paymentLockMode: staged.paymentLockMode !== undefined ? staged.paymentLockMode : (h.paymentLockMode || "SOFT"),
+      isDirty: true
+    };
+  }
+
+  function stageHospitalChange(hospName, field, value) {
+    const key = hospName.toUpperCase();
+    const base = session.adminData.hospitals.find(x => x.hospitalName.toUpperCase() === key);
+    if (!base) return;
+
+    if (!dirtyHospitals[key]) {
+      dirtyHospitals[key] = {
+        hospitalName: base.hospitalName,
+        city: base.city || "",
+        associate: base.associate || "",
+        currentStage: base.currentStage || (base.stageMetrics && base.stageMetrics.latestStage !== "Not Started" ? base.stageMetrics.latestStage : "1. Kickoff Docs"),
+        deadline: base.deadline || "",
+        totalFee: Number(base.totalFee) || 0,
+        milestonesPaid: [...(base.milestonesPaid || [0, 0, 0, 0])],
+        paymentLockMode: base.paymentLockMode || "SOFT"
+      };
+    }
+
+    if (field === "milestone") {
+      dirtyHospitals[key].milestonesPaid[value.idx] = value.checked ? 1 : 0;
+    } else if (field === "totalFee") {
+      dirtyHospitals[key].totalFee = Number(value) || 0;
+    } else {
+      dirtyHospitals[key][field] = value;
+    }
+
+    updateStickySaveBar();
+    // Highlight row/card visually without losing focus
+    const safeId = key.replace(/[^A-Z0-9]/g, "_");
+    const rowEl = document.getElementById("gridRow_" + safeId);
+    if (rowEl) rowEl.classList.add("bg-amber-50");
+    const cardEl = document.getElementById("hospCard_" + safeId);
+    if (cardEl) {
+      cardEl.classList.remove("border-slate-200", "border-amber-300");
+      cardEl.classList.add("border-emerald-500", "ring-2", "ring-emerald-200");
     }
   }
 
-  function openPaymentSetupModal(hosp) {
-    editingPaymentHosp = hosp;
-    document.getElementById("payModalHospTitle").innerText = hosp.hospitalName;
-    document.getElementById("payModalTotalFee").value = hosp.totalFee || "";
-    document.getElementById("payModalLockMode").value = hosp.paymentLockMode || "SOFT";
-    const m = hosp.milestonesPaid || [0, 0, 0, 0];
-    document.getElementById("payM1").checked = m[0] === 1;
-    document.getElementById("payM2").checked = m[1] === 1;
-    document.getElementById("payM3").checked = m[2] === 1;
-    document.getElementById("payM4").checked = m[3] === 1;
-    document.getElementById("paymentSetupModal").classList.remove("hidden");
+  function updateStickySaveBar() {
+    const count = Object.keys(dirtyHospitals).length;
+    const bar = document.getElementById("stickyBulkSaveBar");
+    if (count > 0 && session.role === "admin") {
+      document.getElementById("dirtyCountText").innerText = count;
+      document.getElementById("dirtyBtnCount").innerText = count;
+      bar.classList.remove("hidden");
+    } else {
+      bar.classList.add("hidden");
+    }
   }
 
-  async function savePaymentSetupModal() {
-    if (!editingPaymentHosp) return;
-    const feeVal = Number(document.getElementById("payModalTotalFee").value) || 0;
-    const lockMode = document.getElementById("payModalLockMode").value;
-    const mArr = [
-      document.getElementById("payM1").checked ? 1 : 0,
-      document.getElementById("payM2").checked ? 1 : 0,
-      document.getElementById("payM3").checked ? 1 : 0,
-      document.getElementById("payM4").checked ? 1 : 0
-    ];
+  function discardBulkChanges() {
+    dirtyHospitals = {};
+    updateStickySaveBar();
+    renderActiveLoginsDirectory();
+  }
 
-    document.getElementById("paymentSetupModal").classList.add("hidden");
+  function toggleHospitalRowSelect(hospName, checked) {
+    const key = hospName.toUpperCase();
+    if (checked) selectedHospKeys[key] = true;
+    else delete selectedHospKeys[key];
+    document.getElementById("selectedHospCountBadge").innerText = Object.keys(selectedHospKeys).length;
+  }
+
+  function toggleSelectAllOnPage(checked) {
+    document.querySelectorAll(".hosp-batch-chk").forEach(chk => {
+      chk.checked = checked;
+      const hName = chk.getAttribute("data-hosp");
+      if (checked) selectedHospKeys[hName.toUpperCase()] = true;
+      else delete selectedHospKeys[hName.toUpperCase()];
+    });
+    document.getElementById("selectedHospCountBadge").innerText = Object.keys(selectedHospKeys).length;
+  }
+
+  function applyBatchToSelected() {
+    const keys = Object.keys(selectedHospKeys);
+    if (!keys.length) return alert("Please tick at least 1 hospital checkbox first.");
+
+    const bAssoc = document.getElementById("batchAssocInput").value;
+    const bStage = document.getElementById("batchStageInput").value;
+    const bFeeRaw = document.getElementById("batchFeeInput").value;
+    const bLock = document.getElementById("batchLockInput").value;
+
+    keys.forEach(k => {
+      const hObj = session.adminData.hospitals.find(x => x.hospitalName.toUpperCase() === k);
+      if (!hObj) return;
+      if (bAssoc !== "__KEEP__") stageHospitalChange(hObj.hospitalName, "associate", bAssoc);
+      if (bStage !== "__KEEP__") stageHospitalChange(hObj.hospitalName, "currentStage", bStage);
+      if (bFeeRaw !== "") stageHospitalChange(hObj.hospitalName, "totalFee", Number(bFeeRaw) || 0);
+      if (bLock !== "__KEEP__") stageHospitalChange(hObj.hospitalName, "paymentLockMode", bLock);
+    });
+
+    renderActiveLoginsDirectory();
+    updateStickySaveBar();
+  }
+
+  async function saveAndSyncAllBulk() {
+    const keys = Object.keys(dirtyHospitals);
+    if (!keys.length) return;
+
+    const payloadItems = keys.map(k => {
+      const d = dirtyHospitals[k];
+      return {
+        hospitalName: d.hospitalName,
+        city: d.city,
+        associate: d.associate,
+        currentStage: d.currentStage,
+        deadline: d.deadline,
+        totalFee: d.totalFee,
+        milestonesPaid: (d.milestonesPaid || [0, 0, 0, 0]).join(","),
+        paymentLockMode: d.paymentLockMode
+      };
+    });
+
+    const baseUrl = window.location.href.split("?")[0];
     const res = await callApi({
-      action: "updateHospitalMeta",
+      action: "bulkUpdateHospitals",
       adminUser: session.userId,
       adminPass: session.password,
-      userId: editingPaymentHosp.userId,
-      hospitalName: editingPaymentHosp.hospitalName,
-      totalFee: feeVal,
-      milestonesPaid: mArr.join(","),
-      paymentLockMode: lockMode
-    }, "Updating Payment Milestones...");
+      items: payloadItems,
+      baseUrl: baseUrl
+    }, `Saving & Syncing ${payloadItems.length} Hospital(s) to UDCP_MASTER_DB...`);
 
     if (res && res.status === "ok") {
+      dirtyHospitals = {};
+      selectedHospKeys = {};
       session.adminData = res.data;
+      updateStickySaveBar();
       renderAdminDashboard();
+      alert(`✓ Successfully saved & synced ${res.updatedCount} hospital(s) in UDCP_MASTER_DB!`);
+    } else if (res && res.message) {
+      alert(res.message);
     }
   }
 
@@ -2143,6 +2335,21 @@
     const { hospitals, associates } = session.adminData;
     const isSuperAdmin = (session.role === "admin");
 
+    // Populate batch associate dropdown
+    const batchAssocSel = document.getElementById("batchAssocInput");
+    if (batchAssocSel) {
+      const prevB = batchAssocSel.value;
+      batchAssocSel.innerHTML = `<option value="__KEEP__">Associate (No Change)</option><option value="">-- Unassign --</option>` +
+        (associates || []).map(ag => `<option value="${ag}">${ag}</option>`).join("");
+      if (prevB) batchAssocSel.value = prevB;
+    }
+
+    if (isSuperAdmin) {
+      document.getElementById("bulkBatchToolbar").classList.remove("hidden");
+    } else {
+      document.getElementById("bulkBatchToolbar").classList.add("hidden");
+    }
+
     // Calculate counts for Smart Filter Chips
     const activeUdcp = hospitals.filter(h => h.userId);
     const unassignedList = hospitals.filter(h => !h.associate);
@@ -2151,10 +2358,10 @@
     const notStartedList = hospitals.filter(h => !h.userId);
 
     const chips = [
-      { id: "ACTIVE_UDCP", label: `Active in UDCP (${activeUdcp.length})` },
       { id: "UNASSIGNED", label: `🚨 Unassigned Associate (${unassignedList.length})` },
       { id: "NO_PAYMENT", label: `💳 Without Payment Setup (${noPaymentList.length})` },
-      { id: "PAYMENT_DUE", label: `⏳ Payment Milestone Due (${payDueList.length})` },
+      { id: "ACTIVE_UDCP", label: `Active in UDCP (${activeUdcp.length})` },
+      { id: "PAYMENT_DUE", label: `⏳ Payment Due (${payDueList.length})` },
       { id: "NOT_STARTED", label: `📋 Not Started Yet (${notStartedList.length})` },
       { id: "ALL", label: `All Hospitals (${hospitals.length})` }
     ];
@@ -2162,7 +2369,7 @@
     document.getElementById("smartFilterChipsBar").innerHTML = chips.map(c => {
       const isAct = activeSmartChip === c.id;
       return `
-        <button type="button" onclick="activeSmartChip='${c.id}'; renderActiveLoginsDirectory();"
+        <button type="button" onclick="activeSmartChip='${c.id}'; dirPage=1; renderActiveLoginsDirectory();"
           class="text-xs font-bold px-3 py-1.5 rounded-full transition ${isAct ? 'bg-slate-900 text-amber-300 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
           ${c.label}
         </button>
@@ -2183,134 +2390,268 @@
       return true;
     });
 
-    const box = document.getElementById("activeHospListContainer");
-    if (!filtered.length) {
-      box.innerHTML = `<p class="text-xs text-slate-400 col-span-2 text-center py-8">No hospitals match this filter.</p>`;
-      return;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / DIR_PAGE_SIZE));
+    if (dirPage > totalPages) dirPage = totalPages;
+    const startIdx = (dirPage - 1) * DIR_PAGE_SIZE;
+    const pageItems = filtered.slice(startIdx, startIdx + DIR_PAGE_SIZE);
+
+    // Render Pagination Bar
+    const pagBar = document.getElementById("dirPaginationBar");
+    pagBar.innerHTML = `
+      <div>Showing <strong>${filtered.length ? startIdx + 1 : 0}–${Math.min(startIdx + DIR_PAGE_SIZE, filtered.length)}</strong> of <strong>${filtered.length}</strong> hospitals</div>
+      <div class="flex items-center gap-2">
+        <button type="button" ${dirPage <= 1 ? 'disabled' : ''} onclick="dirPage--; renderActiveLoginsDirectory();"
+          class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold disabled:opacity-40">← Prev</button>
+        <span class="font-bold">Page ${dirPage} of ${totalPages}</span>
+        <button type="button" ${dirPage >= totalPages ? 'disabled' : ''} onclick="dirPage++; renderActiveLoginsDirectory();"
+          class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold disabled:opacity-40">Next →</button>
+      </div>
+    `;
+
+    document.getElementById("selectedHospCountBadge").innerText = Object.keys(selectedHospKeys).length;
+    const bulkChk = document.getElementById("bulkSelectAllPageChk");
+    if (bulkChk) bulkChk.checked = false;
+
+    const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+
+    // 1. RENDER EXCEL BULK GRID
+    const gridBody = document.getElementById("excelBulkGridBody");
+    if (!pageItems.length) {
+      gridBody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">No hospitals match this filter.</td></tr>`;
+    } else {
+      gridBody.innerHTML = pageItems.map(rawH => {
+        const h = getEffectiveHospitalState(rawH);
+        const key = h.hospitalName.toUpperCase();
+        const safeId = key.replace(/[^A-Z0-9]/g, "_");
+        const isChecked = !!selectedHospKeys[key];
+        const sm = h.stageMetrics || { latestStage: "Not Started", latestPercent: 0, latestApproved: 0, latestTotal: 0 };
+        const m = h.milestonesPaid || [0, 0, 0, 0];
+        const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
+
+        const assocOpts = [`<option value="">-- Unassigned --</option>`].concat(
+          (associates || []).map(ag => `<option value="${ag}" ${h.associate === ag ? "selected" : ""}>${ag}</option>`)
+        ).join("");
+
+        const activeStageVal = h.currentStage || (sm.latestStage !== "Not Started" ? sm.latestStage : "1. Kickoff Docs");
+        const stageOpts = stageList.map(st => `<option value="${st}" ${activeStageVal === st ? "selected" : ""}>${st}</option>`).join("");
+
+        return `
+          <tr id="gridRow_${safeId}" class="${h.isDirty ? 'bg-amber-50' : 'hover:bg-slate-50'} transition">
+            <td class="p-2.5 text-center">
+              <input type="checkbox" data-hosp=${escName} ${isChecked ? 'checked' : ''}
+                onchange='toggleHospitalRowSelect(${escName}, this.checked)'
+                class="hosp-batch-chk w-4 h-4 rounded text-red-600 cursor-pointer" />
+            </td>
+            <td class="p-2.5">
+              <div class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</div>
+              <div class="text-[10px] text-slate-500 font-mono">
+                ${h.userId ? `${h.userId}${isSuperAdmin ? ' • ' + h.password : ''}` : 'Not Active Yet'}
+                ${sm.latestTotal > 0 ? ` • <span class="text-emerald-700 font-bold">${sm.latestPercent}% (${sm.latestApproved}/${sm.latestTotal})</span>` : ''}
+              </div>
+            </td>
+            <td class="p-2">
+              ${isSuperAdmin ? `
+                <select onchange='stageHospitalChange(${escName}, "associate", this.value)'
+                  class="w-full text-xs font-bold border ${!h.associate ? 'border-amber-300 bg-amber-50/50' : 'border-slate-300 bg-white'} rounded-lg px-2 py-1.5 outline-none">
+                  ${assocOpts}
+                </select>
+              ` : `<span class="font-bold text-slate-700">${h.associate || 'Unassigned'}</span>`}
+            </td>
+            <td class="p-2">
+              ${isSuperAdmin ? `
+                <select onchange='stageHospitalChange(${escName}, "currentStage", this.value)'
+                  class="w-full text-xs font-bold border border-slate-300 bg-white rounded-lg px-2 py-1.5 outline-none">
+                  ${stageOpts}
+                </select>
+              ` : `<span class="font-bold text-slate-700">${escapeHtml(activeStageVal)}</span>`}
+            </td>
+            <td class="p-2">
+              ${isSuperAdmin ? `
+                <input type="datetime-local" value="${h.deadline || ''}"
+                  onchange='stageHospitalChange(${escName}, "deadline", this.value)'
+                  class="w-full text-[11px] border border-slate-300 bg-white rounded-lg px-2 py-1.5 outline-none" />
+              ` : `<span class="text-[11px] text-slate-600">${formatDeadlineDisplay(h.deadline) || '-'}</span>`}
+            </td>
+            <td class="p-2">
+              ${isSuperAdmin ? `
+                <input type="number" value="${h.totalFee || ''}" placeholder="₹ Fee"
+                  oninput='stageHospitalChange(${escName}, "totalFee", this.value)'
+                  class="w-full text-xs font-bold border border-slate-300 bg-white rounded-lg px-2 py-1.5 outline-none" />
+              ` : `<span class="text-[11px] font-bold text-slate-500">${isHospitalPaymentDue(h) ? '⏳ Hold' : '✓ Clear'}</span>`}
+            </td>
+            <td class="p-2">
+              ${isSuperAdmin ? `
+                <div class="flex items-center gap-1.5 font-bold text-[11px]">
+                  ${[0,1,2,3].map(idx => `
+                    <label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border border-slate-200 cursor-pointer">
+                      <input type="checkbox" ${m[idx] === 1 ? 'checked' : ''}
+                        onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })'
+                        class="w-3.5 h-3.5 rounded text-emerald-600" />
+                      <span>P${idx+1}</span>
+                    </label>
+                  `).join("")}
+                </div>
+              ` : `<span class="text-[11px] text-slate-400">Protected</span>`}
+            </td>
+            <td class="p-2">
+              ${isSuperAdmin ? `
+                <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)'
+                  class="w-full text-[11px] font-bold border border-slate-300 bg-white rounded-lg px-1.5 py-1.5 outline-none">
+                  <option value="SOFT" ${h.paymentLockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
+                  <option value="STRICT" ${h.paymentLockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
+                </select>
+              ` : `-`}
+            </td>
+            <td class="p-2 text-right whitespace-nowrap">
+              ${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ''}
+              ${isSuperAdmin && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 hover:text-red-600 underline">👁 Portal</button>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
-    // Cap render at 60 cards at a time for instant 0ms UI responsiveness when viewing all 185
-    const displayList = filtered.slice(0, 60);
+    // 2. RENDER CARD VIEW (With Inline Payment — Zero Popups)
+    const box = document.getElementById("activeHospListContainer");
+    if (!pageItems.length) {
+      box.innerHTML = `<p class="text-xs text-slate-400 col-span-2 text-center py-8">No hospitals match this filter.</p>`;
+    } else {
+      box.innerHTML = pageItems.map(rawH => {
+        const h = getEffectiveHospitalState(rawH);
+        const key = h.hospitalName.toUpperCase();
+        const safeId = key.replace(/[^A-Z0-9]/g, "_");
+        const isChecked = !!selectedHospKeys[key];
+        const sm = h.stageMetrics || { latestStage: "Not Started", latestPercent: 0, latestApproved: 0, latestTotal: 0, latestRejected: 0 };
+        const m = h.milestonesPaid || [0, 0, 0, 0];
+        const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
 
-    box.innerHTML = displayList.map(h => {
-      const safeKey = h.userId || ("NEW_" + h.hospitalName.replace(/[^A-Za-z0-9]/g, "_"));
-      const sm = h.stageMetrics || { latestStage: "Not Started", latestPercent: 0, latestApproved: 0, latestTotal: 0, latestRejected: 0 };
-      const milestones = h.milestonesPaid || [0, 0, 0, 0];
-      const payDue = isHospitalPaymentDue(h);
+        const assocOptions = [`<option value="">-- Unassigned --</option>`].concat(
+          (associates || []).map(ag => `<option value="${ag}" ${h.associate === ag ? "selected" : ""}>${ag}</option>`)
+        ).join("");
 
-      const assocOptions = [`<option value="">-- Unassigned --</option>`].concat(
-        (associates || []).map(ag => `<option value="${ag}" ${h.associate === ag ? "selected" : ""}>${ag}</option>`)
-      ).join("");
+        const activeStageVal = h.currentStage || (sm.latestStage !== "Not Started" ? sm.latestStage : "1. Kickoff Docs");
+        const stageOptions = stageList.map(st => `<option value="${st}" ${activeStageVal === st ? "selected" : ""}>${st}</option>`).join("");
 
-      const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
-      const stageOptions = stageList.map(st => `<option value="${st}" ${(h.currentStage || sm.latestStage) === st ? "selected" : ""}>${st}</option>`).join("");
-
-      return `
-        <div class="border ${!h.associate ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 bg-slate-50/40'} rounded-2xl p-4 space-y-3 shadow-sm">
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div class="flex flex-wrap items-center gap-1.5">
-                <h4 class="font-extrabold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
-                ${!h.associate ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">Unassigned</span>` : `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">${h.associate}</span>`}
+        return `
+          <div id="hospCard_${safeId}" class="border ${h.isDirty ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50/10' : (!h.associate ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 bg-slate-50/40')} rounded-2xl p-4 space-y-3 shadow-sm">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5">
+                ${isSuperAdmin ? `
+                  <input type="checkbox" data-hosp=${escName} ${isChecked ? 'checked' : ''}
+                    onchange='toggleHospitalRowSelect(${escName}, this.checked)'
+                    class="hosp-batch-chk w-4 h-4 mt-1 rounded text-red-600 cursor-pointer" />
+                ` : ''}
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <h4 class="font-extrabold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
+                    ${!h.associate ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">Unassigned</span>` : `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">${h.associate}</span>`}
+                  </div>
+                  ${h.userId
+                    ? (isSuperAdmin
+                        ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>`
+                        : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`)
+                    : `<p class="text-[11px] text-slate-400 italic mt-0.5">Not active in UDCP yet (Edit & Save All below)</p>`
+                  }
+                  <p class="text-[11px] text-emerald-700 font-bold mt-1">
+                    Stage: ${escapeHtml(activeStageVal)} • ${sm.latestPercent}% (${sm.latestApproved}/${sm.latestTotal})
+                  </p>
+                </div>
               </div>
 
-              ${h.userId
-                ? (isSuperAdmin
-                    ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>`
-                    : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`)
-                : `<p class="text-[11px] text-slate-400 italic mt-0.5">Not provisioned in UDCP yet (Click Save below to activate)</p>`
-              }
-
-              <p class="text-[11px] text-emerald-700 font-bold mt-1">
-                Stage: ${escapeHtml(h.currentStage || sm.latestStage)} • ${sm.latestPercent}% (${sm.latestApproved}/${sm.latestTotal})
-                ${sm.latestRejected > 0 ? `<span class="text-red-600 ml-1">(${sm.latestRejected} Rejected)</span>` : ""}
-              </p>
+              ${h.deadline ? `
+                <div class="text-right shrink-0">
+                  <span data-countdown="${h.deadline}" class="inline-block bg-slate-900 text-emerald-300 font-mono text-[11px] font-extrabold px-2 py-1 rounded-lg">
+                    Calculating...
+                  </span>
+                </div>
+              ` : ''}
             </div>
 
-            ${h.deadline ? `
-              <div class="text-right shrink-0">
-                <span class="text-[10px] font-bold uppercase text-slate-400 block">Live Timer</span>
-                <span data-countdown="${h.deadline}" class="inline-block bg-slate-900 text-emerald-300 font-mono text-xs font-extrabold px-2.5 py-1 rounded-lg mt-0.5">
-                  Calculating...
-                </span>
-              </div>
-            ` : ''}
-          </div>
-
-          <!-- Payment Status Strip -->
-          <div class="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs">
-            <div>
-              ${!h.hasPaymentSetup
-                ? `<span class="font-bold text-slate-400">💳 Payment Not Set</span>`
-                : (isSuperAdmin
-                    ? `<span class="font-bold ${payDue ? 'text-red-600' : 'text-emerald-700'}">
-                        ₹${(h.totalFee || 0).toLocaleString("en-IN")} • [${milestones.map((v, idx) => `P${idx+1}:${v?'✓':'✗'}`).join(" ")}]
-                       </span>`
-                    : `<span class="font-bold ${payDue ? 'text-red-600' : 'text-emerald-700'}">
-                        ${payDue ? '⏳ Payment Milestone Hold' : '✓ Payment Milestone Clear'}
-                       </span>`
-                  )
-              }
-            </div>
             ${isSuperAdmin ? `
-              <button type="button" onclick='openPaymentSetupModal(${JSON.stringify(h).replace(/'/g, "&#39;")})'
-                class="text-[11px] font-extrabold text-red-600 hover:underline">
-                ${h.hasPaymentSetup ? 'Edit Payment / Gate' : '+ Set Payment'}
-              </button>
-            ` : ''}
-          </div>
+              <!-- Line 1: Associate, Stage & Deadline -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
+                <div class="sm:col-span-4">
+                  <label class="block text-[9px] font-bold uppercase text-slate-400">Associate</label>
+                  <select onchange='stageHospitalChange(${escName}, "associate", this.value)'
+                    class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
+                    ${assocOptions}
+                  </select>
+                </div>
+                <div class="sm:col-span-4">
+                  <label class="block text-[9px] font-bold uppercase text-slate-400">Active Stage</label>
+                  <select onchange='stageHospitalChange(${escName}, "currentStage", this.value)'
+                    class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
+                    ${stageOptions}
+                  </select>
+                </div>
+                <div class="sm:col-span-4">
+                  <label class="block text-[9px] font-bold uppercase text-slate-400">Deadline</label>
+                  <input type="datetime-local" value="${h.deadline || ''}"
+                    onchange='stageHospitalChange(${escName}, "deadline", this.value)'
+                    class="w-full text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" />
+                </div>
+              </div>
 
-          <!-- Inline Associate, Stage & Timer Controls (Super Admin) -->
-          ${isSuperAdmin ? `
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
-              <div class="sm:col-span-4">
-                <label class="block text-[9px] font-bold uppercase text-slate-400">Associate</label>
-                <select id="cardAssoc_${safeKey}" class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
-                  ${assocOptions}
-                </select>
+              <!-- Line 2: Direct Inline Payment (Zero Popup) -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 items-center">
+                <div class="sm:col-span-4">
+                  <label class="block text-[9px] font-bold uppercase text-slate-400">Total Fee (₹)</label>
+                  <input type="number" value="${h.totalFee || ''}" placeholder="e.g. 120000"
+                    oninput='stageHospitalChange(${escName}, "totalFee", this.value)'
+                    class="w-full text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none" />
+                </div>
+                <div class="sm:col-span-5">
+                  <label class="block text-[9px] font-bold uppercase text-slate-400 mb-0.5">25% × 4 Paid</label>
+                  <div class="flex items-center gap-1.5 text-[11px] font-extrabold">
+                    ${[0,1,2,3].map(idx => `
+                      <label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border border-slate-200 cursor-pointer">
+                        <input type="checkbox" ${m[idx] === 1 ? 'checked' : ''}
+                          onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })'
+                          class="w-3.5 h-3.5 rounded text-emerald-600" />
+                        <span>P${idx+1}</span>
+                      </label>
+                    `).join("")}
+                  </div>
+                </div>
+                <div class="sm:col-span-3">
+                  <label class="block text-[9px] font-bold uppercase text-slate-400">Gate Mode</label>
+                  <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)'
+                    class="w-full text-[11px] font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none">
+                    <option value="SOFT" ${h.paymentLockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
+                    <option value="STRICT" ${h.paymentLockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
+                  </select>
+                </div>
               </div>
-              <div class="sm:col-span-4">
-                <label class="block text-[9px] font-bold uppercase text-slate-400">Active Stage</label>
-                <select id="cardStage_${safeKey}" class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
-                  ${stageOptions}
-                </select>
+            ` : `
+              <div class="bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold ${isHospitalPaymentDue(h) ? 'text-red-600' : 'text-emerald-700'}">
+                ${isHospitalPaymentDue(h) ? '⏳ Payment Milestone Hold' : '✓ Payment Milestone Clear'}
               </div>
-              <div class="sm:col-span-4">
-                <label class="block text-[9px] font-bold uppercase text-slate-400">Deadline</label>
-                <input id="cardDeadline_${safeKey}" type="datetime-local" value="${h.deadline || ''}"
-                  class="w-full text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" />
-              </div>
-              <div class="sm:col-span-12 flex justify-end pt-1">
-                <button type="button" onclick='saveHospitalCardMeta("${h.userId || ''}", ${JSON.stringify(h.hospitalName).replace(/'/g, "&#39;")})'
-                  class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-extrabold px-3.5 py-1.5 rounded-lg shadow-sm">
-                  ✓ Save & Sync Card
+            `}
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              ${h.driveUrl ? `
+                <a href="${h.driveUrl}" target="_blank"
+                  class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                  📁 Drive Folder ↗
+                </a>
+              ` : ''}
+              ${isSuperAdmin && h.userId ? `
+                <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
+                  class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                  👁 Open Portal
                 </button>
-              </div>
+                <button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                  📋 Copy Login
+                </button>
+              ` : ''}
             </div>
-          ` : ''}
-
-          <div class="flex flex-wrap gap-2 pt-1">
-            ${h.driveUrl ? `
-              <a href="${h.driveUrl}" target="_blank"
-                class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                📁 Drive Folder ↗
-              </a>
-            ` : ''}
-            ${isSuperAdmin && h.userId ? `
-              <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
-                class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                👁 Open Portal
-              </button>
-              <button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
-                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                📋 Copy Login
-              </button>
-            ` : ''}
           </div>
-        </div>
-      `;
-    }).join("");
+        `;
+      }).join("");
+    }
 
+    updateStickySaveBar();
     updateAllCountdowns();
   }
 </script>
