@@ -3,69 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>NC CLOSER — NABH Evidence & Compliance Portal</title>
+  <title>UDCP — Umbrella Docs & Compliance Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
     .loader { border: 3px solid #f3f3f3; border-top: 3px solid #dc2626; border-radius: 50%; width: 22px; height: 22px; animation: spin 0.8s linear infinite; display: inline-block; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .umbrella-gradient { background: linear-gradient(135deg, #b91c1c 0%, #dc2626 55%, #991b1b 100%); }
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
 <script>
   // =========================================================================
-  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL PASTE KAREIN:
+  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby12EBhrXxlwjRt6ESCk9fWwNfufQRiA5HFmFOOuNqtoe6BLIjgmx1Sbm3UtIPE-xD5/exec";
   // =========================================================================
 </script>
 
-  <!-- TOP NAVBAR -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-lg bg-red-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">NC</div>
+  <!-- UMBRELLA BRANDED TOP NAVBAR (Red & Gold Identity) -->
+  <header class="umbrella-gradient text-white sticky top-0 z-30 shadow-md border-b-2 border-amber-400">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <!-- Custom Red & Gold Umbrella SVG Emblem -->
+        <div class="w-10 h-10 rounded-xl bg-white/10 border border-amber-300/60 flex items-center justify-center shadow-inner shrink-0">
+          <svg class="w-6 h-6 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.03 2 11h9v7.5c0 .83-.67 1.5-1.5 1.5S8 19.33 8 18.5V18H6v.5C6 20.43 7.57 22 9.5 22S13 20.43 13 18.5V11h9c0-4.97-4.48-9-10-9z"/>
+          </svg>
+        </div>
         <div>
-          <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">NC CLOSER Portal</h1>
-          <p class="text-[11px] text-slate-500">Direct Multi-Evidence PDF & Audit Verification</p>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-white text-base sm:text-lg tracking-tight leading-none">UDCP PORTAL</h1>
+            <span class="hidden sm:inline-block text-[10px] font-extrabold bg-amber-400 text-red-950 px-2 py-0.5 rounded-full uppercase">Umbrella Healthcare</span>
+          </div>
+          <p class="text-[11px] text-amber-100/90 mt-0.5">Umbrella Docs & Compliance Portal • <em>Always and Anywhere With You</em></p>
         </div>
       </div>
+
       <div id="navUserBox" class="hidden flex items-center gap-2 sm:gap-3">
         <button id="backToAdminBtn" type="button" onclick="returnToAdminDesk()"
-          class="hidden text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1.5 rounded-lg shadow-sm transition">
+          class="hidden text-xs font-extrabold bg-amber-400 hover:bg-amber-300 text-red-950 px-3 py-1.5 rounded-lg shadow transition">
           ← Back to Admin Desk
         </button>
-        <span id="navRoleBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700"></span>
-        <button type="button" onclick="logout()" class="text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg transition">Logout</button>
+        <span id="navRoleBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-white/15 border border-white/25 text-white"></span>
+        <button type="button" onclick="logout()" class="text-xs font-bold bg-slate-950/80 hover:bg-slate-950 text-white px-3 py-1.5 rounded-lg transition">Logout</button>
       </div>
     </div>
   </header>
 
   <!-- GLOBAL LOADER -->
-  <div id="globalLoader" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 flex items-center justify-center">
-    <div class="bg-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3">
+  <div id="globalLoader" class="hidden fixed inset-0 bg-slate-900/45 backdrop-blur-[1px] z-50 flex items-center justify-center">
+    <div class="bg-white px-6 py-4 rounded-2xl shadow-xl border-t-4 border-red-600 flex items-center gap-3">
       <div class="loader"></div>
-      <span id="loaderText" class="text-sm font-semibold text-slate-700">Processing...</span>
+      <span id="loaderText" class="text-sm font-bold text-slate-800">Syncing with UDCP...</span>
     </div>
   </div>
 
   <!-- 1. LOGIN SCREEN -->
   <main id="loginSection" class="flex-1 flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8">
-      <div class="text-center mb-6">
-        <span class="inline-block px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold tracking-wide uppercase mb-2">Secure Portal Access</span>
-        <h2 class="text-2xl font-extrabold text-slate-900">Sign In to NC CLOSER</h2>
-        <p class="text-xs text-slate-500 mt-1">Hospital Login, Ops Team (Mobile & Pass), or Super Admin</p>
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+      <div class="umbrella-gradient p-6 text-center text-white border-b-2 border-amber-400">
+        <span class="inline-block px-3 py-0.5 rounded-full bg-amber-400 text-red-950 text-[11px] font-black tracking-wider uppercase mb-2">
+          Umbrella Healthcare Consultancy
+        </span>
+        <h2 class="text-2xl font-black tracking-tight">Sign In to UDCP</h2>
+        <p class="text-xs text-red-100 mt-1">Umbrella Docs & Compliance Portal</p>
       </div>
 
-      <div class="space-y-4">
+      <div class="p-6 sm:p-8 space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID or Registered Mobile</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Hospital ID / Registered Mobile / Admin ID</label>
           <input id="loginUserId" type="text" autocomplete="off" placeholder="e.g. HOSP-101, 9889732893, or ADMIN-UHC"
             onkeydown="if(event.key==='Enter') handleLoginSubmit(event)"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm font-medium uppercase" />
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm font-semibold uppercase" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
@@ -74,15 +86,19 @@
             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm" />
         </div>
         <div id="loginError" class="hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 p-2.5 rounded-lg"></div>
-        <button type="button" onclick="handleLoginSubmit(event)" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
-          Login to Dashboard →
+        <button type="button" onclick="handleLoginSubmit(event)" class="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 rounded-xl shadow-md transition text-sm">
+          Access UDCP Dashboard →
         </button>
+        <p class="text-[11px] text-center text-slate-400 pt-1">
+          Powered by <strong>Umbrella Healthcare Consultancy</strong> • Always and Anywhere With You
+        </p>
       </div>
     </div>
   </main>
 
   <!-- 2. HOSPITAL DASHBOARD (Hospital Self-Upload View) -->
-  <section id="hospitalSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
+  <section id="hospitalSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
+    <!-- LIVE DEADLINE COUNTDOWN BANNER -->
     <div id="hospDeadlineBanner" class="hidden rounded-2xl border-2 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <span class="text-[11px] font-extrabold uppercase tracking-wider block">⏳ Submission Target Deadline / अंतिम समय सीमा</span>
@@ -94,21 +110,39 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <!-- 4-MILESTONE PAYMENT & STAGE PROGRESS CARD -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <span class="text-xs font-bold text-red-600 uppercase tracking-wider" id="hospIdLabel"></span>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900" id="hospNameTitle"></h2>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-extrabold bg-red-600 text-white px-2.5 py-0.5 rounded" id="hospIdLabel"></span>
+            <span class="text-xs font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full" id="hospStageBadge"></span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1" id="hospNameTitle"></h2>
           <p class="text-xs text-slate-500" id="hospCityLabel"></p>
         </div>
         <div class="text-left sm:text-right">
           <div class="text-2xl font-black text-emerald-600" id="hospPercentText">0%</div>
-          <div class="text-[11px] font-semibold text-slate-500" id="hospCountSummary">0 of 0 NCs Completed</div>
+          <div class="text-[11px] font-semibold text-slate-500" id="hospCountSummary">0 of 0 Completed</div>
         </div>
       </div>
+
       <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
         <div id="hospProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
       </div>
+
+      <!-- 4-Milestone Payment Stepper (25% x 4) -->
+      <div id="hospPaymentBar" class="hidden pt-3 border-t border-slate-100 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-extrabold text-slate-700 uppercase">Consultancy Fee Milestones (25% × 4 Stages)</span>
+          <span id="hospFeeSummaryText" class="font-bold text-slate-600"></span>
+        </div>
+        <div id="hospMilestoneGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+        <div id="hospPaymentWarningBanner" class="hidden bg-red-50 border border-red-300 text-red-800 text-xs font-bold p-3 rounded-xl"></div>
+      </div>
+
+      <!-- Stage Filter Pills for Hospital -->
+      <div id="hospStageFilterPills" class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100"></div>
     </div>
 
     <div id="hospNcList" class="space-y-4"></div>
@@ -116,15 +150,16 @@
 
   <!-- 2B. OPS / CALENDAR DIRECT HOSPITAL VIEW (?hosp=HOSP-101) -->
   <section id="opsHospitalViewSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
-    <!-- Top Hospital Header + Internal Google Drive Link + Download All CSV -->
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <span id="opsViewHospId" class="font-mono text-xs font-extrabold bg-red-600 text-white px-2.5 py-0.5 rounded"></span>
-            <span id="opsViewAgentBadge" class="hidden text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full"></span>
+            <span id="opsViewAssociateBadge" class="hidden text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full"></span>
+            <span id="opsViewStageBadge" class="text-xs font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full"></span>
+            <span id="opsViewPayBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full"></span>
           </div>
-          <h2 id="opsViewHospName" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1"></h2>
+          <h2 id="opsViewHospName" class="text-xl sm:text-2xl font-black text-slate-900 mt-1"></h2>
           <p id="opsViewDeadlineText" class="text-xs font-semibold text-slate-500 mt-0.5"></p>
         </div>
 
@@ -139,7 +174,7 @@
         </div>
       </div>
 
-      <!-- Action Bar: Google Drive Folder (Inside Portal) + Download All NCs + Ops Operator Login -->
+      <!-- Action Bar: Google Drive Folder (Inside Portal) + Download All CSV + Ops Operator Login -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
         <div class="flex flex-wrap gap-2">
           <a id="opsViewDriveBtn" href="#" target="_blank"
@@ -148,7 +183,7 @@
           </a>
           <button type="button" onclick="downloadOpsHospitalCsv()"
             class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm inline-flex items-center gap-1.5 transition">
-            📥 Download All NCs (Excel / CSV)
+            📥 Download All Docs & Status (CSV)
           </button>
         </div>
 
@@ -170,8 +205,8 @@
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
-          <h2 id="adminHeaderTitle" class="text-xl font-extrabold text-slate-900">NC CLOSER — Admin Control Center</h2>
-          <p class="text-xs text-slate-500">Auto-syncs target links to <strong>WORKING TARGETS</strong> & stores PDFs in <strong>NC CLOSER</strong></p>
+          <h2 id="adminHeaderTitle" class="text-xl font-black text-slate-900">UDCP — Super Admin Control Center</h2>
+          <p class="text-xs text-slate-500">Stage-wise Compliance, 25%×4 Payment Gates & <strong>WORKING TARGETS</strong> Calendar Sync</p>
         </div>
         <div class="flex items-center gap-3">
           <button type="button" onclick="refreshAdminData()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl">
@@ -192,7 +227,7 @@
     <div id="credShareBox" class="hidden bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-5 shadow-md">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="space-y-1">
-          <span class="inline-block px-2.5 py-0.5 bg-emerald-600 text-white text-[11px] font-bold rounded-full">✓ SAVED IN "NC CLOSER" & LOGIN READY</span>
+          <span class="inline-block px-2.5 py-0.5 bg-emerald-600 text-white text-[11px] font-bold rounded-full">✓ SAVED IN UDCP & LOGIN READY</span>
           <h3 class="text-lg font-extrabold text-slate-900" id="shareHospName"></h3>
           <div class="text-xs sm:text-sm text-slate-700 space-y-0.5 font-medium">
             <p><strong>Hospital Login Link:</strong> <span id="sharePortalLink" class="text-blue-700 underline break-all"></span></p>
@@ -216,20 +251,20 @@
 
     <!-- Admin Navigation Tabs -->
     <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
-      <button type="button" id="mainTabAssign" onclick="switchAdminMainTab('assign')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">
-        1. NCs & Evidence Verification
+      <button type="button" id="mainTabAssign" onclick="switchAdminMainTab('assign')" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm">
+        1. Assign Stage Docs & Verify Proofs
       </button>
       <button type="button" id="mainTabLogins" onclick="switchAdminMainTab('logins')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
-        2. Hospital Cards, Drive Folders & Timers
+        2. Hospital Master Cards, Unassigned & Payment Filters
       </button>
     </div>
 
     <!-- TAB 1: ASSIGN & REVIEW -->
     <div id="adminAssignView" class="space-y-6">
-      <!-- Super Admin Only: Assign New NCs Box -->
+      <!-- Super Admin Only: Assign New Requirements Box -->
       <div id="superAdminAssignBox" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-900 text-base">Assign Corrective Action Requirements</h3>
+          <h3 class="font-bold text-slate-900 text-base">Assign Stage Requirements / Compliance Docs</h3>
           <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
             <button type="button" id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">Copy-Paste & Fetch from Sheet</button>
             <button type="button" id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-600">One-by-One Entry</button>
@@ -237,10 +272,11 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div class="md:col-span-5 space-y-1.5">
+          <!-- Hospital Picker -->
+          <div class="md:col-span-4 space-y-1.5">
             <label class="block text-xs font-bold text-slate-700">1. Search & Select Hospital *</label>
             <div>
-              <input id="hospSearchBox" type="text" oninput="filterHospitalDropdown()" placeholder="🔍 Type hospital name to filter list..."
+              <input id="hospSearchBox" type="text" oninput="filterHospitalDropdown()" placeholder="🔍 Type hospital name to filter..."
                 class="w-full px-3.5 py-2 rounded-t-xl border border-b-0 border-slate-300 bg-slate-50 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-red-500 outline-none" />
               <select id="adminHospSelect" onchange="toggleNewHospitalInput()"
                 class="w-full px-3 py-2.5 rounded-b-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-semibold">
@@ -248,20 +284,36 @@
             </div>
           </div>
 
-          <div class="md:col-span-4 space-y-1.5">
-            <label class="block text-xs font-bold text-slate-700">2. Target Submission Date & Time</label>
-            <input id="assignDeadlineInput" type="datetime-local"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-medium" />
-            <p class="text-[10px] text-slate-400">Starts live countdown & pins card in Ops Calendar</p>
+          <!-- Stage Selector -->
+          <div class="md:col-span-3 space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700">2. Project Stage *</label>
+            <select id="assignStageSelect"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-amber-50/60 focus:ring-2 focus:ring-red-500 outline-none font-bold text-slate-900">
+              <option value="1. Kickoff Docs">1. Kickoff Docs</option>
+              <option value="2. Desktop NC">2. Desktop NC</option>
+              <option value="3. Audit Prep">3. Audit Prep</option>
+              <option value="4. Onsite NC">4. Onsite NC</option>
+              <option value="5. Final Clearance">5. Final Clearance</option>
+            </select>
+            <p class="text-[10px] text-slate-400">Tracks stage-wise live % in DB</p>
           </div>
 
+          <!-- Deadline Picker -->
           <div class="md:col-span-3 space-y-1.5">
-            <label class="block text-xs font-bold text-slate-700">3. Ops Calendar Associate</label>
-            <select id="assignOpsAgentSelect"
+            <label class="block text-xs font-bold text-slate-700">3. Target Date & Time</label>
+            <input id="assignDeadlineInput" type="datetime-local"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-medium" />
+            <p class="text-[10px] text-slate-400">Pins card in Ops Calendar</p>
+          </div>
+
+          <!-- Associate Selector -->
+          <div class="md:col-span-2 space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700">4. Associate</label>
+            <select id="assignAssociateSelect"
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-semibold">
-              <option value="">Auto-Detect from Sheet</option>
+              <option value="">-- Select --</option>
             </select>
-            <p id="detectedAgentHint" class="text-[10px] text-emerald-700 font-bold truncate">Auto-matches from WORKING TARGETS</p>
+            <p id="detectedAssocHint" class="text-[10px] text-emerald-700 font-bold truncate">Assign on the go</p>
           </div>
 
           <div id="newHospFields" class="hidden md:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-red-50/60 p-3 rounded-xl border border-red-200">
@@ -280,16 +332,16 @@
 
         <div id="bulkNcBox" class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 text-center space-y-3">
           <p class="text-xs text-slate-700">
-            <strong>Zero Upload Hassle:</strong> Paste your NCs (<code>Sr No</code> in Col A, <code>Corrective Action Evidence</code> in Col B) into the Input Sheet, select Hospital & Deadline above, and click Fetch!
+            <strong>Zero Upload Hassle:</strong> Paste your items (<code>Sr No</code> in Col A, <code>Requirement / Evidence</code> in Col B) into the Input Sheet, select Hospital, Stage & Associate above, and click Fetch!
           </p>
           <div class="flex flex-wrap justify-center gap-3">
             <a id="openInputSheetLink" href="#" target="_blank"
               class="text-xs font-bold bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 px-4 py-2.5 rounded-xl shadow-sm inline-flex items-center gap-1.5">
-              📄 Step 1: Open NC Input Sheet (Paste NCs Here) ↗
+              📄 Step 1: Open Input Sheet (Paste Items Here) ↗
             </a>
             <button type="button" onclick="fetchFromInputSheet()"
               class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl shadow transition">
-              ⚡ Step 2: Fetch Pasted NCs for Selected Hospital
+              ⚡ Step 2: Fetch Pasted Items for Selected Hospital
             </button>
           </div>
         </div>
@@ -301,7 +353,7 @@
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="md:col-span-6">
-            <label class="block text-xs font-bold text-slate-700 mb-1">Corrective Action / Required Evidence *</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Requirement / Corrective Action Evidence *</label>
             <input id="ncActionInput" type="text" placeholder="e.g. Fire extinguisher refilling tag live photo"
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
@@ -318,15 +370,23 @@
         </div>
       </div>
 
-      <!-- All NCs Review List -->
+      <!-- All Items Review List -->
       <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h3 class="font-bold text-slate-900 text-base">NC Evidence Tracker & Verification</h3>
+          <h3 class="font-bold text-slate-900 text-base">Stage Requirements & Evidence Verification</h3>
           <div class="flex flex-wrap items-center gap-2">
             <input id="adminSearchInput" type="text" oninput="renderAdminTable()" placeholder="Search hospital or keyword..."
               class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white outline-none focus:border-red-500" />
             <select id="adminFilterHosp" onchange="onFilterHospChange()" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white font-semibold">
               <option value="ALL">All Hospitals</option>
+            </select>
+            <select id="adminFilterStage" onchange="renderAdminTable()" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white font-semibold">
+              <option value="ALL">All Stages</option>
+              <option value="1. Kickoff Docs">1. Kickoff Docs</option>
+              <option value="2. Desktop NC">2. Desktop NC</option>
+              <option value="3. Audit Prep">3. Audit Prep</option>
+              <option value="4. Onsite NC">4. Onsite NC</option>
+              <option value="5. Final Clearance">5. Final Clearance</option>
             </select>
             <a id="filterDriveLinkBtn" href="#" target="_blank"
               class="hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
@@ -351,16 +411,25 @@
       </div>
     </div>
 
-    <!-- TAB 2: ACTIVE HOSPITAL CARDS, DRIVE FOLDERS & TIMERS -->
+    <!-- TAB 2: HOSPITAL MASTER CARDS, UNASSIGNED & PAYMENT FILTERS -->
     <div id="adminLoginsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Hospital Cards, Google Drive Folders & Live Timers</h3>
-          <p class="text-xs text-slate-500">Access hospital Drive folders, download all NCs, monitor countdowns, or open any hospital portal</p>
+          <h3 class="font-bold text-slate-900 text-base">Hospital Master Cards — Incremental Associate & Payment Setup</h3>
+          <p class="text-xs text-slate-500">Filter unassigned hospitals or pending payment setups, and update any hospital on the spot</p>
         </div>
-        <input id="directorySearchInput" type="text" oninput="renderActiveLoginsDirectory()" placeholder="🔍 Search active hospital..."
-          class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white outline-none focus:border-red-500" />
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="directoryAssocFilter" onchange="renderActiveLoginsDirectory()" class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white font-semibold">
+            <option value="ALL">All Associates</option>
+          </select>
+          <input id="directorySearchInput" type="text" oninput="renderActiveLoginsDirectory()" placeholder="🔍 Search hospital name / ID..."
+            class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white outline-none focus:border-red-500" />
+        </div>
       </div>
+
+      <!-- SMART QUICK-FILTER CHIPS (Unassigned, No Payment Setup, Payment Due, Active) -->
+      <div id="smartFilterChipsBar" class="flex flex-wrap gap-2 pt-1 pb-2 border-b border-slate-100"></div>
+
       <div id="activeHospListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </div>
   </section>
@@ -368,12 +437,12 @@
   <!-- 4. MULTI-EVIDENCE MERGER MODAL -->
   <div id="evidenceModal" class="hidden fixed inset-0 bg-slate-900/80 z-40 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden my-auto">
-      <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+      <div class="px-5 py-3.5 umbrella-gradient text-white flex items-center justify-between border-b-2 border-amber-400">
         <div>
-          <span id="modalNcTag" class="text-[11px] font-bold text-amber-400 uppercase"></span>
+          <span id="modalNcTag" class="text-[11px] font-bold text-amber-300 uppercase"></span>
           <h3 class="font-bold text-sm sm:text-base">Add Photos / Scans / PDFs (Auto-Merges into 1 PDF)</h3>
         </div>
-        <button type="button" onclick="closeEvidenceModal()" class="text-slate-300 hover:text-white text-xl font-bold px-2">&times;</button>
+        <button type="button" onclick="closeEvidenceModal()" class="text-white/80 hover:text-white text-xl font-bold px-2">&times;</button>
       </div>
 
       <div class="p-4 sm:p-5 space-y-4">
@@ -460,7 +529,7 @@
         <button type="button" onclick="document.getElementById('unableModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
       <p class="text-xs text-slate-600">
-        Please write the reason why this evidence cannot be provided right now (कृपया कारण लिखें कि यह दस्तावेज़/साक्ष्य अभी क्यों उपलब्ध नहीं हो पा रहा है):
+        Please write the reason why this document/evidence cannot be provided right now (कृपया कारण लिखें कि यह दस्तावेज़/साक्ष्य अभी क्यों उपलब्ध नहीं हो पा रहा है):
       </p>
       <textarea id="unableReasonInput" rows="3" placeholder="e.g. Renewal applied at CMO office, receipt pending / नवीनीकरण हेतु आवेदन किया गया है..."
         class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-red-500 outline-none"></textarea>
@@ -495,15 +564,72 @@
     </div>
   </div>
 
+  <!-- 7. SUPER ADMIN PAYMENT & STAGE SETTINGS MODAL -->
+  <div id="paymentSetupModal" class="hidden fixed inset-0 bg-slate-900/75 z-40 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 umbrella-gradient text-white flex items-center justify-between border-b-2 border-amber-400">
+        <div>
+          <span class="text-[10px] font-extrabold text-amber-300 uppercase">Super Admin Financial & Stage Gate</span>
+          <h3 id="payModalHospTitle" class="font-bold text-base"></h3>
+        </div>
+        <button type="button" onclick="document.getElementById('paymentSetupModal').classList.add('hidden')" class="text-white/80 hover:text-white text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Total Consultancy Fee (₹)</label>
+            <input id="payModalTotalFee" type="number" placeholder="e.g. 120000"
+              class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Stage Gate Mode</label>
+            <select id="payModalLockMode" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-slate-50">
+              <option value="SOFT">SOFT (Reminder Banner Only)</option>
+              <option value="STRICT">STRICT (Lock Upload Until Paid)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+          <span class="block text-xs font-extrabold text-slate-800">25% × 4 Stage Payment Milestones (Tick if Paid):</span>
+          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
+            <input id="payM1" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
+            <span><strong>Installment 1 (25%)</strong> — Before Stage 1 (Kickoff Docs)</span>
+          </label>
+          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
+            <input id="payM2" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
+            <span><strong>Installment 2 (25%)</strong> — Before Stage 3 (Audit Prep)</span>
+          </label>
+          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
+            <input id="payM3" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
+            <span><strong>Installment 3 (25%)</strong> — Before Stage 4 (Onsite NC)</span>
+          </label>
+          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
+            <input id="payM4" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
+            <span><strong>Installment 4 (25%)</strong> — Before Stage 5 (Final Clearance)</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" onclick="document.getElementById('paymentSetupModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
+          <button type="button" onclick="savePaymentSetupModal()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow">
+            ✓ Save Payment & Gate Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <canvas id="workCanvas" class="hidden"></canvas>
 
 <script>
-  const STORAGE_KEY = "nc_closer_session_v6";
-  const OPS_AUTH_KEY = "nc_closer_ops_auth_v1";
+  const STORAGE_KEY = "udcp_session_v1";
+  const OPS_AUTH_KEY = "udcp_ops_auth_v1";
 
   let session = {
     role: null,        // "admin", "ops_team", "hospital"
-    subRole: "",       // "ADMIN", "OPERATOR", "ASSOCIATE"
+    subRole: "",       // "ADMIN", "OPERATOR", "ASSOCIATE", "FIELD"
     fullName: "",
     userId: "",
     password: "",
@@ -511,11 +637,15 @@
     adminCredentials: null,
     hospital: null,
     ncs: [],
-    adminData: { hospitals: [], ncs: [], inputSheetUrl: "", opsAgents: [] }
+    adminData: { hospitals: [], ncs: [], inputSheetUrl: "", associates: [] }
   };
 
+  let hospStageFilter = "ALL";
+  let activeSmartChip = "ACTIVE_UDCP"; // ACTIVE_UDCP, ALL, UNASSIGNED, NO_PAYMENT, PAYMENT_DUE, NOT_STARTED
+  let editingPaymentHosp = null;
+
   let opsPublicViewData = { hospital: null, ncs: [] };
-  let opsUnlockedUser = null; // { loginId, password, fullName, role }
+  let opsUnlockedUser = null;
 
   let activeNc = null;
   let cameraStream = null;
@@ -572,7 +702,7 @@
   }
 
   // =========================================================================
-  // SMART VISUAL FORMATTER FOR NC REQUIREMENTS
+  // SMART VISUAL FORMATTER FOR REQUIREMENTS
   // =========================================================================
   function escapeHtml(str) {
     return String(str || "")
@@ -611,12 +741,12 @@
         const content = escapeHtml(line.replace(/^[-•*]\s*/, ""));
         html += `
           <div class="flex items-start gap-2 pl-2 text-slate-700">
-            <span class="text-red-500 font-bold mt-0.5">•</span>
+            <span class="text-red-600 font-bold mt-0.5">•</span>
             <span>${content}</span>
           </div>`;
       } else {
         html += `
-          <div class="font-bold text-slate-900 bg-slate-50/90 border-l-2 border-slate-400 px-2.5 py-1 rounded-r">
+          <div class="font-bold text-slate-900 bg-slate-50/90 border-l-2 border-red-500 px-2.5 py-1 rounded-r">
             ${escapeHtml(line)}
           </div>`;
       }
@@ -656,7 +786,7 @@
     }
   });
 
-  function callApi(payload, msg = "Syncing with NC CLOSER...") {
+  function callApi(payload, msg = "Syncing with UDCP...") {
     if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
       alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
       return Promise.resolve(null);
@@ -695,7 +825,7 @@
     })
     .catch(() => {
       return new Promise((resolve) => {
-        const cbName = "ncCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+        const cbName = "udcpCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
         const script = document.createElement("script");
         window[cbName] = function(data) {
           delete window[cbName];
@@ -720,7 +850,7 @@
   // DIRECT CALENDAR LINK VIEW (?hosp=HOSP-101)
   // =========================================================================
   async function loadDirectHospitalOpsView(hospId) {
-    const res = await callApi({ action: "getPublicHospitalView", hospId: hospId }, `Loading ${hospId} Compliance Tracker...`);
+    const res = await callApi({ action: "getPublicHospitalView", hospId: hospId }, `Loading ${hospId} UDCP Tracker...`);
     if (!res || res.status !== "ok") {
       alert((res && res.message) || "Hospital not found.");
       return;
@@ -738,12 +868,24 @@
     document.getElementById("opsViewHospId").innerText = hospital.userId;
     document.getElementById("opsViewHospName").innerText = hospital.hospitalName + (hospital.city ? ` (${hospital.city})` : "");
 
-    const agBadge = document.getElementById("opsViewAgentBadge");
-    if (hospital.opsAgent) {
-      agBadge.innerText = "Associate: " + hospital.opsAgent;
+    const agBadge = document.getElementById("opsViewAssociateBadge");
+    if (hospital.associate) {
+      agBadge.innerText = "Associate: " + hospital.associate;
       agBadge.classList.remove("hidden");
     } else {
       agBadge.classList.add("hidden");
+    }
+
+    const stBadge = document.getElementById("opsViewStageBadge");
+    stBadge.innerText = hospital.currentStage || "1. Kickoff Docs";
+
+    const payBadge = document.getElementById("opsViewPayBadge");
+    if (hospital.isPaymentClear) {
+      payBadge.innerText = "✓ Payment Milestone Clear";
+      payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+    } else {
+      payBadge.innerText = "⏳ Payment Milestone Hold";
+      payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800";
     }
 
     const timerBox = document.getElementById("opsViewTimerBox");
@@ -765,13 +907,10 @@
       driveBtn.classList.add("hidden");
     }
 
-    const total = ncs.length;
-    const approved = ncs.filter(n => n.status === "Approved").length;
-    const pct = total ? Math.round((approved / total) * 100) : 0;
-    document.getElementById("opsViewPercent").innerText = pct + "%";
-    document.getElementById("opsViewSummary").innerText = `${approved} of ${total} Approved`;
+    const metrics = hospital.stageMetrics || { latestPercent: 0, latestApproved: 0, latestTotal: ncs.length };
+    document.getElementById("opsViewPercent").innerText = metrics.latestPercent + "%";
+    document.getElementById("opsViewSummary").innerText = `${metrics.latestApproved} of ${metrics.latestTotal} Approved (${metrics.latestStage || ''})`;
 
-    // Ops Operator Auth Status Bar
     const authBox = document.getElementById("opsAuthStatusBox");
     const canVerify = opsUnlockedUser && (opsUnlockedUser.role === "OPERATOR" || opsUnlockedUser.role === "ADMIN");
 
@@ -792,8 +931,8 @@
     }
 
     const listContainer = document.getElementById("opsViewNcList");
-    if (!total) {
-      listContainer.innerHTML = `<div class="bg-white p-8 rounded-2xl border text-center text-sm text-slate-500">No NCs assigned to this hospital yet.</div>`;
+    if (!ncs.length) {
+      listContainer.innerHTML = `<div class="bg-white p-8 rounded-2xl border text-center text-sm text-slate-500">No items assigned to this hospital yet.</div>`;
       return;
     }
 
@@ -803,6 +942,7 @@
           <div class="flex flex-wrap items-center gap-2">
             <span class="font-mono text-xs font-extrabold bg-slate-900 text-white px-2.5 py-0.5 rounded">Sr. ${nc.srNo || nc.ncId}</span>
             <span class="text-xs font-bold text-slate-500">${nc.ncId}</span>
+            <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">${escapeHtml(nc.stage)}</span>
             <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
               nc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
               nc.status === 'Submitted' ? 'bg-blue-100 text-blue-800' :
@@ -891,15 +1031,16 @@
 
   function downloadOpsHospitalCsv() {
     const { hospital, ncs } = opsPublicViewData;
-    if (!hospital || !ncs.length) return alert("No NCs available to download.");
+    if (!hospital || !ncs.length) return alert("No items available to download.");
 
-    const headers = ["NC_ID", "Sr_No", "Hospital_Name", "Status", "Corrective_Action", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
+    const headers = ["Doc_ID", "Stage", "Sr_No", "Hospital_Name", "Status", "Requirement", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
     const escapeCsv = val => `"${String(val || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
 
     const rows = [headers.join(",")];
     ncs.forEach(n => {
       rows.push([
         escapeCsv(n.ncId),
+        escapeCsv(n.stage),
         escapeCsv(n.srNo),
         escapeCsv(n.hospitalName),
         escapeCsv(n.status),
@@ -915,7 +1056,7 @@
     const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_NC_Report.csv`;
+    link.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_UDCP_Report.csv`;
     link.click();
   }
 
@@ -937,7 +1078,7 @@
     const errBox = document.getElementById("loginError");
     errBox.classList.add("hidden");
 
-    const res = await callApi({ action: "login", userId: uid, password: pass }, isImpersonate ? "Opening Hospital Portal..." : "Signing in...");
+    const res = await callApi({ action: "login", userId: uid, password: pass }, isImpersonate ? "Opening Hospital Portal..." : "Signing in to UDCP...");
     if (!res) return;
 
     if (res.status !== "ok") {
@@ -968,11 +1109,11 @@
       if (isSuperAdmin) {
         session.adminCredentials = { userId: uid, password: pass };
         document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
-        document.getElementById("adminHeaderTitle").innerText = "NC CLOSER — Admin Control Center";
+        document.getElementById("adminHeaderTitle").innerText = "UDCP — Super Admin Control Center";
         document.getElementById("superAdminAssignBox").classList.remove("hidden");
       } else {
         document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
-        document.getElementById("adminHeaderTitle").innerText = `NC CLOSER — Ops Team Desk (${session.subRole})`;
+        document.getElementById("adminHeaderTitle").innerText = `UDCP — Ops Team Desk (${session.subRole})`;
         document.getElementById("superAdminAssignBox").classList.add("hidden");
       }
       document.getElementById("backToAdminBtn").classList.add("hidden");
@@ -989,6 +1130,7 @@
       }
       session.hospital = res.hospital;
       session.ncs = res.ncs || [];
+      hospStageFilter = "ALL";
       document.getElementById("adminSection").classList.add("hidden");
       document.getElementById("hospitalSection").classList.remove("hidden");
       renderHospitalDashboard();
@@ -1017,44 +1159,126 @@
   }
 
   // =========================================================================
-  // HOSPITAL DASHBOARD
+  // HOSPITAL DASHBOARD (WITH 4-MILESTONE PAYMENT GATE & STAGE PILLS)
   // =========================================================================
-  function renderHospitalDashboard() {
-    document.getElementById("hospIdLabel").innerText = session.hospital.userId;
-    document.getElementById("hospNameTitle").innerText = session.hospital.hospitalName;
-    document.getElementById("hospCityLabel").innerText = session.hospital.city || "";
+  function getRequiredMilestoneForStageOrder(ord) {
+    if (ord === 1 || ord === 2) return { index: 0, label: "1st Installment (25% — Kickoff)" };
+    if (ord === 3) return { index: 1, label: "2nd Installment (25% — Audit Prep)" };
+    if (ord === 4) return { index: 2, label: "3rd Installment (25% — Onsite NC)" };
+    if (ord === 5) return { index: 3, label: "4th Installment (25% — Final Clearance)" };
+    return null;
+  }
 
+  function renderHospitalDashboard() {
+    const h = session.hospital;
+    document.getElementById("hospIdLabel").innerText = h.userId;
+    document.getElementById("hospNameTitle").innerText = h.hospitalName;
+    document.getElementById("hospCityLabel").innerText = h.city || "";
+    document.getElementById("hospStageBadge").innerText = h.currentStage || "1. Kickoff Docs";
+
+    // Countdown Banner
     const banner = document.getElementById("hospDeadlineBanner");
     const timerBox = document.getElementById("hospLiveTimerBox");
-    if (session.hospital.deadline) {
-      const check = computeCountdownText(session.hospital.deadline);
+    if (h.deadline) {
+      const check = computeCountdownText(h.deadline);
       banner.classList.remove("hidden");
       banner.className = check.expired
         ? "rounded-2xl border-2 border-red-400 bg-red-50 text-red-900 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         : "rounded-2xl border-2 border-amber-400 bg-amber-50 text-amber-950 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3";
-      document.getElementById("hospDeadlineDateText").innerText = "Target Date & Time: " + formatDeadlineDisplay(session.hospital.deadline);
-      timerBox.setAttribute("data-countdown", session.hospital.deadline);
+      document.getElementById("hospDeadlineDateText").innerText = "Target Date & Time: " + formatDeadlineDisplay(h.deadline);
+      timerBox.setAttribute("data-countdown", h.deadline);
       updateAllCountdowns();
     } else {
       banner.classList.add("hidden");
       timerBox.removeAttribute("data-countdown");
     }
 
-    const total = session.ncs.length;
-    const completed = session.ncs.filter(n => n.status === "Approved" || n.status === "Submitted").length;
+    // 4-Milestone Payment Bar
+    const payBar = document.getElementById("hospPaymentBar");
+    const mGrid = document.getElementById("hospMilestoneGrid");
+    const warnBanner = document.getElementById("hospPaymentWarningBanner");
+    const milestones = h.milestonesPaid || [0, 0, 0, 0];
+    const totalFee = Number(h.totalFee) || 0;
+    const hasPaySetup = totalFee > 0 || milestones.some(x => x === 1);
+
+    if (hasPaySetup) {
+      payBar.classList.remove("hidden");
+      const paidCount = milestones.filter(x => x === 1).length;
+      const eachAmt = totalFee ? Math.round(totalFee * 0.25) : 0;
+      document.getElementById("hospFeeSummaryText").innerText = totalFee
+        ? `Paid: ₹${(paidCount * eachAmt).toLocaleString("en-IN")} / ₹${totalFee.toLocaleString("en-IN")} (${paidCount * 25}%)`
+        : `${paidCount * 25}% Completed`;
+
+      const mLabels = [
+        { title: "P1 (25%)", sub: "Stage 1: Kickoff", paid: milestones[0] === 1 },
+        { title: "P2 (25%)", sub: "Stage 3: Audit Prep", paid: milestones[1] === 1 },
+        { title: "P3 (25%)", sub: "Stage 4: Onsite NC", paid: milestones[2] === 1 },
+        { title: "P4 (25%)", sub: "Stage 5: Certificate", paid: milestones[3] === 1 }
+      ];
+      mGrid.innerHTML = mLabels.map(m => `
+        <div class="p-2.5 rounded-xl border text-xs ${m.paid ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-600'}">
+          <div class="font-extrabold flex items-center justify-between">
+            <span>${m.title}</span>
+            <span>${m.paid ? '✓ PAID' : '⏳ DUE'}</span>
+          </div>
+          <div class="text-[10px] mt-0.5">${m.sub}${eachAmt ? ' • ₹' + eachAmt.toLocaleString('en-IN') : ''}</div>
+        </div>
+      `).join("");
+    } else {
+      payBar.classList.add("hidden");
+    }
+
+    // Stage Filter Pills
+    const stages = ["ALL", "1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+    const pillsBox = document.getElementById("hospStageFilterPills");
+    pillsBox.innerHTML = stages.map(st => {
+      const cnt = st === "ALL" ? session.ncs.length : session.ncs.filter(n => n.stage === st).length;
+      if (st !== "ALL" && cnt === 0) return "";
+      const active = hospStageFilter === st;
+      return `
+        <button type="button" onclick="hospStageFilter='${st}'; renderHospitalDashboard();"
+          class="text-xs font-bold px-3 py-1.5 rounded-full transition ${active ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+          ${st === "ALL" ? "All Stages" : st} (${cnt})
+        </button>
+      `;
+    }).join("");
+
+    const visibleList = hospStageFilter === "ALL"
+      ? session.ncs
+      : session.ncs.filter(n => n.stage === hospStageFilter);
+
+    const total = visibleList.length;
+    const completed = visibleList.filter(n => n.status === "Approved" || n.status === "Submitted").length;
     const pct = total ? Math.round((completed / total) * 100) : 0;
 
     document.getElementById("hospPercentText").innerText = pct + "%";
-    document.getElementById("hospCountSummary").innerText = `${completed} of ${total} NCs Submitted / Approved`;
+    document.getElementById("hospCountSummary").innerText = `${completed} of ${total} Submitted / Approved`;
     document.getElementById("hospProgressBar").style.width = pct + "%";
+
+    // Check if any due milestone triggers Soft Warning or Strict Lock
+    let anyUnpaidWarning = "";
+    visibleList.forEach(nc => {
+      if (hasPaySetup && nc.status !== "Approved") {
+        const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
+        if (reqM && milestones[reqM.index] !== 1) {
+          anyUnpaidWarning = `⚠️ Payment Milestone Pending: ${reqM.label} is due for "${nc.stage}". ${h.paymentLockMode === 'STRICT' ? 'Document upload is temporarily locked until milestone clearance.' : 'Please clear your consultancy installment at the earliest.'}`;
+        }
+      }
+    });
+    if (anyUnpaidWarning) {
+      warnBanner.innerText = anyUnpaidWarning;
+      warnBanner.classList.remove("hidden");
+    } else {
+      warnBanner.classList.add("hidden");
+    }
 
     const container = document.getElementById("hospNcList");
     if (!total) {
-      container.innerHTML = `<div class="bg-white p-8 rounded-2xl border text-center text-sm text-slate-500">No NCs assigned to your hospital yet.</div>`;
+      container.innerHTML = `<div class="bg-white p-8 rounded-2xl border text-center text-sm text-slate-500">No requirements assigned in this stage yet.</div>`;
       return;
     }
 
-    container.innerHTML = session.ncs.map(nc => {
+    container.innerHTML = visibleList.map(nc => {
       const badgeMap = {
         "Pending": "bg-amber-100 text-amber-800",
         "Submitted": "bg-blue-100 text-blue-800",
@@ -1062,14 +1286,18 @@
         "Rejected": "bg-red-100 text-red-800",
         "Unable to Provide": "bg-purple-100 text-purple-800"
       };
-      const canRespond = nc.status !== "Approved";
+      const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
+      const isStagePaymentDue = hasPaySetup && reqM && milestones[reqM.index] !== 1;
+      const isStrictLocked = isStagePaymentDue && (h.paymentLockMode === "STRICT");
+      const canRespond = nc.status !== "Approved" && !isStrictLocked;
 
       return `
         <div class="bg-white rounded-2xl border ${nc.status === 'Rejected' ? 'border-red-300' : 'border-slate-200'} p-5 shadow-sm space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="font-mono text-xs font-extrabold bg-slate-900 text-white px-2.5 py-1 rounded-lg">Sr. ${nc.srNo || nc.ncId}</span>
               <span class="text-xs font-bold text-slate-500">${nc.ncId}</span>
+              <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">${escapeHtml(nc.stage)}</span>
             </div>
             <span class="text-xs font-bold px-3 py-1 rounded-full ${badgeMap[nc.status] || 'bg-slate-100'}">${nc.status}</span>
           </div>
@@ -1090,7 +1318,11 @@
             <div>
               ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold text-blue-600 underline">📑 View Submitted Merged PDF</a>` : `<span class="text-xs text-slate-400">Awaiting response</span>`}
             </div>
-            ${canRespond ? `
+            ${isStrictLocked ? `
+              <span class="text-xs font-bold bg-red-100 text-red-800 px-3 py-2 rounded-xl border border-red-200">
+                🔒 Locked — Clear ${reqM.label}
+              </span>
+            ` : (canRespond ? `
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick='openUnableModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
                   class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 transition">
@@ -1101,7 +1333,7 @@
                   📸 Capture / Upload Proof
                 </button>
               </div>
-            ` : ''}
+            ` : '')}
           </div>
         </div>
       `;
@@ -1109,13 +1341,13 @@
   }
 
   // =========================================================================
-  // MULTI-EVIDENCE QUEUE & AUTO PDF MERGER
+  // MULTI-EVIDENCE QUEUE & AUTO PDF MERGER (With 15-item memory safety cap)
   // =========================================================================
   function openEvidenceModal(nc) {
     activeNc = nc;
     evidenceQueue = [];
     renderQueueUI();
-    document.getElementById("modalNcTag").innerText = `Sr. ${nc.srNo || nc.ncId} (${nc.ncId})`;
+    document.getElementById("modalNcTag").innerText = `${nc.stage} • Sr. ${nc.srNo || nc.ncId}`;
     document.getElementById("evidenceModal").classList.remove("hidden");
     detectGPS();
     setCaptureMode("camera");
@@ -1192,7 +1424,7 @@
 
   function processImageToStampedJpeg(imgObj, isScan, addStamp) {
     const canvas = document.getElementById("workCanvas");
-    const maxW = 1150;
+    const maxW = 1000; // Optimized for fast mobile PDF merging
     const scale = Math.min(1, maxW / imgObj.width);
     const w = Math.round(imgObj.width * scale);
     const h = Math.round(imgObj.height * scale);
@@ -1216,22 +1448,23 @@
     }
 
     if (addStamp) {
-      ctx.fillStyle = "#0f172a";
+      ctx.fillStyle = "#7f1d1d";
       ctx.fillRect(0, h, w, barH);
       const nowStr = new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
       const fontSize = Math.max(13, Math.round(barH * 0.28));
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${fontSize}px Inter, sans-serif`;
-      ctx.fillText(`${session.hospital.hospitalName}  |  Sr. ${activeNc.srNo || activeNc.ncId}`, 14, h + fontSize + 6);
-      ctx.fillStyle = "#a7f3d0";
+      ctx.fillText(`${session.hospital.hospitalName}  |  Sr. ${activeNc.srNo || activeNc.ncId} (${activeNc.stage})`, 14, h + fontSize + 6);
+      ctx.fillStyle = "#fde68a";
       ctx.font = `${Math.round(fontSize * 0.9)}px monospace`;
       ctx.fillText(`${nowStr}  •  GPS: ${currentCoords}`, 14, h + barH - 10);
     }
 
-    return canvas.toDataURL("image/jpeg", 0.78);
+    return canvas.toDataURL("image/jpeg", 0.72);
   }
 
   function captureAndQueuePhoto() {
+    if (evidenceQueue.length >= 15) return alert("Maximum 15 items per PDF batch. Please submit this batch first.");
     const video = document.getElementById("cameraVideo");
     if (!video.videoWidth) return;
 
@@ -1258,7 +1491,7 @@
       });
       renderQueueUI();
     };
-    img.src = tempCanvas.toDataURL("image/jpeg", 0.92);
+    img.src = tempCanvas.toDataURL("image/jpeg", 0.9);
   }
 
   async function handleQueueFilesSelect(e) {
@@ -1268,6 +1501,10 @@
     const addStamp = document.getElementById("fileGpsStampToggle").checked;
 
     for (const file of files) {
+      if (evidenceQueue.length >= 15) {
+        alert("Maximum 15 items allowed per merged PDF.");
+        break;
+      }
       if (file.type === "application/pdf") {
         const buf = await file.arrayBuffer();
         evidenceQueue.push({
@@ -1326,7 +1563,7 @@
 
   async function mergeAndUploadFinalPDF() {
     if (!evidenceQueue.length) return;
-    document.getElementById("loaderText").innerText = "Merging into Single PDF & Saving to NC CLOSER...";
+    document.getElementById("loaderText").innerText = "Merging into Single PDF & Saving to UDCP...";
     document.getElementById("globalLoader").classList.remove("hidden");
 
     try {
@@ -1407,7 +1644,7 @@
       action: "getAdminData",
       adminUser: session.userId,
       adminPass: session.password
-    }, "Refreshing Data...");
+    }, "Refreshing UDCP Data...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
@@ -1416,12 +1653,12 @@
 
   function switchAdminMainTab(tab) {
     if (tab === "assign") {
-      document.getElementById("mainTabAssign").className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white";
+      document.getElementById("mainTabAssign").className = "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm";
       document.getElementById("mainTabLogins").className = "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
       document.getElementById("adminAssignView").classList.remove("hidden");
       document.getElementById("adminLoginsView").classList.add("hidden");
     } else {
-      document.getElementById("mainTabLogins").className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white";
+      document.getElementById("mainTabLogins").className = "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm";
       document.getElementById("mainTabAssign").className = "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
       document.getElementById("adminLoginsView").classList.remove("hidden");
       document.getElementById("adminAssignView").classList.add("hidden");
@@ -1460,7 +1697,7 @@
     opts += `<option value="__NEW__" class="font-bold text-red-600">+ ADD NEW HOSPITAL (Not in List)</option>`;
     filtered.forEach(h => {
       const tag = h.userId ? ` [${h.userId}]` : "";
-      const ag = h.opsAgent ? ` • ${h.opsAgent}` : "";
+      const ag = h.associate ? ` • ${h.associate}` : "";
       opts += `<option value="${h.hospitalName.replace(/"/g, '&quot;')}">${h.hospitalName}${h.city ? ' (' + h.city + ')' : ''}${tag}${ag}</option>`;
     });
     select.innerHTML = opts;
@@ -1474,20 +1711,30 @@
   }
 
   function renderAdminDashboard() {
-    const { hospitals, ncs, inputSheetUrl, opsAgents } = session.adminData;
+    const { hospitals, ncs, inputSheetUrl, associates } = session.adminData;
 
     if (inputSheetUrl) {
       document.getElementById("openInputSheetLink").href = inputSheetUrl;
     }
 
-    const agentSel = document.getElementById("assignOpsAgentSelect");
-    const prevAgent = agentSel.value;
-    let aOpts = `<option value="">Auto-Detect from Sheet</option>`;
-    (opsAgents || []).forEach(ag => {
+    // Populate Associate Dropdowns
+    const assocSel = document.getElementById("assignAssociateSelect");
+    const prevAssoc = assocSel.value;
+    let aOpts = `<option value="">-- Unassigned --</option>`;
+    (associates || []).forEach(ag => {
       aOpts += `<option value="${ag}">${ag}</option>`;
     });
-    agentSel.innerHTML = aOpts;
-    if (prevAgent) agentSel.value = prevAgent;
+    assocSel.innerHTML = aOpts;
+    if (prevAssoc) assocSel.value = prevAssoc;
+
+    const dirAssocSel = document.getElementById("directoryAssocFilter");
+    const prevDirAssoc = dirAssocSel.value;
+    let daOpts = `<option value="ALL">All Associates</option><option value="NONE">Unassigned Only</option>`;
+    (associates || []).forEach(ag => {
+      daOpts += `<option value="${ag}">${ag}</option>`;
+    });
+    dirAssocSel.innerHTML = daOpts;
+    if (prevDirAssoc) dirAssocSel.value = prevDirAssoc;
 
     filterHospitalDropdown();
 
@@ -1505,7 +1752,7 @@
     const done = ncs.filter(n => n.status === "Approved").length;
     const pct = total ? Math.round((done / total) * 100) : 0;
     document.getElementById("adminPercentText").innerText = pct + "%";
-    document.getElementById("adminStatsText").innerText = `${done} of ${total} NCs Approved`;
+    document.getElementById("adminStatsText").innerText = `${done} of ${total} Total Items Approved`;
     document.getElementById("adminProgressBar").style.width = pct + "%";
 
     renderAdminTable();
@@ -1545,26 +1792,27 @@
   function toggleNewHospitalInput() {
     const val = document.getElementById("adminHospSelect").value;
     const box = document.getElementById("newHospFields");
-    const hint = document.getElementById("detectedAgentHint");
-    const agentSel = document.getElementById("assignOpsAgentSelect");
+    const hint = document.getElementById("detectedAssocHint");
+    const assocSel = document.getElementById("assignAssociateSelect");
+    const stageSel = document.getElementById("assignStageSelect");
 
     if (val === "__NEW__") {
       box.classList.remove("hidden");
-      hint.innerText = "Select Ops Associate above for new hospital";
-      agentSel.value = "";
+      hint.innerText = "Assign Associate & Stage";
+      assocSel.value = "";
+      stageSel.value = "1. Kickoff Docs";
     } else {
       box.classList.add("hidden");
       const existing = session.adminData.hospitals.find(h => h.hospitalName === val);
       if (existing) {
-        if (existing.deadline) {
-          document.getElementById("assignDeadlineInput").value = existing.deadline;
-        }
-        if (existing.opsAgent) {
-          agentSel.value = existing.opsAgent;
-          hint.innerText = "✓ Matched Associate: " + existing.opsAgent;
+        if (existing.deadline) document.getElementById("assignDeadlineInput").value = existing.deadline;
+        if (existing.currentStage) stageSel.value = existing.currentStage;
+        if (existing.associate) {
+          assocSel.value = existing.associate;
+          hint.innerText = "✓ Associate: " + existing.associate;
         } else {
-          agentSel.value = "";
-          hint.innerText = "Not in WORKING TARGETS (Defaults to UMBRELLA)";
+          assocSel.value = "";
+          hint.innerText = "⚠ Unassigned Associate";
         }
       }
     }
@@ -1588,7 +1836,8 @@
       return alert("Please select a Hospital from the list (or choose + ADD NEW HOSPITAL) first!");
     }
     const deadlineVal = document.getElementById("assignDeadlineInput").value;
-    const opsAgentVal = document.getElementById("assignOpsAgentSelect").value;
+    const assocVal = document.getElementById("assignAssociateSelect").value;
+    const stageVal = document.getElementById("assignStageSelect").value;
     const baseUrl = window.location.href.split("?")[0];
 
     const res = await callApi({
@@ -1598,13 +1847,14 @@
       hospitalName: target.hospitalName,
       city: target.city,
       deadline: deadlineVal,
-      opsAgent: opsAgentVal,
+      associate: assocVal,
+      stage: stageVal,
       baseUrl: baseUrl
-    }, `Fetching NCs & Pinning Link in Ops Calendar...`);
+    }, `Fetching ${stageVal} Items for ${target.hospitalName}...`);
 
     if (!res) return;
     if (res.status !== "ok") {
-      return alert(res.message || "Could not fetch NCs.");
+      return alert(res.message || "Could not fetch items.");
     }
 
     session.adminData = res.data;
@@ -1612,7 +1862,7 @@
     if (res.credentialCard) {
       showCredentialShareCard(res.credentialCard);
     }
-    alert(`✓ Successfully imported ${res.fetchedCount} NCs for ${target.hospitalName}!`);
+    alert(`✓ Successfully imported ${res.fetchedCount} items under [${stageVal}] for ${target.hospitalName}!`);
   }
 
   async function submitSingleNC(e) {
@@ -1621,9 +1871,10 @@
     if (!target) return alert("Please select or enter a Hospital Name first.");
 
     const actionText = document.getElementById("ncActionInput").value.trim();
-    if (!actionText) return alert("Please enter Corrective Action / Required Evidence.");
+    if (!actionText) return alert("Please enter Requirement / Evidence description.");
     const deadlineVal = document.getElementById("assignDeadlineInput").value;
-    const opsAgentVal = document.getElementById("assignOpsAgentSelect").value;
+    const assocVal = document.getElementById("assignAssociateSelect").value;
+    const stageVal = document.getElementById("assignStageSelect").value;
     const baseUrl = window.location.href.split("?")[0];
 
     const res = await callApi({
@@ -1633,12 +1884,13 @@
       hospitalName: target.hospitalName,
       city: target.city,
       deadline: deadlineVal,
-      opsAgent: opsAgentVal,
+      associate: assocVal,
+      stage: stageVal,
       baseUrl: baseUrl,
       srNo: document.getElementById("ncSrInput").value.trim(),
       correctiveAction: actionText,
       adminNote: document.getElementById("ncSimpleNoteInput").value.trim()
-    }, "Saving Item & Pinning Link in Ops Calendar...");
+    }, "Saving Item & Syncing UDCP...");
 
     if (res && res.status === "ok") {
       session.adminData = res.data;
@@ -1652,7 +1904,7 @@
 
   function showCredentialShareCard(hosp) {
     const portalUrl = window.location.href.split("?")[0];
-    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.opsAgent ? ` (Associate: ${hosp.opsAgent})` : "");
+    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.associate ? ` (Associate: ${hosp.associate})` : "");
     document.getElementById("sharePortalLink").innerText = portalUrl;
     document.getElementById("shareUserId").innerText = hosp.userId;
     document.getElementById("sharePass").innerText = hosp.password;
@@ -1662,7 +1914,7 @@
     let deadlineMsg = "";
     if (hosp.deadline) {
       const fDate = formatDeadlineDisplay(hosp.deadline);
-      dLine.innerText = "⏳ Target Deadline: " + fDate + (hosp.opsAgent ? ` (Calendar link pinned under ${hosp.opsAgent})` : "");
+      dLine.innerText = "⏳ Target Deadline: " + fDate + (hosp.associate ? ` (Calendar link pinned under ${hosp.associate})` : "");
       dLine.classList.remove("hidden");
       deadlineMsg = `\nTarget Deadline: *${fDate}*`;
     } else {
@@ -1671,16 +1923,17 @@
 
     document.getElementById("credShareBox").classList.remove("hidden");
 
-    lastShareText = `*NC CLOSER — NABH Compliance Portal*\n\nHospital: *${hosp.hospitalName}*\nPortal Link: ${portalUrl}\nUser ID: *${hosp.userId}*\nPassword: *${hosp.password}*${deadlineMsg}\n\nPlease login and upload live photo / compliance PDF before the deadline.`;
+    lastShareText = `*UDCP — Umbrella Docs & Compliance Portal*\n_Umbrella Healthcare Consultancy_\n\nHospital: *${hosp.hospitalName}*\nStage: *${hosp.currentStage || 'Active Stage'}*\nPortal Link: ${portalUrl}\nUser ID: *${hosp.userId}*\nPassword: *${hosp.password}*${deadlineMsg}\n\nPlease login and upload live photo / compliance PDF before the deadline.`;
   }
 
   function copyShareMessage() {
     navigator.clipboard.writeText(lastShareText);
-    alert("Portal Link, User ID, Password & Deadline copied for WhatsApp!");
+    alert("UDCP Portal Link, User ID, Password & Deadline copied for WhatsApp!");
   }
 
   function renderAdminTable() {
     const fHosp = document.getElementById("adminFilterHosp").value;
+    const fStage = document.getElementById("adminFilterStage").value;
     const fStat = document.getElementById("adminFilterStatus").value;
     const q = document.getElementById("adminSearchInput").value.trim().toLowerCase();
 
@@ -1689,14 +1942,15 @@
 
     const list = session.adminData.ncs.filter(n => {
       if (fHosp !== "ALL" && n.userId !== fHosp) return false;
+      if (fStage !== "ALL" && n.stage !== fStage) return false;
       if (fStat !== "ALL" && n.status !== fStat) return false;
-      if (q && !(`${n.hospitalName} ${n.correctiveAction} ${n.userId}`).toLowerCase().includes(q)) return false;
+      if (q && !(`${n.hospitalName} ${n.correctiveAction} ${n.userId} ${n.stage}`).toLowerCase().includes(q)) return false;
       return true;
     });
 
     const container = document.getElementById("adminNcTableContainer");
     if (!list.length) {
-      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No items found.</p>`;
+      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No items found for selected filters.</p>`;
       return;
     }
 
@@ -1709,14 +1963,15 @@
             <span class="font-bold text-sm text-slate-900">${escapeHtml(nc.hospitalName)}</span>
             <span class="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded">${nc.userId}</span>
             <span class="font-mono text-[11px] bg-slate-900 text-white px-2 py-0.5 rounded">Sr. ${nc.srNo || nc.ncId}</span>
+            <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">${escapeHtml(nc.stage)}</span>
             <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
               nc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
               nc.status === 'Submitted' ? 'bg-blue-100 text-blue-800' :
               nc.status === 'Unable to Provide' ? 'bg-purple-100 text-purple-800' :
               nc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
             }">${nc.status}</span>
-            ${hospObj && hospObj.driveUrl ? `<a href="${hospObj.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline ml-1">📁 Drive Folder ↗</a>` : ''}
-            ${isSuperAdmin ? `<button type="button" onclick="openHospitalPortalAsAdmin('${nc.userId}')" class="text-[11px] font-bold text-slate-700 hover:text-red-600 underline ml-1">👁 Open Portal</button>` : ''}
+            ${hospObj && hospObj.driveUrl ? `<a href="${hospObj.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline ml-1">📁 Drive ↗</a>` : ''}
+            ${isSuperAdmin ? `<button type="button" onclick="openHospitalPortalAsAdmin('${nc.userId}')" class="text-[11px] font-bold text-slate-700 hover:text-red-600 underline ml-1">👁 Portal</button>` : ''}
           </div>
 
           <div class="flex items-start gap-2">
@@ -1766,7 +2021,7 @@
   }
 
   async function deleteNC(userId, ncId) {
-    if (!confirm("Delete this NC item permanently?")) return;
+    if (!confirm("Delete this item permanently?")) return;
     const res = await callApi({
       action: "deleteNC",
       adminUser: session.userId,
@@ -1804,60 +2059,174 @@
     }
   }
 
-  async function saveCardDeadline(userId) {
-    const inputEl = document.getElementById("cardDeadline_" + userId);
-    const agentEl = document.getElementById("cardAgent_" + userId);
-    if (!inputEl) return;
+  // =========================================================================
+  // TAB 2: HOSPITAL MASTER CARDS, SMART ATTENTION FILTERS & INCREMENTAL SETUP
+  // =========================================================================
+  async function saveHospitalCardMeta(userId, hospitalName) {
+    const safeKey = userId || ("NEW_" + hospitalName.replace(/[^A-Za-z0-9]/g, "_"));
+    const deadlineEl = document.getElementById("cardDeadline_" + safeKey);
+    const assocEl = document.getElementById("cardAssoc_" + safeKey);
+    const stageEl = document.getElementById("cardStage_" + safeKey);
     const baseUrl = window.location.href.split("?")[0];
+
     const res = await callApi({
-      action: "updateDeadline",
+      action: "updateHospitalMeta",
       adminUser: session.userId,
       adminPass: session.password,
       userId: userId,
-      deadline: inputEl.value,
-      opsAgent: agentEl ? agentEl.value : "",
+      hospitalName: hospitalName,
+      deadline: deadlineEl ? deadlineEl.value : "",
+      associate: assocEl ? assocEl.value : "",
+      currentStage: stageEl ? stageEl.value : "",
       baseUrl: baseUrl
-    }, "Updating Timer & Pinning Link in Ops Calendar...");
+    }, "Saving Hospital Settings & Syncing Calendar...");
+
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
     }
   }
 
+  function openPaymentSetupModal(hosp) {
+    editingPaymentHosp = hosp;
+    document.getElementById("payModalHospTitle").innerText = hosp.hospitalName;
+    document.getElementById("payModalTotalFee").value = hosp.totalFee || "";
+    document.getElementById("payModalLockMode").value = hosp.paymentLockMode || "SOFT";
+    const m = hosp.milestonesPaid || [0, 0, 0, 0];
+    document.getElementById("payM1").checked = m[0] === 1;
+    document.getElementById("payM2").checked = m[1] === 1;
+    document.getElementById("payM3").checked = m[2] === 1;
+    document.getElementById("payM4").checked = m[3] === 1;
+    document.getElementById("paymentSetupModal").classList.remove("hidden");
+  }
+
+  async function savePaymentSetupModal() {
+    if (!editingPaymentHosp) return;
+    const feeVal = Number(document.getElementById("payModalTotalFee").value) || 0;
+    const lockMode = document.getElementById("payModalLockMode").value;
+    const mArr = [
+      document.getElementById("payM1").checked ? 1 : 0,
+      document.getElementById("payM2").checked ? 1 : 0,
+      document.getElementById("payM3").checked ? 1 : 0,
+      document.getElementById("payM4").checked ? 1 : 0
+    ];
+
+    document.getElementById("paymentSetupModal").classList.add("hidden");
+    const res = await callApi({
+      action: "updateHospitalMeta",
+      adminUser: session.userId,
+      adminPass: session.password,
+      userId: editingPaymentHosp.userId,
+      hospitalName: editingPaymentHosp.hospitalName,
+      totalFee: feeVal,
+      milestonesPaid: mArr.join(","),
+      paymentLockMode: lockMode
+    }, "Updating Payment Milestones...");
+
+    if (res && res.status === "ok") {
+      session.adminData = res.data;
+      renderAdminDashboard();
+    }
+  }
+
+  function isHospitalPaymentDue(h) {
+    if (!h.hasPaymentSetup) return false;
+    const ord = (h.stageMetrics && h.stageMetrics.latestStageOrder) || 1;
+    const reqM = getRequiredMilestoneForStageOrder(ord);
+    if (!reqM) return false;
+    return (h.milestonesPaid || [0, 0, 0, 0])[reqM.index] !== 1;
+  }
+
   function renderActiveLoginsDirectory() {
     const q = (document.getElementById("directorySearchInput")?.value || "").trim().toLowerCase();
-    const { opsAgents } = session.adminData;
+    const assocFilter = document.getElementById("directoryAssocFilter")?.value || "ALL";
+    const { hospitals, associates } = session.adminData;
     const isSuperAdmin = (session.role === "admin");
 
-    const active = session.adminData.hospitals.filter(h =>
-      h.userId && (!q || h.hospitalName.toLowerCase().includes(q) || h.userId.toLowerCase().includes(q) || (h.opsAgent && h.opsAgent.toLowerCase().includes(q)))
-    );
+    // Calculate counts for Smart Filter Chips
+    const activeUdcp = hospitals.filter(h => h.userId);
+    const unassignedList = hospitals.filter(h => !h.associate);
+    const noPaymentList = hospitals.filter(h => !h.hasPaymentSetup);
+    const payDueList = hospitals.filter(h => isHospitalPaymentDue(h));
+    const notStartedList = hospitals.filter(h => !h.userId);
+
+    const chips = [
+      { id: "ACTIVE_UDCP", label: `Active in UDCP (${activeUdcp.length})` },
+      { id: "UNASSIGNED", label: `🚨 Unassigned Associate (${unassignedList.length})` },
+      { id: "NO_PAYMENT", label: `💳 Without Payment Setup (${noPaymentList.length})` },
+      { id: "PAYMENT_DUE", label: `⏳ Payment Milestone Due (${payDueList.length})` },
+      { id: "NOT_STARTED", label: `📋 Not Started Yet (${notStartedList.length})` },
+      { id: "ALL", label: `All Hospitals (${hospitals.length})` }
+    ];
+
+    document.getElementById("smartFilterChipsBar").innerHTML = chips.map(c => {
+      const isAct = activeSmartChip === c.id;
+      return `
+        <button type="button" onclick="activeSmartChip='${c.id}'; renderActiveLoginsDirectory();"
+          class="text-xs font-bold px-3 py-1.5 rounded-full transition ${isAct ? 'bg-slate-900 text-amber-300 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+          ${c.label}
+        </button>
+      `;
+    }).join("");
+
+    let filtered = hospitals.filter(h => {
+      if (activeSmartChip === "ACTIVE_UDCP" && !h.userId) return false;
+      if (activeSmartChip === "UNASSIGNED" && h.associate) return false;
+      if (activeSmartChip === "NO_PAYMENT" && h.hasPaymentSetup) return false;
+      if (activeSmartChip === "PAYMENT_DUE" && !isHospitalPaymentDue(h)) return false;
+      if (activeSmartChip === "NOT_STARTED" && h.userId) return false;
+
+      if (assocFilter === "NONE" && h.associate) return false;
+      if (assocFilter !== "ALL" && assocFilter !== "NONE" && h.associate !== assocFilter) return false;
+
+      if (q && !(`${h.hospitalName} ${h.userId} ${h.associate} ${h.city}`).toLowerCase().includes(q)) return false;
+      return true;
+    });
+
     const box = document.getElementById("activeHospListContainer");
-    if (!active.length) {
-      box.innerHTML = `<p class="text-xs text-slate-400 col-span-2 text-center py-6">No active hospital cards found.</p>`;
+    if (!filtered.length) {
+      box.innerHTML = `<p class="text-xs text-slate-400 col-span-2 text-center py-8">No hospitals match this filter.</p>`;
       return;
     }
 
-    box.innerHTML = active.map(h => {
-      const hospNcs = session.adminData.ncs.filter(n => n.userId === h.userId);
-      const done = hospNcs.filter(n => n.status === "Approved").length;
-      const pct = hospNcs.length ? Math.round((done / hospNcs.length) * 100) : 0;
+    // Cap render at 60 cards at a time for instant 0ms UI responsiveness when viewing all 185
+    const displayList = filtered.slice(0, 60);
 
-      const agentOptions = [`<option value="">Auto Associate</option>`].concat(
-        (opsAgents || []).map(ag => `<option value="${ag}" ${h.opsAgent === ag ? "selected" : ""}>${ag}</option>`)
+    box.innerHTML = displayList.map(h => {
+      const safeKey = h.userId || ("NEW_" + h.hospitalName.replace(/[^A-Za-z0-9]/g, "_"));
+      const sm = h.stageMetrics || { latestStage: "Not Started", latestPercent: 0, latestApproved: 0, latestTotal: 0, latestRejected: 0 };
+      const milestones = h.milestonesPaid || [0, 0, 0, 0];
+      const payDue = isHospitalPaymentDue(h);
+
+      const assocOptions = [`<option value="">-- Unassigned --</option>`].concat(
+        (associates || []).map(ag => `<option value="${ag}" ${h.associate === ag ? "selected" : ""}>${ag}</option>`)
       ).join("");
 
+      const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+      const stageOptions = stageList.map(st => `<option value="${st}" ${(h.currentStage || sm.latestStage) === st ? "selected" : ""}>${st}</option>`).join("");
+
       return `
-        <div class="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/40 shadow-sm">
+        <div class="border ${!h.associate ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 bg-slate-50/40'} rounded-2xl p-4 space-y-3 shadow-sm">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <h4 class="font-extrabold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
-              ${isSuperAdmin ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>` : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`}
-              <p class="text-[11px] text-emerald-600 font-bold mt-1">
-                Progress: ${pct}% (${done}/${hospNcs.length})
-                ${h.opsAgent ? ` &nbsp;•&nbsp; <span class="text-blue-700">Associate: ${h.opsAgent}</span>` : ""}
+              <div class="flex flex-wrap items-center gap-1.5">
+                <h4 class="font-extrabold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
+                ${!h.associate ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">Unassigned</span>` : `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">${h.associate}</span>`}
+              </div>
+
+              ${h.userId
+                ? (isSuperAdmin
+                    ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>`
+                    : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`)
+                : `<p class="text-[11px] text-slate-400 italic mt-0.5">Not provisioned in UDCP yet (Click Save below to activate)</p>`
+              }
+
+              <p class="text-[11px] text-emerald-700 font-bold mt-1">
+                Stage: ${escapeHtml(h.currentStage || sm.latestStage)} • ${sm.latestPercent}% (${sm.latestApproved}/${sm.latestTotal})
+                ${sm.latestRejected > 0 ? `<span class="text-red-600 ml-1">(${sm.latestRejected} Rejected)</span>` : ""}
               </p>
             </div>
+
             ${h.deadline ? `
               <div class="text-right shrink-0">
                 <span class="text-[10px] font-bold uppercase text-slate-400 block">Live Timer</span>
@@ -1865,20 +2234,58 @@
                   Calculating...
                 </span>
               </div>
-            ` : `<span class="text-[10px] font-semibold bg-slate-200 text-slate-600 px-2 py-1 rounded-lg">No Timer Set</span>`}
+            ` : ''}
           </div>
 
-          ${isSuperAdmin ? `
-            <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
-              <input id="cardDeadline_${h.userId}" type="datetime-local" value="${h.deadline || ''}"
-                class="flex-1 min-w-[140px] text-xs font-medium text-slate-700 outline-none" />
-              <select id="cardAgent_${h.userId}" class="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none">
-                ${agentOptions}
-              </select>
-              <button type="button" onclick="saveCardDeadline('${h.userId}')"
-                class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-extrabold px-2.5 py-1.5 rounded-lg shrink-0">
-                ⏱ Set & Sync
+          <!-- Payment Status Strip -->
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs">
+            <div>
+              ${!h.hasPaymentSetup
+                ? `<span class="font-bold text-slate-400">💳 Payment Not Set</span>`
+                : (isSuperAdmin
+                    ? `<span class="font-bold ${payDue ? 'text-red-600' : 'text-emerald-700'}">
+                        ₹${(h.totalFee || 0).toLocaleString("en-IN")} • [${milestones.map((v, idx) => `P${idx+1}:${v?'✓':'✗'}`).join(" ")}]
+                       </span>`
+                    : `<span class="font-bold ${payDue ? 'text-red-600' : 'text-emerald-700'}">
+                        ${payDue ? '⏳ Payment Milestone Hold' : '✓ Payment Milestone Clear'}
+                       </span>`
+                  )
+              }
+            </div>
+            ${isSuperAdmin ? `
+              <button type="button" onclick='openPaymentSetupModal(${JSON.stringify(h).replace(/'/g, "&#39;")})'
+                class="text-[11px] font-extrabold text-red-600 hover:underline">
+                ${h.hasPaymentSetup ? 'Edit Payment / Gate' : '+ Set Payment'}
               </button>
+            ` : ''}
+          </div>
+
+          <!-- Inline Associate, Stage & Timer Controls (Super Admin) -->
+          ${isSuperAdmin ? `
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
+              <div class="sm:col-span-4">
+                <label class="block text-[9px] font-bold uppercase text-slate-400">Associate</label>
+                <select id="cardAssoc_${safeKey}" class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
+                  ${assocOptions}
+                </select>
+              </div>
+              <div class="sm:col-span-4">
+                <label class="block text-[9px] font-bold uppercase text-slate-400">Active Stage</label>
+                <select id="cardStage_${safeKey}" class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
+                  ${stageOptions}
+                </select>
+              </div>
+              <div class="sm:col-span-4">
+                <label class="block text-[9px] font-bold uppercase text-slate-400">Deadline</label>
+                <input id="cardDeadline_${safeKey}" type="datetime-local" value="${h.deadline || ''}"
+                  class="w-full text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" />
+              </div>
+              <div class="sm:col-span-12 flex justify-end pt-1">
+                <button type="button" onclick='saveHospitalCardMeta("${h.userId || ''}", ${JSON.stringify(h.hospitalName).replace(/'/g, "&#39;")})'
+                  class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-extrabold px-3.5 py-1.5 rounded-lg shadow-sm">
+                  ✓ Save & Sync Card
+                </button>
+              </div>
             </div>
           ` : ''}
 
@@ -1889,7 +2296,7 @@
                 📁 Drive Folder ↗
               </a>
             ` : ''}
-            ${isSuperAdmin ? `
+            ${isSuperAdmin && h.userId ? `
               <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
                 class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
                 👁 Open Portal
