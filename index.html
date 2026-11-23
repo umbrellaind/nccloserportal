@@ -287,9 +287,20 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <!-- Hospital Picker -->
+          <!-- Hospital Picker with Stage-Wise Filter -->
           <div class="md:col-span-4 space-y-1.5">
-            <label class="block text-xs font-bold text-slate-700">1. Search & Select Hospital *</label>
+            <div class="flex items-center justify-between gap-1">
+              <label class="block text-xs font-bold text-slate-700">1. Select Hospital *</label>
+              <select id="hospDropdownStageFilter" onchange="filterHospitalDropdown()"
+                class="text-[11px] font-extrabold text-red-700 bg-red-50 border border-red-200 rounded-lg px-2 py-0.5 outline-none cursor-pointer">
+                <option value="ALL">All Stages</option>
+                <option value="1. Kickoff Docs">1. Kickoff</option>
+                <option value="2. Desktop NC">2. DA NC</option>
+                <option value="3. Audit Prep">3. Audit Prep</option>
+                <option value="4. Onsite NC">4. OA NC</option>
+                <option value="5. Final Clearance">5. Final Clear.</option>
+              </select>
+            </div>
             <div>
               <input id="hospSearchBox" type="text" oninput="filterHospitalDropdown()" placeholder="🔍 Type hospital name to filter..."
                 class="w-full px-3.5 py-2 rounded-t-xl border border-b-0 border-slate-300 bg-slate-50 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-red-500 outline-none" />
@@ -510,8 +521,11 @@
         </div>
       </div>
 
-      <!-- SMART QUICK-FILTER CHIPS -->
-      <div id="smartFilterChipsBar" class="flex flex-wrap gap-2 pt-1 pb-2 border-b border-slate-100"></div>
+      <!-- SMART QUICK-FILTER CHIPS & STAGE-WISE FILTER CHIPS -->
+      <div class="space-y-2 pt-1 pb-2 border-b border-slate-100">
+        <div id="smartFilterChipsBar" class="flex flex-wrap gap-2"></div>
+        <div id="stageFilterChipsBar" class="flex flex-wrap items-center gap-1.5 pt-1"></div>
+      </div>
 
       <!-- BATCH APPLY TOOLBAR (Super Admin Only) -->
       <div id="bulkBatchToolbar" class="hidden bg-amber-50/90 border border-amber-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
@@ -802,6 +816,7 @@
 
   let hospStageFilter = "ALL";
   let activeSmartChip = "ACTIVE_UDCP"; // ACTIVE_UDCP, ALL, UNASSIGNED, NO_PAYMENT, PAYMENT_DUE, NOT_STARTED
+  let activeStageChip = "ALL"; // ALL, 1. Kickoff Docs, 2. Desktop NC, 3. Audit Prep, 4. Onsite NC, 5. Final Clearance
   let editingPaymentHosp = null;
 
   let opsPublicViewData = { hospital: null, ncs: [] };
@@ -2080,18 +2095,33 @@
 • Skipped Already Existing: ${res.skippedCount}`);
   }
 
+  function getHospitalResolvedStage(h) {
+    if (h.currentStage) return h.currentStage;
+    if (h.stageMetrics && h.stageMetrics.latestStage && h.stageMetrics.latestStage !== "Not Started") {
+      return h.stageMetrics.latestStage;
+    }
+    return "";
+  }
+
   function filterHospitalDropdown() {
     const query = (document.getElementById("hospSearchBox").value || "").trim().toLowerCase();
+    const stageFilt = (document.getElementById("hospDropdownStageFilter")?.value || "ALL");
     const { hospitals } = session.adminData;
     const select = document.getElementById("adminHospSelect");
     const prevVal = select.value;
 
-    const filtered = hospitals.filter(h =>
-      !query ||
-      h.hospitalName.toLowerCase().includes(query) ||
-      (h.city && h.city.toLowerCase().includes(query)) ||
-      (h.userId && h.userId.toLowerCase().includes(query))
-    );
+    const filtered = hospitals.filter(h => {
+      if (stageFilt !== "ALL") {
+        const hStage = getHospitalResolvedStage(h);
+        if (hStage !== stageFilt) return false;
+      }
+      if (query && !(
+        h.hospitalName.toLowerCase().includes(query) ||
+        (h.city && h.city.toLowerCase().includes(query)) ||
+        (h.userId && h.userId.toLowerCase().includes(query))
+      )) return false;
+      return true;
+    });
 
     let opts = `<option value="">-- Select Hospital (${filtered.length} matching) --</option>`;
     opts += `<option value="__NEW__" class="font-bold text-red-600">+ ADD NEW HOSPITAL (Not in List)</option>`;
@@ -2707,6 +2737,32 @@
       `;
     }).join("");
 
+    const stageChipDefs = [
+      { id: "ALL", label: "All Stages" },
+      { id: "1. Kickoff Docs", label: "📋 1. Kickoff" },
+      { id: "2. Desktop NC", label: "🖥️ 2. DA NC" },
+      { id: "3. Audit Prep", label: "🏥 3. Audit Prep" },
+      { id: "4. Onsite NC", label: "🔍 4. OA NC" },
+      { id: "5. Final Clearance", label: "🏆 5. Final Clearance" }
+    ];
+
+    const stageChipsEl = document.getElementById("stageFilterChipsBar");
+    if (stageChipsEl) {
+      stageChipsEl.innerHTML = `<span class="text-[11px] font-extrabold text-slate-500 uppercase mr-1">Stage Filter:</span>` +
+        stageChipDefs.map(sc => {
+          const cnt = sc.id === "ALL"
+            ? hospitals.length
+            : hospitals.filter(h => getHospitalResolvedStage(h) === sc.id).length;
+          const isAct = (activeStageChip === sc.id);
+          return `
+            <button type="button" onclick="activeStageChip='${sc.id}'; if('${sc.id}' !== 'ALL' && activeSmartChip === 'NOT_STARTED') activeSmartChip='ALL'; dirPage=1; renderActiveLoginsDirectory();"
+              class="text-[11px] font-extrabold px-2.5 py-1 rounded-lg border transition ${isAct ? 'bg-red-600 text-white border-red-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-red-50'}">
+              ${sc.label} (${cnt})
+            </button>
+          `;
+        }).join("");
+    }
+
     let filtered = hospitals.filter(h => {
       if (activeSmartChip === "ACTIVE_UDCP" && !h.userId) return false;
       if (activeSmartChip === "UNASSIGNED" && h.associate) return false;
@@ -2714,8 +2770,12 @@
       if (activeSmartChip === "PAYMENT_DUE" && !isHospitalPaymentDue(h)) return false;
       if (activeSmartChip === "NOT_STARTED" && h.userId) return false;
 
+      if (activeStageChip !== "ALL") {
+        if (getHospitalResolvedStage(h) !== activeStageChip) return false;
+      }
+
       if (assocFilter === "NONE" && h.associate) return false;
-      if (assocFilter !== "ALL" && assocFilter !== "NONE" && h.associate !== assocFilter) return false;
+      if (assocFilter !== "ALL" && assocFilter !== "NONE" && !String(h.associate || "").trim().includes(assocFilter.trim())) return false;
 
       if (q && !(`${h.hospitalName} ${h.userId} ${h.associate} ${h.city}`).toLowerCase().includes(q)) return false;
       return true;
@@ -3225,7 +3285,7 @@
 
         <script>
           window.onload = function() { setTimeout(function() { window.print(); }, 350); };
-        </script>
+        <\/script>
       </body>
       </html>
     `);
