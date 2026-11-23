@@ -17,17 +17,13 @@
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
 <script>
-  // =========================================================================
-  // YAHAN APNA GOOGLE APPS SCRIPT WEB APP URL (/exec) PASTE KAREIN:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby12EBhrXxlwjRt6ESCk9fWwNfufQRiA5HFmFOOuNqtoe6BLIjgmx1Sbm3UtIPE-xD5/exec";
-  // =========================================================================
 </script>
 
-  <!-- UMBRELLA BRANDED TOP NAVBAR (Red & Gold Identity) -->
+  <!-- UMBRELLA BRANDED TOP NAVBAR -->
   <header class="umbrella-gradient text-white sticky top-0 z-30 shadow-md border-b-2 border-amber-400">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
       <div class="flex items-center gap-3">
-        <!-- Custom Red & Gold Umbrella SVG Emblem -->
         <div class="w-10 h-10 rounded-xl bg-white/10 border border-amber-300/60 flex items-center justify-center shadow-inner shrink-0">
           <svg class="w-6 h-6 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.03 2 11h9v7.5c0 .83-.67 1.5-1.5 1.5S8 19.33 8 18.5V18H6v.5C6 20.43 7.57 22 9.5 22S13 20.43 13 18.5V11h9c0-4.97-4.48-9-10-9z"/>
@@ -96,9 +92,8 @@
     </div>
   </main>
 
-  <!-- 2. HOSPITAL DASHBOARD (Hospital Self-Upload View) -->
+  <!-- 2. HOSPITAL DASHBOARD -->
   <section id="hospitalSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
-    <!-- LIVE DEADLINE COUNTDOWN BANNER -->
     <div id="hospDeadlineBanner" class="hidden rounded-2xl border-2 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <span class="text-[11px] font-extrabold uppercase tracking-wider block">⏳ Submission Target Deadline / अंतिम समय सीमा</span>
@@ -110,7 +105,6 @@
       </div>
     </div>
 
-    <!-- 4-MILESTONE PAYMENT & STAGE PROGRESS CARD -->
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -131,7 +125,6 @@
         <div id="hospProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
       </div>
 
-      <!-- 4-Milestone Payment Stepper (25% x 4) -->
       <div id="hospPaymentBar" class="hidden pt-3 border-t border-slate-100 space-y-2">
         <div class="flex items-center justify-between text-xs">
           <span class="font-extrabold text-slate-700 uppercase">Consultancy Fee Milestones (25% × 4 Stages)</span>
@@ -141,7 +134,6 @@
         <div id="hospPaymentWarningBanner" class="hidden bg-red-50 border border-red-300 text-red-800 text-xs font-bold p-3 rounded-xl"></div>
       </div>
 
-      <!-- STAGE-WISE BREAKDOWN CARDS & SELECTOR (Shows Submitted/Approved/Pending per Stage) -->
       <div class="pt-3 border-t border-slate-100 space-y-2.5">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wide">📊 Stage-Wise Document Progress (Click a Stage to Filter):</span>
@@ -162,7 +154,7 @@
     <div id="hospNcList" class="space-y-4"></div>
   </section>
 
-  <!-- 2B. OPS / CALENDAR DIRECT HOSPITAL VIEW (?hosp=HOSP-101) -->
+  <!-- 2B. OPS / CALENDAR DIRECT HOSPITAL VIEW (?hosp=...) -->
   <section id="opsHospitalViewSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -188,7 +180,6 @@
         </div>
       </div>
 
-      <!-- Action Bar: Google Drive Folder (Inside Portal) + Download All CSV + Ops Operator Login -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
         <div class="flex flex-wrap gap-2">
           <a id="opsViewDriveBtn" href="#" target="_blank"
@@ -213,9 +204,8 @@
     <div id="opsViewNcList" class="space-y-4"></div>
   </section>
 
-  <!-- 3. ADMIN / OPS TEAM DASHBOARD -->
+  <!-- 3. ADMIN / OPS / ASSOCIATE DASHBOARD -->
   <section id="adminSection" class="hidden max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
-    <!-- Top Progress & Stats -->
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
@@ -237,7 +227,6 @@
       </div>
     </div>
 
-    <!-- Instant Credentials Card -->
     <div id="credShareBox" class="hidden bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-5 shadow-md">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="space-y-1">
@@ -263,7 +252,6 @@
       </div>
     </div>
 
-    <!-- Admin Navigation Tabs -->
     <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
       <button type="button" id="mainTabAssign" onclick="switchAdminMainTab('assign')" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm">
         1. Assign Stage Docs & Verify Proofs
@@ -273,21 +261,19 @@
       </button>
     </div>
 
-    <!-- TAB 1: ASSIGN & REVIEW -->
+    <!-- TAB 1 -->
     <div id="adminAssignView" class="space-y-6">
-      <!-- Super Admin Only: Assign New Requirements Box -->
       <div id="superAdminAssignBox" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <h3 class="font-bold text-slate-900 text-base">Assign Stage Requirements / Compliance Docs</h3>
           <div class="flex flex-wrap bg-slate-100 p-1 rounded-xl text-xs font-bold gap-1">
-            <button type="button" id="tabTemplateBtn" onclick="switchEntryMode('template')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm">⚡ Ready-Made Checklist (Stage 1 / Stage 3)</button>
+            <button type="button" id="tabTemplateBtn" onclick="switchEntryMode('template')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm">⚡ Ready-Made Checklist</button>
             <button type="button" id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg text-slate-700">Copy-Paste & Fetch (NCs)</button>
             <button type="button" id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-700">One-by-One Entry</button>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <!-- Hospital Picker with Stage-Wise Filter -->
           <div class="md:col-span-4 space-y-1.5">
             <div class="flex items-center justify-between gap-1">
               <label class="block text-xs font-bold text-slate-700">1. Select Hospital *</label>
@@ -310,7 +296,6 @@
             </div>
           </div>
 
-          <!-- Stage Selector -->
           <div class="md:col-span-3 space-y-1.5">
             <label class="block text-xs font-bold text-slate-700">2. Project Stage *</label>
             <select id="assignStageSelect"
@@ -321,18 +306,14 @@
               <option value="4. Onsite NC">4. Onsite NC</option>
               <option value="5. Final Clearance">5. Final Clearance</option>
             </select>
-            <p class="text-[10px] text-slate-400">Tracks stage-wise live % in DB</p>
           </div>
 
-          <!-- Deadline Picker -->
           <div class="md:col-span-3 space-y-1.5">
             <label class="block text-xs font-bold text-slate-700">3. Target Date & Time</label>
             <input id="assignDeadlineInput" type="datetime-local"
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-red-500 outline-none font-medium" />
-            <p class="text-[10px] text-slate-400">Pins card in Ops Calendar</p>
           </div>
 
-          <!-- Associate Selector -->
           <div class="md:col-span-2 space-y-1.5">
             <label class="block text-xs font-bold text-slate-700">4. Associate</label>
             <select id="assignAssociateSelect"
@@ -356,108 +337,73 @@
           </div>
         </div>
 
-        <!-- READY-MADE CHECKLIST PANEL (STAGE 1: KICKOFF DOCS & STAGE 3: AUDIT PREP) -->
         <div id="templateChecklistBox" class="bg-amber-50/50 border border-amber-300 rounded-2xl p-4 sm:p-5 space-y-4">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-amber-200 pb-3">
             <div class="flex flex-wrap items-center gap-2">
               <button type="button" id="tmplStage1Tab" onclick="loadReadyMadeTemplate('STAGE_1')"
                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm transition">
-                📋 Stage 1: Kickoff Docs (37 Items)
+                📋 Stage 1: Kickoff Docs
               </button>
               <button type="button" id="tmplStage3Tab" onclick="loadReadyMadeTemplate('STAGE_3')"
                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition">
-                🏥 Stage 3: Audit Prep (34 Items)
+                🏥 Stage 3: Audit Prep
               </button>
-              <a id="tmplSourceSheetLink" href="#" target="_blank"
-                class="hidden text-[11px] font-bold text-blue-700 underline ml-1">
-                Open Master Template Sheet ↗
-              </a>
+              <a id="tmplSourceSheetLink" href="#" target="_blank" class="hidden text-[11px] font-bold text-blue-700 underline ml-1">Open Master Template Sheet ↗</a>
             </div>
-
             <div class="flex flex-wrap items-center gap-2">
-              <input id="tmplSearchInput" type="text" oninput="renderTemplateChecklistItems()"
-                placeholder="🔍 Filter checklist items..."
+              <input id="tmplSearchInput" type="text" oninput="renderTemplateChecklistItems()" placeholder="🔍 Filter checklist items..."
                 class="text-xs border border-slate-300 rounded-xl px-3 py-1.5 bg-white outline-none focus:border-red-500" />
-              <button type="button" onclick="toggleAllTemplateItems(true)"
-                class="text-xs font-extrabold bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-xl transition">
-                ☑️ Select All
-              </button>
-              <button type="button" onclick="toggleAllTemplateItems(false)"
-                class="text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl transition">
-                ☐ Clear All
-              </button>
+              <button type="button" onclick="toggleAllTemplateItems(true)" class="text-xs font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-xl">☑️ Select All</button>
+              <button type="button" onclick="toggleAllTemplateItems(false)" class="text-xs font-bold bg-white text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl">☐ Clear All</button>
             </div>
           </div>
 
           <div id="tmplPaymentPreviewBanner" class="hidden text-xs font-bold px-3.5 py-2 rounded-xl border"></div>
-
           <div class="flex items-center justify-between text-xs text-slate-600">
-            <span>All selected items will be assigned to the hospital as <strong>Pending</strong> (Manual verification & approval after hospital upload):</span>
-            <span class="font-extrabold text-slate-900"><span id="tmplTickedCount">0</span> Items Selected to Assign</span>
+            <span>Selected items will be assigned as <strong>Pending</strong>:</span>
+            <span class="font-extrabold text-slate-900"><span id="tmplTickedCount">0</span> Items Selected</span>
           </div>
-
-          <div id="tmplChecklistContainer" class="max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
-            <div class="p-6 text-center text-xs text-slate-500">
-              Select a Hospital above and click <strong>Stage 1: Kickoff Docs</strong> or <strong>Stage 3: Audit Prep</strong> to load items.
-            </div>
-          </div>
-
+          <div id="tmplChecklistContainer" class="max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl divide-y divide-slate-100"></div>
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
             <span id="tmplDuplicateSummary" class="text-[11px] font-semibold text-slate-500"></span>
-            <button type="button" onclick="pushReadyMadeTemplateToHospital()"
-              class="bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md transition">
+            <button type="button" onclick="pushReadyMadeTemplateToHospital()" class="bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md transition">
               ✓ Push Checklist to Selected Hospital & Sync UDCP
             </button>
           </div>
         </div>
 
         <div id="bulkNcBox" class="hidden bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 text-center space-y-3">
-          <p class="text-xs text-slate-700">
-            <strong>Zero Upload Hassle:</strong> Paste your items (<code>Sr No</code> in Col A, <code>Requirement / Evidence</code> in Col B) into the Input Sheet, select Hospital, Stage & Associate above, and click Fetch!
-          </p>
+          <p class="text-xs text-slate-700">Paste items into the Input Sheet and click Fetch.</p>
           <div class="flex flex-wrap justify-center gap-3">
-            <a id="openInputSheetLink" href="#" target="_blank"
-              class="text-xs font-bold bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 px-4 py-2.5 rounded-xl shadow-sm inline-flex items-center gap-1.5">
-              📄 Step 1: Open Input Sheet (Paste Items Here) ↗
-            </a>
-            <button type="button" onclick="fetchFromInputSheet()"
-              class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl shadow transition">
-              ⚡ Step 2: Fetch Pasted Items for Selected Hospital
-            </button>
+            <a id="openInputSheetLink" href="#" target="_blank" class="text-xs font-bold bg-white border border-slate-300 text-slate-800 px-4 py-2.5 rounded-xl shadow-sm">📄 Step 1: Open Input Sheet ↗</a>
+            <button type="button" onclick="fetchFromInputSheet()" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl shadow">⚡ Step 2: Fetch Pasted Items</button>
           </div>
         </div>
 
         <div id="singleNcForm" class="hidden grid grid-cols-1 md:grid-cols-12 gap-3 pt-2">
           <div class="md:col-span-2">
             <label class="block text-xs font-bold text-slate-700 mb-1">Sr No</label>
-            <input id="ncSrInput" type="text" placeholder="1"
-              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
+            <input id="ncSrInput" type="text" placeholder="1" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="md:col-span-6">
             <label class="block text-xs font-bold text-slate-700 mb-1">Requirement / Corrective Action Evidence *</label>
-            <input id="ncActionInput" type="text" placeholder="e.g. Fire extinguisher refilling tag live photo"
-              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
+            <input id="ncActionInput" type="text" placeholder="Requirement details..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="md:col-span-4">
             <label class="block text-xs font-bold text-slate-700 mb-1">Optional Simplified Note</label>
-            <input id="ncSimpleNoteInput" type="text" placeholder="Simple Hindi/English instruction..."
-              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
+            <input id="ncSimpleNoteInput" type="text" placeholder="Guidance note..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="md:col-span-12 flex justify-end">
-            <button type="button" onclick="submitSingleNC(event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow transition">
-              + Add Item & Generate Login
-            </button>
+            <button type="button" onclick="submitSingleNC(event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow">+ Add Item & Generate Login</button>
           </div>
         </div>
       </div>
 
-      <!-- All Items Review List -->
       <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h3 class="font-bold text-slate-900 text-base">Stage Requirements & Evidence Verification</h3>
           <div class="flex flex-wrap items-center gap-2">
-            <input id="adminSearchInput" type="text" oninput="renderAdminTable()" placeholder="Search hospital or keyword..."
-              class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white outline-none focus:border-red-500" />
+            <input id="adminSearchInput" type="text" oninput="renderAdminTable()" placeholder="Search hospital or keyword..." class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white outline-none focus:border-red-500" />
             <select id="adminFilterHosp" onchange="onFilterHospChange()" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white font-semibold">
               <option value="ALL">All Hospitals</option>
             </select>
@@ -469,18 +415,8 @@
               <option value="4. Onsite NC">4. Onsite NC</option>
               <option value="5. Final Clearance">5. Final Clearance</option>
             </select>
-            <a id="filterDriveLinkBtn" href="#" target="_blank"
-              class="hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
-              📁 Drive Folder ↗
-            </a>
-            <button id="filterAnalyticsPdfBtn" type="button" onclick="openSelectedFilterHospitalPdf()"
-              class="hidden text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
-              📊 Analytics PDF
-            </button>
-            <button id="filterOpenPortalBtn" type="button" onclick="openSelectedFilterHospitalPortal()"
-              class="hidden text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg shadow-sm">
-              👁 Open Hospital Portal
-            </button>
+            <a id="filterDriveLinkBtn" href="#" target="_blank" class="hidden text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg">📁 Drive Folder ↗</a>
+            <button id="filterOpenPortalBtn" type="button" onclick="openSelectedFilterHospitalPortal()" class="hidden text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg">👁 Open Hospital Portal</button>
             <select id="adminFilterStatus" onchange="renderAdminTable()" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white">
               <option value="ALL">All Statuses</option>
               <option value="Submitted">Submitted (Review)</option>
@@ -491,43 +427,34 @@
             </select>
           </div>
         </div>
-
         <div id="adminNcTableContainer" class="space-y-3"></div>
       </div>
     </div>
 
-    <!-- TAB 2: HOSPITAL MASTER CARDS & EXCEL BULK GRID MODE -->
+    <!-- TAB 2 -->
     <div id="adminLoginsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4 pb-20">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Hospital Master Directory — Bulk Associate & Payment Setup</h3>
-          <p class="text-xs text-slate-500">Edit multiple hospitals inline (Associate, Stage, Deadline, Total Fee & P1–P4) and click <strong>Save & Sync All</strong> once</p>
+          <h3 class="font-bold text-slate-900 text-base">Hospital Master Directory</h3>
+          <p class="text-xs text-slate-500">Edit hospitals inline and click <strong>Save & Sync All</strong></p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <!-- View Mode Switcher -->
           <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-extrabold border border-slate-200">
-            <button type="button" id="dirViewGridBtn" onclick="switchDirectoryViewMode('grid')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm">
-              📊 Excel Bulk Grid
-            </button>
-            <button type="button" id="dirViewCardBtn" onclick="switchDirectoryViewMode('card')" class="px-3 py-1.5 rounded-lg text-slate-700">
-              📇 Card View
-            </button>
+            <button type="button" id="dirViewGridBtn" onclick="switchDirectoryViewMode('grid')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm">📊 Excel Bulk Grid</button>
+            <button type="button" id="dirViewCardBtn" onclick="switchDirectoryViewMode('card')" class="px-3 py-1.5 rounded-lg text-slate-700">📇 Card View</button>
           </div>
           <select id="directoryAssocFilter" onchange="dirPage=1; renderActiveLoginsDirectory()" class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white font-semibold">
             <option value="ALL">All Associates</option>
           </select>
-          <input id="directorySearchInput" type="text" oninput="dirPage=1; renderActiveLoginsDirectory()" placeholder="🔍 Search hospital name / ID..."
-            class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white outline-none focus:border-red-500" />
+          <input id="directorySearchInput" type="text" oninput="dirPage=1; renderActiveLoginsDirectory()" placeholder="🔍 Search hospital name / ID..." class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white outline-none focus:border-red-500" />
         </div>
       </div>
 
-      <!-- SMART QUICK-FILTER CHIPS & STAGE-WISE FILTER CHIPS -->
       <div class="space-y-2 pt-1 pb-2 border-b border-slate-100">
         <div id="smartFilterChipsBar" class="flex flex-wrap gap-2"></div>
         <div id="stageFilterChipsBar" class="flex flex-wrap items-center gap-1.5 pt-1"></div>
       </div>
 
-      <!-- BATCH APPLY TOOLBAR (Super Admin Only) -->
       <div id="bulkBatchToolbar" class="hidden bg-amber-50/90 border border-amber-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
           <label class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 bg-white px-3 py-1.5 rounded-xl border border-amber-300 cursor-pointer">
@@ -536,7 +463,6 @@
           </label>
           <select id="batchAssocInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
             <option value="__KEEP__">Associate (No Change)</option>
-            <option value="">-- Clear / Unassign --</option>
           </select>
           <select id="batchStageInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
             <option value="__KEEP__">Stage (No Change)</option>
@@ -546,21 +472,16 @@
             <option value="4. Onsite NC">4. Onsite NC</option>
             <option value="5. Final Clearance">5. Final Clearance</option>
           </select>
-          <input id="batchFeeInput" type="number" placeholder="Total Fee ₹ (Optional)"
-            class="w-36 text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white" />
+          <input id="batchFeeInput" type="number" placeholder="Total Fee ₹" class="w-32 text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white" />
           <select id="batchLockInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
             <option value="__KEEP__">Gate (No Change)</option>
             <option value="SOFT">SOFT</option>
             <option value="STRICT">STRICT</option>
           </select>
         </div>
-        <button type="button" onclick="applyBatchToSelected()"
-          class="bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-extrabold px-4 py-2 rounded-xl shadow transition">
-          ⚡ Apply to Selected Rows
-        </button>
+        <button type="button" onclick="applyBatchToSelected()" class="bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-extrabold px-4 py-2 rounded-xl shadow">⚡ Apply to Selected Rows</button>
       </div>
 
-      <!-- EXCEL BULK GRID CONTAINER -->
       <div id="excelBulkGridWrapper" class="overflow-x-auto border border-slate-200 rounded-2xl">
         <table class="w-full text-left border-collapse text-xs">
           <thead class="bg-slate-900 text-white uppercase text-[10px] tracking-wider">
@@ -570,9 +491,9 @@
               <th class="p-2.5 min-w-[130px]">Associate</th>
               <th class="p-2.5 min-w-[145px]">Active Stage</th>
               <th class="p-2.5 min-w-[160px]">Target Deadline</th>
-              <th class="p-2.5 min-w-[115px] admin-fin-col">Total Fee (₹)</th>
-              <th class="p-2.5 min-w-[175px] admin-fin-col">25% × 4 Paid (P1–P4)</th>
-              <th class="p-2.5 min-w-[95px] admin-fin-col">Gate</th>
+              <th class="p-2.5 min-w-[115px]">Total Fee (₹)</th>
+              <th class="p-2.5 min-w-[175px]">25% × 4 Paid (P1–P4)</th>
+              <th class="p-2.5 min-w-[95px]">Gate</th>
               <th class="p-2.5 text-right">Quick Links</th>
             </tr>
           </thead>
@@ -580,35 +501,23 @@
         </table>
       </div>
 
-      <!-- CARD VIEW CONTAINER -->
       <div id="activeHospListContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-
-      <!-- PAGINATION BAR -->
       <div id="dirPaginationBar" class="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-slate-600"></div>
     </div>
 
-    <!-- STICKY FLOATING "SAVE & SYNC ALL" BAR -->
     <div id="stickyBulkSaveBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-3xl bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-amber-400 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2.5">
         <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
-        <span class="text-xs sm:text-sm font-extrabold">
-          <span id="dirtyCountText" class="text-amber-300">0</span> Hospital(s) Modified (Unsaved Changes)
-        </span>
+        <span class="text-xs sm:text-sm font-extrabold"><span id="dirtyCountText" class="text-amber-300">0</span> Hospital(s) Modified</span>
       </div>
       <div class="flex items-center gap-2">
-        <button type="button" onclick="discardBulkChanges()"
-          class="text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-2 rounded-xl transition">
-          Discard
-        </button>
-        <button type="button" onclick="saveAndSyncAllBulk()"
-          class="text-xs sm:text-sm font-black bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-5 py-2 rounded-xl shadow-lg transition">
-          ✓ Save & Sync All (<span id="dirtyBtnCount">0</span>)
-        </button>
+        <button type="button" onclick="discardBulkChanges()" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-2 rounded-xl">Discard</button>
+        <button type="button" onclick="saveAndSyncAllBulk()" class="text-xs sm:text-sm font-black bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-5 py-2 rounded-xl shadow-lg">✓ Save & Sync All (<span id="dirtyBtnCount">0</span>)</button>
       </div>
     </div>
   </section>
 
-  <!-- 4. MULTI-EVIDENCE MERGER MODAL -->
+  <!-- MODALS -->
   <div id="evidenceModal" class="hidden fixed inset-0 bg-slate-900/80 z-40 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-3.5 umbrella-gradient text-white flex items-center justify-between border-b-2 border-amber-400">
@@ -618,95 +527,53 @@
         </div>
         <button type="button" onclick="closeEvidenceModal()" class="text-white/80 hover:text-white text-xl font-bold px-2">&times;</button>
       </div>
-
       <div class="p-4 sm:p-5 space-y-4">
         <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl text-xs font-bold">
-          <button type="button" id="modeCamBtn" onclick="setCaptureMode('camera')" class="py-2 rounded-lg bg-white text-slate-900 shadow-sm">
-            📸 Live Camera (Photo / Scan)
-          </button>
-          <button type="button" id="modeFileBtn" onclick="setCaptureMode('file')" class="py-2 rounded-lg text-slate-600">
-            📁 Add Existing Photo / PDF
-          </button>
+          <button type="button" id="modeCamBtn" onclick="setCaptureMode('camera')" class="py-2 rounded-lg bg-white text-slate-900 shadow-sm">📸 Live Camera</button>
+          <button type="button" id="modeFileBtn" onclick="setCaptureMode('file')" class="py-2 rounded-lg text-slate-600">📁 Add Photo / PDF</button>
         </div>
-
         <div id="cameraViewBox" class="space-y-3">
           <div class="relative bg-black rounded-xl overflow-hidden aspect-[4/3] flex items-center justify-center">
             <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
-            <button type="button" onclick="flipCamera()"
-              class="absolute top-3 right-3 bg-slate-900/75 hover:bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/20 flex items-center gap-1.5">
-              🔄 Flip Camera
-            </button>
-            <div id="gpsLiveBadge" class="absolute bottom-2 left-2 bg-black/70 text-emerald-300 text-[10px] font-mono px-2 py-1 rounded">
-              📍 Detecting GPS...
-            </div>
+            <button type="button" onclick="flipCamera()" class="absolute top-3 right-3 bg-slate-900/75 text-white text-xs font-bold px-3 py-1.5 rounded-full">🔄 Flip</button>
+            <div id="gpsLiveBadge" class="absolute bottom-2 left-2 bg-black/70 text-emerald-300 text-[10px] font-mono px-2 py-1 rounded">📍 Detecting GPS...</div>
           </div>
-
           <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-              <input id="camDocScanToggle" type="checkbox" class="rounded text-red-600 w-4 h-4" />
-              <span>📄 Document Scan (Clean B&W)</span>
-            </label>
-            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-              <input id="camGpsStampToggle" type="checkbox" checked class="rounded text-red-600 w-4 h-4" />
-              <span>📍 GPS & Time Stamp</span>
-            </label>
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer"><input id="camDocScanToggle" type="checkbox" class="w-4 h-4" /><span>📄 Clean B&W Scan</span></label>
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer"><input id="camGpsStampToggle" type="checkbox" checked class="w-4 h-4" /><span>📍 GPS & Time Stamp</span></label>
           </div>
-
-          <button type="button" onclick="captureAndQueuePhoto()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow text-sm">
-            + Capture & Add to PDF Queue
-          </button>
+          <button type="button" onclick="captureAndQueuePhoto()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow text-sm">+ Capture & Add to PDF Queue</button>
         </div>
-
         <div id="fileUploadBox" class="hidden space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-              <input id="fileDocScanToggle" type="checkbox" class="rounded text-red-600 w-4 h-4" />
-              <span>📄 Apply B&W Document Scan (for images)</span>
-            </label>
-            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-              <input id="fileGpsStampToggle" type="checkbox" checked class="rounded text-red-600 w-4 h-4" />
-              <span>📍 GPS & Time Stamp</span>
-            </label>
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer"><input id="fileDocScanToggle" type="checkbox" class="w-4 h-4" /><span>📄 Apply B&W Scan</span></label>
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer"><input id="fileGpsStampToggle" type="checkbox" checked class="w-4 h-4" /><span>📍 GPS & Time Stamp</span></label>
           </div>
-
-          <label class="block border-2 border-dashed border-slate-300 hover:border-red-500 rounded-xl p-6 text-center cursor-pointer transition">
+          <label class="block border-2 border-dashed border-slate-300 hover:border-red-500 rounded-xl p-6 text-center cursor-pointer">
             <span class="text-2xl block mb-1">📑</span>
             <span class="text-xs font-bold text-slate-700 block">Select Multiple Images or PDFs to Merge</span>
-            <span class="text-[11px] text-slate-400">You can add photos + existing PDFs together</span>
             <input id="proofFileInput" type="file" accept="image/*,application/pdf" multiple onchange="handleQueueFilesSelect(event)" class="hidden" />
           </label>
         </div>
-
         <div class="border-t border-slate-200 pt-3 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold text-slate-800">Attached Items in Queue (<span id="queueCount">0</span>)</span>
-            <span class="text-[11px] text-slate-500">All items auto-merge into 1 PDF</span>
+            <span class="text-xs font-extrabold text-slate-800">Attached Items (<span id="queueCount">0</span>)</span>
+            <span class="text-[11px] text-slate-500">Merges into 1 PDF</span>
           </div>
-          <div id="evidenceQueueList" class="max-h-36 overflow-y-auto space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
-            <p class="text-slate-400 text-center py-2">No photos or PDFs added yet.</p>
-          </div>
+          <div id="evidenceQueueList" class="max-h-36 overflow-y-auto space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs"></div>
         </div>
-
-        <button id="submitMergedBtn" type="button" onclick="mergeAndUploadFinalPDF()" disabled
-          class="w-full bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow text-sm transition">
-          ✓ Merge All & Submit Final PDF
-        </button>
+        <button id="submitMergedBtn" type="button" onclick="mergeAndUploadFinalPDF()" disabled class="w-full bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow text-sm">✓ Merge All & Submit Final PDF</button>
       </div>
     </div>
   </div>
 
-  <!-- 5. HOSPITAL "UNABLE TO PROVIDE" MODAL -->
   <div id="unableModal" class="hidden fixed inset-0 bg-slate-900/75 z-40 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-5 space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="font-bold text-slate-900 text-base">Unable to Provide / देने में असमर्थ</h3>
         <button type="button" onclick="document.getElementById('unableModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
-      <p class="text-xs text-slate-600">
-        Please write the reason why this document/evidence cannot be provided right now (कृपया कारण लिखें कि यह दस्तावेज़/साक्ष्य अभी क्यों उपलब्ध नहीं हो पा रहा है):
-      </p>
-      <textarea id="unableReasonInput" rows="3" placeholder="e.g. Renewal applied at CMO office, receipt pending / नवीनीकरण हेतु आवेदन किया गया है..."
-        class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-red-500 outline-none"></textarea>
+      <textarea id="unableReasonInput" rows="3" placeholder="Reason..." class="w-full p-3 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500"></textarea>
       <div class="flex justify-end gap-2">
         <button type="button" onclick="document.getElementById('unableModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
         <button type="button" onclick="submitUnableResponse()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow">Submit Response</button>
@@ -714,83 +581,19 @@
     </div>
   </div>
 
-  <!-- 6. OPS OPERATOR LOGIN MODAL (For Approve / Reject on ?hosp= View) -->
   <div id="opsAuthModal" class="hidden fixed inset-0 bg-slate-900/75 z-40 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-5 space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="font-bold text-slate-900 text-base">🔐 Ops Operator Verification</h3>
         <button type="button" onclick="document.getElementById('opsAuthModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
-      <p class="text-xs text-slate-600">
-        Enter your registered Mobile Number & Password (from <strong>USERS_AUTH</strong>) to unlock Approve / Reject buttons:
-      </p>
       <div class="space-y-3">
-        <input id="opsModalMobile" type="text" placeholder="Registered Mobile Number (e.g. 9889732893)"
-          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
-        <input id="opsModalPass" type="password" placeholder="Password"
-          onkeydown="if(event.key==='Enter') submitOpsModalLogin()"
-          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
+        <input id="opsModalMobile" type="text" placeholder="Registered Mobile Number" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
+        <input id="opsModalPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter') submitOpsModalLogin()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
       </div>
       <div class="flex justify-end gap-2">
         <button type="button" onclick="document.getElementById('opsAuthModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
         <button type="button" onclick="submitOpsModalLogin()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow">Unlock Ops Controls</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 7. SUPER ADMIN PAYMENT & STAGE SETTINGS MODAL -->
-  <div id="paymentSetupModal" class="hidden fixed inset-0 bg-slate-900/75 z-40 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-      <div class="px-5 py-3.5 umbrella-gradient text-white flex items-center justify-between border-b-2 border-amber-400">
-        <div>
-          <span class="text-[10px] font-extrabold text-amber-300 uppercase">Super Admin Financial & Stage Gate</span>
-          <h3 id="payModalHospTitle" class="font-bold text-base"></h3>
-        </div>
-        <button type="button" onclick="document.getElementById('paymentSetupModal').classList.add('hidden')" class="text-white/80 hover:text-white text-xl font-bold px-2">&times;</button>
-      </div>
-
-      <div class="p-5 space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Total Consultancy Fee (₹)</label>
-            <input id="payModalTotalFee" type="number" placeholder="e.g. 120000"
-              class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Stage Gate Mode</label>
-            <select id="payModalLockMode" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-slate-50">
-              <option value="SOFT">SOFT (Reminder Banner Only)</option>
-              <option value="STRICT">STRICT (Lock Upload Until Paid)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-          <span class="block text-xs font-extrabold text-slate-800">25% × 4 Stage Payment Milestones (Tick if Paid):</span>
-          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
-            <input id="payM1" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
-            <span><strong>Installment 1 (25%)</strong> — Before Stage 1 (Kickoff Docs)</span>
-          </label>
-          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
-            <input id="payM2" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
-            <span><strong>Installment 2 (25%)</strong> — Before Stage 3 (Audit Prep)</span>
-          </label>
-          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
-            <input id="payM3" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
-            <span><strong>Installment 3 (25%)</strong> — Before Stage 4 (Onsite NC)</span>
-          </label>
-          <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer">
-            <input id="payM4" type="checkbox" class="w-4 h-4 rounded text-emerald-600" />
-            <span><strong>Installment 4 (25%)</strong> — Before Stage 5 (Final Clearance)</span>
-          </label>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" onclick="document.getElementById('paymentSetupModal').classList.add('hidden')" class="px-4 py-2 rounded-xl border text-xs font-bold text-slate-600">Cancel</button>
-          <button type="button" onclick="savePaymentSetupModal()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow">
-            ✓ Save Payment & Gate Settings
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -802,8 +605,8 @@
   const OPS_AUTH_KEY = "udcp_ops_auth_v1";
 
   let session = {
-    role: null,        // "admin", "ops_team", "hospital"
-    subRole: "",       // "ADMIN", "OPERATOR", "ASSOCIATE", "FIELD"
+    role: null,
+    subRole: "",
     fullName: "",
     userId: "",
     password: "",
@@ -815,10 +618,8 @@
   };
 
   let hospStageFilter = "ALL";
-  let activeSmartChip = "ACTIVE_UDCP"; // ACTIVE_UDCP, ALL, UNASSIGNED, NO_PAYMENT, PAYMENT_DUE, NOT_STARTED
-  let activeStageChip = "ALL"; // ALL, 1. Kickoff Docs, 2. Desktop NC, 3. Audit Prep, 4. Onsite NC, 5. Final Clearance
-  let editingPaymentHosp = null;
-
+  let activeSmartChip = "ACTIVE_UDCP";
+  let activeStageChip = "ALL";
   let opsPublicViewData = { hospital: null, ncs: [] };
   let opsUnlockedUser = null;
 
@@ -829,9 +630,16 @@
   let evidenceQueue = [];
   let lastShareText = "";
 
-  // =========================================================================
-  // LIVE COUNTDOWN TIMER ENGINE
-  // =========================================================================
+  let activeTemplateStageKey = "STAGE_1";
+  let loadedTemplateItems = [];
+  let tickedTemplateCodes = {};
+
+  let dirViewMode = "grid";
+  let dirPage = 1;
+  const DIR_PAGE_SIZE = 30;
+  let dirtyHospitals = {};
+  let selectedHospKeys = {};
+
   setInterval(updateAllCountdowns, 1000);
 
   function formatDeadlineDisplay(isoStr) {
@@ -847,17 +655,11 @@
     if (isNaN(target)) return { text: isoStr, expired: false };
     const diff = target - Date.now();
     if (diff <= 0) return { text: "⏰ TIME OVER / OVERDUE", expired: true };
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const mins = Math.floor((diff / 1000 / 60) % 60);
+    const days = Math.floor(diff / 86400000);
+    const hrs = Math.floor((diff / 3600000) % 24);
+    const mins = Math.floor((diff / 60000) % 60);
     const secs = Math.floor((diff / 1000) % 60);
-
-    const dPart = days > 0 ? `${days}d ` : "";
-    return {
-      text: `${dPart}${String(hrs).padStart(2, "0")}h : ${String(mins).padStart(2, "0")}m : ${String(secs).padStart(2, "0")}s`,
-      expired: false
-    };
+    return { text: `${days > 0 ? days + "d " : ""}${String(hrs).padStart(2, "0")}h : ${String(mins).padStart(2, "0")}m : ${String(secs).padStart(2, "0")}s`, expired: false };
   }
 
   function updateAllCountdowns() {
@@ -876,64 +678,37 @@
     });
   }
 
-  // =========================================================================
-  // SMART VISUAL FORMATTER FOR REQUIREMENTS
-  // =========================================================================
   function escapeHtml(str) {
-    return String(str || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
   function formatNcRichText(rawText) {
     const clean = String(rawText || "").replace(/\r\n/g, "\n").trim();
     if (!clean) return "";
-
     const lines = clean.split("\n");
+    const hasHindi = s => /[\u0900-\u097F]/.test(s);
     let html = `<div class="space-y-2 text-xs sm:text-sm leading-relaxed">`;
-    let prevWasEnglish = false;
-    let dividerInserted = false;
+    let prevEng = false;
+    let divDone = false;
 
-    const hasHindi = str => /[\u0900-\u097F]/.test(str);
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) {
-        html += `<div class="h-1"></div>`;
-        continue;
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) { html += `<div class="h-1"></div>`; continue; }
+      const isHi = hasHindi(line);
+      if (!divDone && prevEng && isHi) {
+        html += `<div class="border-t border-slate-200 my-2.5 pt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">हिंदी विवरण / Hindi Translation</div>`;
+        divDone = true;
       }
-
-      const isHindiLine = hasHindi(line);
-      if (!dividerInserted && prevWasEnglish && isHindiLine) {
-        html += `<div class="border-t border-slate-200 my-2.5 pt-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400"><span>हिंदी विवरण / Hindi Translation</span></div>`;
-        dividerInserted = true;
-      }
-      if (!isHindiLine) prevWasEnglish = true;
-
-      if (line.startsWith("-") || line.startsWith("•") || line.startsWith("*")) {
-        const content = escapeHtml(line.replace(/^[-•*]\s*/, ""));
-        html += `
-          <div class="flex items-start gap-2 pl-2 text-slate-700">
-            <span class="text-red-600 font-bold mt-0.5">•</span>
-            <span>${content}</span>
-          </div>`;
+      if (!isHi) prevEng = true;
+      if (/^[-•*]/.test(line)) {
+        html += `<div class="flex items-start gap-2 pl-2 text-slate-700"><span class="text-red-600 font-bold mt-0.5">•</span><span>${escapeHtml(line.replace(/^[-•*]\s*/, ""))}</span></div>`;
       } else {
-        html += `
-          <div class="font-bold text-slate-900 bg-slate-50/90 border-l-2 border-red-500 px-2.5 py-1 rounded-r">
-            ${escapeHtml(line)}
-          </div>`;
+        html += `<div class="font-bold text-slate-900 bg-slate-50/90 border-l-2 border-red-500 px-2.5 py-1 rounded-r">${escapeHtml(line)}</div>`;
       }
     }
-
-    html += `</div>`;
-    return html;
+    return html + `</div>`;
   }
 
-  // =========================================================================
-  // INITIALIZATION: CHECK ?hosp= DIRECT LINK FIRST, ELSE SAVED SESSION
-  // =========================================================================
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const savedOps = localStorage.getItem(OPS_AUTH_KEY);
@@ -942,7 +717,6 @@
 
     const params = new URLSearchParams(window.location.search);
     const directHospId = params.get("hosp");
-
     if (directHospId) {
       await loadDirectHospitalOpsView(directHospId.trim().toUpperCase());
       return;
@@ -962,87 +736,73 @@
   });
 
   function callApi(payload, msg = "Syncing with UDCP...") {
-    if (SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
-      alert("Please paste your Google Apps Script Web App URL in SCRIPT_URL inside index.html first!");
+    if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
+      alert("Please configure SCRIPT_URL first.");
       return Promise.resolve(null);
     }
     document.getElementById("loaderText").innerText = msg;
     document.getElementById("globalLoader").classList.remove("hidden");
 
     if (payload.action === "uploadProof") {
-      return fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(payload)
-      }).then(async () => {
-        // Smart polling: checks at 1.5s, 3.0s, 4.5s until status becomes Submitted
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          await new Promise(r => setTimeout(r, 1500));
-          const verifyRes = await callApi({ action: "login", userId: session.userId, password: session.password }, `Confirming PDF Upload (${attempt}/3)...`);
-          if (verifyRes && verifyRes.status === "ok" && Array.isArray(verifyRes.ncs)) {
-            const updatedItem = verifyRes.ncs.find(x => x.ncId === payload.ncId);
-            if (updatedItem && updatedItem.status === "Submitted") {
-              return verifyRes;
+      return fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
+        .then(async () => {
+          for (let i = 1; i <= 3; i++) {
+            await new Promise(r => setTimeout(r, 1500));
+            const v = await callApi({ action: "login", userId: session.userId, password: session.password }, `Confirming PDF Upload (${i}/3)...`);
+            if (v && v.status === "ok" && Array.isArray(v.ncs) && v.ncs.some(x => x.ncId === payload.ncId && x.status === "Submitted")) {
+              return v;
             }
+            if (i === 3) return v;
           }
-          if (attempt === 3) return verifyRes;
-        }
-      }).catch(err => {
-        document.getElementById("globalLoader").classList.add("hidden");
-        alert("Upload Error: " + err.message);
-        return null;
-      });
+        })
+        .catch(err => {
+          document.getElementById("globalLoader").classList.add("hidden");
+          alert("Upload Error: " + err.message);
+          return null;
+        });
     }
 
     const jsonStr = JSON.stringify(payload);
-    const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const b64 = btoa(unescape(encodeURIComponent(jsonStr))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-    return fetch(`${SCRIPT_URL}?payload=${b64}`, {
-      method: "GET",
-      redirect: "follow"
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("globalLoader").classList.add("hidden");
-      return data;
-    })
-    .catch(() => {
-      return new Promise((resolve) => {
-        const cbName = "udcpCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-        const script = document.createElement("script");
-        window[cbName] = function(data) {
-          delete window[cbName];
-          script.remove();
+    return fetch(`${SCRIPT_URL}?payload=${b64}`, { method: "GET", redirect: "follow" })
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById("globalLoader").classList.add("hidden");
+        return d;
+      })
+      .catch(() => new Promise(resolve => {
+        const cb = "udcpCb_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+        const s = document.createElement("script");
+        window[cb] = data => {
+          delete window[cb];
+          s.remove();
           document.getElementById("globalLoader").classList.add("hidden");
           resolve(data);
         };
-        script.onerror = function() {
-          delete window[cbName];
-          script.remove();
+        s.onerror = () => {
+          delete window[cb];
+          s.remove();
           document.getElementById("globalLoader").classList.add("hidden");
-          alert("Network Error: Please open link in Google Chrome with active internet.");
+          alert("Network Error: Check internet connection.");
           resolve(null);
         };
-        script.src = `${SCRIPT_URL}?payload=${b64}&callback=${cbName}`;
-        document.body.appendChild(script);
-      });
-    });
+        s.src = `${SCRIPT_URL}?payload=${b64}&callback=${cb}`;
+        document.body.appendChild(s);
+      }));
   }
 
-  // =========================================================================
-  // DIRECT CALENDAR LINK VIEW (?hosp=HOSP-101)
-  // =========================================================================
   async function loadDirectHospitalOpsView(hospId) {
-    const payload = { action: "getPublicHospitalView", hospId: hospId };
-try {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    if (parsed && parsed.userId) payload.userId = parsed.userId;
-    if (parsed && parsed.password) payload.password = parsed.password;
-  }
-} catch (e) {}
+    const payload = { action: "getPublicHospitalView", hospId };
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p && p.userId) payload.userId = p.userId;
+        if (p && p.password) payload.password = p.password;
+      }
+    } catch (e) {}
+
     const res = await callApi(payload, `Loading ${hospId} UDCP Tracker...`);
     if (!res || res.status !== "ok") {
       alert((res && res.message) || "Hospital not found.");
@@ -1069,31 +829,25 @@ try {
       agBadge.classList.add("hidden");
     }
 
-    const stBadge = document.getElementById("opsViewStageBadge");
-    stBadge.innerText = hospital.currentStage || "1. Kickoff Docs";
+    document.getElementById("opsViewStageBadge").innerText = hospital.currentStage || "1. Kickoff Docs";
 
     const payBadge = document.getElementById("opsViewPayBadge");
-    let currentRole = (typeof session !== "undefined" && session && session.role) ? String(session.role).toLowerCase() : "";
-if (!currentRole) {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) currentRole = String(JSON.parse(saved).role || "").toLowerCase();
-  } catch (e) {}
-}
-const canSeeFeeInDirectView = (!currentRole || currentRole === "admin" || currentRole === "associate");
-if (!canSeeFeeInDirectView) {
-  if (payBadge) payBadge.classList.add("hidden");
-} else if (payBadge) {
-  payBadge.classList.remove("hidden");
-}
-    if (hospital.isPaymentClear) {
-      payBadge.innerText = "✓ Payment Milestone Clear";
-      payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-      if (!canSeeFeeInDirectView && payBadge) payBadge.classList.add("hidden");
-    } else {
-      payBadge.innerText = "⏳ Payment Milestone Hold";
-      payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800";
-      if (!canSeeFeeInDirectView && payBadge) payBadge.classList.add("hidden");
+    const roleLower = String((session && session.role) || "").toLowerCase();
+    const subLower = String((session && session.subRole) || "").toLowerCase();
+    const canSeeFeeInDirectView = (roleLower === "admin" || roleLower === "associate" || subLower === "admin" || subLower === "associate");
+
+    if (payBadge) {
+      if (!canSeeFeeInDirectView) {
+        payBadge.classList.add("hidden");
+      } else if (hospital.isPaymentClear) {
+        payBadge.innerText = "✓ Payment Milestone Clear";
+        payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+        payBadge.classList.remove("hidden");
+      } else {
+        payBadge.innerText = "⏳ Payment Milestone Hold";
+        payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800";
+        payBadge.classList.remove("hidden");
+      }
     }
 
     const timerBox = document.getElementById("opsViewTimerBox");
@@ -1117,26 +871,13 @@ if (!canSeeFeeInDirectView) {
 
     const metrics = hospital.stageMetrics || { latestPercent: 0, latestApproved: 0, latestTotal: ncs.length };
     document.getElementById("opsViewPercent").innerText = metrics.latestPercent + "%";
-    document.getElementById("opsViewSummary").innerText = `${metrics.latestApproved} of ${metrics.latestTotal} Approved (${metrics.latestStage || ''})`;
+    document.getElementById("opsViewSummary").innerText = `${metrics.latestApproved} of ${metrics.latestTotal} Approved (${metrics.latestStage || ""})`;
 
     const authBox = document.getElementById("opsAuthStatusBox");
     const canVerify = opsUnlockedUser && (opsUnlockedUser.role === "OPERATOR" || opsUnlockedUser.role === "ADMIN");
-
-    if (opsUnlockedUser) {
-      authBox.innerHTML = `
-        <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-xl text-xs">
-          <span class="font-bold text-emerald-800">✓ ${escapeHtml(opsUnlockedUser.fullName)} (${opsUnlockedUser.role})</span>
-          <button type="button" onclick="lockOpsControls()" class="text-red-600 font-bold underline ml-1">Lock</button>
-        </div>
-      `;
-    } else {
-      authBox.innerHTML = `
-        <button type="button" onclick="openOpsAuthModal()"
-          class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition">
-          🔐 Ops Operator Login (Approve / Reject)
-        </button>
-      `;
-    }
+    authBox.innerHTML = opsUnlockedUser
+      ? `<div class="flex items-center gap-2 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-xl text-xs"><span class="font-bold text-emerald-800">✓ ${escapeHtml(opsUnlockedUser.fullName)} (${opsUnlockedUser.role})</span><button type="button" onclick="lockOpsControls()" class="text-red-600 font-bold underline ml-1">Lock</button></div>`
+      : `<button type="button" onclick="openOpsAuthModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition">🔐 Ops Operator Login (Approve / Reject)</button>`;
 
     const listContainer = document.getElementById("opsViewNcList");
     if (!ncs.length) {
@@ -1152,27 +893,23 @@ if (!canSeeFeeInDirectView) {
             <span class="text-xs font-bold text-slate-500">${nc.ncId}</span>
             <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">${escapeHtml(nc.stage)}</span>
             <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-              nc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
-              nc.status === 'Submitted' ? 'bg-blue-100 text-blue-800' :
-              nc.status === 'Unable to Provide' ? 'bg-purple-100 text-purple-800' :
-              nc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+              nc.status === "Approved" ? "bg-emerald-100 text-emerald-800" :
+              nc.status === "Submitted" ? "bg-blue-100 text-blue-800" :
+              nc.status === "Unable to Provide" ? "bg-purple-100 text-purple-800" :
+              nc.status === "Rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
             }">${nc.status}</span>
           </div>
-
           <div>${formatNcRichText(nc.correctiveAction)}</div>
-
-          ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ''}
-          ${nc.status === 'Unable to Provide' ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ''}
-          ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Verification Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ''}
-          ${nc.gps && nc.status !== 'Unable to Provide' ? `<p class="text-[11px] text-slate-400">📍 ${nc.gps} • ${nc.submittedAt}</p>` : ''}
+          ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ""}
+          ${nc.status === "Unable to Provide" ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ""}
+          ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Verification Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ""}
         </div>
-
         <div class="flex flex-wrap items-center gap-2 shrink-0">
-          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-2 rounded-xl">📑 View / Download PDF</a>` : `<span class="text-xs text-slate-400">Pending Upload</span>`}
-          ${canVerify && (nc.status === 'Submitted' || nc.status === 'Unable to Provide') ? `
-            <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl shadow-sm">✓ Approve</button>
-            <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl shadow-sm">✕ Reject</button>
-          ` : ''}
+          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-xl">📑 View PDF</a>` : `<span class="text-xs text-slate-400">Pending Upload</span>`}
+          ${canVerify && (nc.status === "Submitted" || nc.status === "Unable to Provide") ? `
+            <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl">✓ Approve</button>
+            <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl">✕ Reject</button>
+          ` : ""}
         </div>
       </div>
     `).join("");
@@ -1188,18 +925,9 @@ if (!canSeeFeeInDirectView) {
     const loginId = document.getElementById("opsModalMobile").value.trim();
     const pass = document.getElementById("opsModalPass").value.trim();
     if (!loginId || !pass) return alert("Please enter Mobile Number and Password.");
-
-    const res = await callApi({ action: "opsAuth", loginId: loginId, password: pass }, "Verifying Ops Operator...");
-    if (!res || res.status !== "ok") {
-      return alert((res && res.message) || "Invalid Credentials.");
-    }
-
-    opsUnlockedUser = {
-      loginId: loginId,
-      password: pass,
-      fullName: res.user.fullName,
-      role: res.user.role
-    };
+    const res = await callApi({ action: "opsAuth", loginId, password: pass }, "Verifying Ops Operator...");
+    if (!res || res.status !== "ok") return alert((res && res.message) || "Invalid Credentials.");
+    opsUnlockedUser = { loginId, password: pass, fullName: res.user.fullName, role: res.user.role };
     localStorage.setItem(OPS_AUTH_KEY, JSON.stringify(opsUnlockedUser));
     document.getElementById("opsAuthModal").classList.add("hidden");
     renderDirectHospitalOpsView();
@@ -1215,20 +943,19 @@ if (!canSeeFeeInDirectView) {
     if (!opsUnlockedUser) return openOpsAuthModal();
     let remark = "";
     if (decision === "Rejected") {
-      remark = prompt("Enter reason for rejection (Hospital will see this):");
+      remark = prompt("Enter reason for rejection:");
       if (remark === null) return;
     }
     const res = await callApi({
       action: "verifyNC",
       adminUser: opsUnlockedUser.loginId,
       adminPass: opsUnlockedUser.password,
-      userId: userId,
-      ncId: ncId,
-      decision: decision,
-      remark: remark,
+      userId,
+      ncId,
+      decision,
+      remark,
       returnSingleHosp: true
     }, `Updating to ${decision}...`);
-
     if (res && res.status === "ok") {
       opsPublicViewData = { hospital: res.hospital, ncs: res.ncs || [] };
       renderDirectHospitalOpsView();
@@ -1239,53 +966,28 @@ if (!canSeeFeeInDirectView) {
 
   function downloadOpsHospitalCsv() {
     const { hospital, ncs } = opsPublicViewData;
-    if (!hospital || !ncs.length) return alert("No items available to download.");
-
+    if (!hospital || !ncs.length) return alert("No items available.");
     const headers = ["Doc_ID", "Stage", "Sr_No", "Hospital_Name", "Status", "Requirement", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
-    const escapeCsv = val => `"${String(val || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
-
-    const rows = [headers.join(",")];
-    ncs.forEach(n => {
-      rows.push([
-        escapeCsv(n.ncId),
-        escapeCsv(n.stage),
-        escapeCsv(n.srNo),
-        escapeCsv(n.hospitalName),
-        escapeCsv(n.status),
-        escapeCsv(n.correctiveAction),
-        escapeCsv(n.adminNote),
-        escapeCsv(n.hospitalResponse),
-        escapeCsv(n.submittedAt),
-        escapeCsv(n.proofUrl),
-        escapeCsv(n.remark)
-      ].join(","));
-    });
-
+    const esc = v => `"${String(v || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+    const rows = [headers.join(",")].concat(ncs.map(n => [esc(n.ncId), esc(n.stage), esc(n.srNo), esc(n.hospitalName), esc(n.status), esc(n.correctiveAction), esc(n.adminNote), esc(n.hospitalResponse), esc(n.submittedAt), esc(n.proofUrl), esc(n.remark)].join(",")));
     const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_UDCP_Report.csv`;
-    link.click();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_UDCP_Report.csv`;
+    a.click();
   }
 
-  // =========================================================================
-  // MAIN LOGIN & SESSION ROUTING
-  // =========================================================================
   async function handleLoginSubmit(e) {
     if (e && e.preventDefault) e.preventDefault();
     const uid = document.getElementById("loginUserId").value.trim().toUpperCase();
     const pass = document.getElementById("loginPassword").value.trim();
-    if (!uid || !pass) {
-      alert("Please enter both User ID / Mobile and Password.");
-      return;
-    }
+    if (!uid || !pass) return alert("Please enter both User ID / Mobile and Password.");
     await performLogin(uid, pass, false);
   }
 
   async function performLogin(uid, pass, silent, isImpersonate = false) {
     const errBox = document.getElementById("loginError");
     errBox.classList.add("hidden");
-
     const res = await callApi({ action: "login", userId: uid, password: pass }, isImpersonate ? "Opening Hospital Portal..." : "Signing in to UDCP...");
     if (!res) return;
 
@@ -1305,42 +1007,34 @@ if (!canSeeFeeInDirectView) {
     session.password = pass;
     session.isAdminImpersonating = isImpersonate;
 
-    if (!isImpersonate) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ userId: uid, password: pass }));
-    }
+    if (!isImpersonate) localStorage.setItem(STORAGE_KEY, JSON.stringify({ userId: uid, password: pass }));
 
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("navUserBox").classList.remove("hidden");
 
     if (res.role === "admin" || res.role === "ops_team" || res.role === "associate") {
-    const isSuperAdmin = (res.role === "admin");
-    const isAssociate = (res.role === "associate");
-    if (isSuperAdmin) {
-      session.adminCredentials = { userId: uid, password: pass };
-      document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
-      document.getElementById("adminHeaderTitle").innerText = "UDCP – Super Admin Control Center";
-      document.getElementById("superAdminAssignBox").classList.remove("hidden");
-    } else if (isAssociate) {
-      document.getElementById("navRoleBadge").innerText = `${session.fullName} (ASSOCIATE)`;
-      document.getElementById("adminHeaderTitle").innerText = `UDCP – Associate Desk (${session.fullName})`;
-      document.getElementById("superAdminAssignBox").classList.add("hidden");
-    } else {
-      document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
-      document.getElementById("adminHeaderTitle").innerText = `UDCP – Ops Team Desk (${session.subRole})`;
-      document.getElementById("superAdminAssignBox").classList.add("hidden");
-    }
-    document.getElementById("backToAdminBtn").classList.add("hidden");
-    session.adminData = res.data;
-    document.getElementById("hospitalSection").classList.add("hidden");
-    document.getElementById("adminSection").classList.remove("hidden");
-    renderAdminDashboard();
-} else {
-      document.getElementById("navRoleBadge").innerText = uid;
-      if (isImpersonate) {
-        document.getElementById("backToAdminBtn").classList.remove("hidden");
+      if (res.role === "admin") {
+        session.adminCredentials = { userId: uid, password: pass };
+        document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
+        document.getElementById("adminHeaderTitle").innerText = "UDCP — Super Admin Control Center";
+        document.getElementById("superAdminAssignBox").classList.remove("hidden");
+      } else if (res.role === "associate") {
+        document.getElementById("navRoleBadge").innerText = `${session.fullName} (ASSOCIATE)`;
+        document.getElementById("adminHeaderTitle").innerText = `UDCP — Associate Desk (${session.fullName})`;
+        document.getElementById("superAdminAssignBox").classList.add("hidden");
       } else {
-        document.getElementById("backToAdminBtn").classList.add("hidden");
+        document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
+        document.getElementById("adminHeaderTitle").innerText = `UDCP — Ops Team Desk (${session.subRole})`;
+        document.getElementById("superAdminAssignBox").classList.add("hidden");
       }
+      document.getElementById("backToAdminBtn").classList.add("hidden");
+      session.adminData = res.data;
+      document.getElementById("hospitalSection").classList.add("hidden");
+      document.getElementById("adminSection").classList.remove("hidden");
+      renderAdminDashboard();
+    } else {
+      document.getElementById("navRoleBadge").innerText = uid;
+      document.getElementById("backToAdminBtn").classList.toggle("hidden", !isImpersonate);
       session.hospital = res.hospital;
       session.ncs = res.ncs || [];
       hospStageFilter = "ALL";
@@ -1352,12 +1046,8 @@ if (!canSeeFeeInDirectView) {
 
   async function openHospitalPortalAsAdmin(hospUserId) {
     const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
-    if (!hosp || !hosp.password) {
-      return alert("Hospital login credentials not generated yet.");
-    }
-    if (!session.adminCredentials) {
-      session.adminCredentials = { userId: session.userId, password: session.password };
-    }
+    if (!hosp || !hosp.password) return alert("Hospital login credentials not generated yet.");
+    if (!session.adminCredentials) session.adminCredentials = { userId: session.userId, password: session.password };
     await performLogin(hosp.userId, hosp.password, false, true);
   }
 
@@ -1371,9 +1061,6 @@ if (!canSeeFeeInDirectView) {
     window.location.href = window.location.href.split("?")[0];
   }
 
-  // =========================================================================
-  // HOSPITAL DASHBOARD (WITH 4-MILESTONE PAYMENT GATE & STAGE PILLS)
-  // =========================================================================
   function getRequiredMilestoneForStageOrder(ord) {
     if (ord === 1 || ord === 2) return { index: 0, label: "1st Installment (25% — Kickoff)" };
     if (ord === 3) return { index: 1, label: "2nd Installment (25% — Audit Prep)" };
@@ -1389,7 +1076,6 @@ if (!canSeeFeeInDirectView) {
     document.getElementById("hospCityLabel").innerText = h.city || "";
     document.getElementById("hospStageBadge").innerText = h.currentStage || "1. Kickoff Docs";
 
-    // Countdown Banner
     const banner = document.getElementById("hospDeadlineBanner");
     const timerBox = document.getElementById("hospLiveTimerBox");
     if (h.deadline) {
@@ -1406,7 +1092,6 @@ if (!canSeeFeeInDirectView) {
       timerBox.removeAttribute("data-countdown");
     }
 
-    // 4-Milestone Payment Bar
     const payBar = document.getElementById("hospPaymentBar");
     const mGrid = document.getElementById("hospMilestoneGrid");
     const warnBanner = document.getElementById("hospPaymentWarningBanner");
@@ -1421,7 +1106,6 @@ if (!canSeeFeeInDirectView) {
       document.getElementById("hospFeeSummaryText").innerText = totalFee
         ? `Paid: ₹${(paidCount * eachAmt).toLocaleString("en-IN")} / ₹${totalFee.toLocaleString("en-IN")} (${paidCount * 25}%)`
         : `${paidCount * 25}% Completed`;
-
       const mLabels = [
         { title: "P1 (25%)", sub: "Stage 1: Kickoff", paid: milestones[0] === 1 },
         { title: "P2 (25%)", sub: "Stage 3: Audit Prep", paid: milestones[1] === 1 },
@@ -1429,25 +1113,20 @@ if (!canSeeFeeInDirectView) {
         { title: "P4 (25%)", sub: "Stage 5: Certificate", paid: milestones[3] === 1 }
       ];
       mGrid.innerHTML = mLabels.map(m => `
-        <div class="p-2.5 rounded-xl border text-xs ${m.paid ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-600'}">
-          <div class="font-extrabold flex items-center justify-between">
-            <span>${m.title}</span>
-            <span>${m.paid ? '✓ PAID' : '⏳ DUE'}</span>
-          </div>
-          <div class="text-[10px] mt-0.5">${m.sub}${eachAmt ? ' • ₹' + eachAmt.toLocaleString('en-IN') : ''}</div>
+        <div class="p-2.5 rounded-xl border text-xs ${m.paid ? "bg-emerald-50 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"}">
+          <div class="font-extrabold flex items-center justify-between"><span>${m.title}</span><span>${m.paid ? "✓ PAID" : "⏳ DUE"}</span></div>
+          <div class="text-[10px] mt-0.5">${m.sub}${eachAmt ? " • ₹" + eachAmt.toLocaleString("en-IN") : ""}</div>
         </div>
       `).join("");
     } else {
       payBar.classList.add("hidden");
     }
 
-    // Stage-Wise Summary Cards + Dropdown Sync
     const stageDropdown = document.getElementById("hospStageDropdown");
     if (stageDropdown) stageDropdown.value = hospStageFilter;
 
     const stages = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
     const cardsBox = document.getElementById("hospStageSummaryCards");
-
     const allTotal = session.ncs.length;
     const allSubmitted = session.ncs.filter(n => n.status === "Submitted").length;
     const allApproved = session.ncs.filter(n => n.status === "Approved").length;
@@ -1455,23 +1134,11 @@ if (!canSeeFeeInDirectView) {
     const allPct = allTotal ? Math.round((allApproved / allTotal) * 100) : 0;
 
     let cardsHtml = `
-      <div onclick="hospStageFilter='ALL'; renderHospitalDashboard();"
-        class="cursor-pointer rounded-xl border-2 p-3 transition ${hospStageFilter === 'ALL' ? 'border-red-600 bg-red-50/40 shadow-sm' : 'border-slate-200 bg-slate-50/60 hover:border-slate-300'}">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-black text-slate-900">All Stages Combined</span>
-          <span class="text-xs font-black text-emerald-700">${allPct}% Approved</span>
-        </div>
-        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1.5">
-          <div class="bg-emerald-500 h-full" style="width:${allPct}%"></div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600">
-          <span>Total: ${allTotal}</span>
-          <span class="text-emerald-700">✓ Appr: ${allApproved}</span>
-          <span class="text-blue-700">📤 Subm: ${allSubmitted}</span>
-          <span class="text-amber-700">⏳ Pend: ${allPending}</span>
-        </div>
-      </div>
-    `;
+      <div onclick="hospStageFilter='ALL'; renderHospitalDashboard();" class="cursor-pointer rounded-xl border-2 p-3 transition ${hospStageFilter === "ALL" ? "border-red-600 bg-red-50/40 shadow-sm" : "border-slate-200 bg-slate-50/60"}">
+        <div class="flex items-center justify-between"><span class="text-xs font-black text-slate-900">All Stages Combined</span><span class="text-xs font-black text-emerald-700">${allPct}% Approved</span></div>
+        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1.5"><div class="bg-emerald-500 h-full" style="width:${allPct}%"></div></div>
+        <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600"><span>Total: ${allTotal}</span><span class="text-emerald-700">✓ Appr: ${allApproved}</span><span class="text-blue-700">📤 Subm: ${allSubmitted}</span><span class="text-amber-700">⏳ Pend: ${allPending}</span></div>
+      </div>`;
 
     stages.forEach(st => {
       const list = session.ncs.filter(n => n.stage === st);
@@ -1481,33 +1148,16 @@ if (!canSeeFeeInDirectView) {
       const subm = list.filter(n => n.status === "Submitted").length;
       const pend = list.filter(n => n.status === "Pending" || n.status === "Rejected").length;
       const stPct = tot ? Math.round((appr / tot) * 100) : 0;
-      const isAct = (hospStageFilter === st);
-
       cardsHtml += `
-        <div onclick="hospStageFilter='${st}'; renderHospitalDashboard();"
-          class="cursor-pointer rounded-xl border-2 p-3 transition ${isAct ? 'border-red-600 bg-red-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold text-slate-900">${st}</span>
-            <span class="text-xs font-black text-emerald-700">${stPct}%</span>
-          </div>
-          <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1.5">
-            <div class="bg-emerald-500 h-full" style="width:${stPct}%"></div>
-          </div>
-          <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600">
-            <span>Total: ${tot}</span>
-            <span class="text-emerald-700">✓ Appr: ${appr}</span>
-            <span class="text-blue-700">📤 Subm: ${subm}</span>
-            <span class="text-amber-700">⏳ Pend: ${pend}</span>
-          </div>
-        </div>
-      `;
+        <div onclick="hospStageFilter='${st}'; renderHospitalDashboard();" class="cursor-pointer rounded-xl border-2 p-3 transition ${hospStageFilter === st ? "border-red-600 bg-red-50/40 shadow-sm" : "border-slate-200 bg-white"}">
+          <div class="flex items-center justify-between"><span class="text-xs font-extrabold text-slate-900">${st}</span><span class="text-xs font-black text-emerald-700">${stPct}%</span></div>
+          <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1.5"><div class="bg-emerald-500 h-full" style="width:${stPct}%"></div></div>
+          <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600"><span>Total: ${tot}</span><span class="text-emerald-700">✓ Appr: ${appr}</span><span class="text-blue-700">📤 Subm: ${subm}</span><span class="text-amber-700">⏳ Pend: ${pend}</span></div>
+        </div>`;
     });
     cardsBox.innerHTML = cardsHtml;
 
-    const visibleList = hospStageFilter === "ALL"
-      ? session.ncs
-      : session.ncs.filter(n => n.stage === hospStageFilter);
-
+    const visibleList = hospStageFilter === "ALL" ? session.ncs : session.ncs.filter(n => n.stage === hospStageFilter);
     const total = visibleList.length;
     const approvedCnt = visibleList.filter(n => n.status === "Approved").length;
     const submittedCnt = visibleList.filter(n => n.status === "Submitted").length;
@@ -1517,22 +1167,17 @@ if (!canSeeFeeInDirectView) {
     document.getElementById("hospCountSummary").innerText = `${approvedCnt} Approved • ${submittedCnt} Under Review • ${total} Total`;
     document.getElementById("hospProgressBar").style.width = pct + "%";
 
-    // Check if any due milestone triggers Soft Warning or Strict Lock
     let anyUnpaidWarning = "";
     visibleList.forEach(nc => {
       if (hasPaySetup && nc.status !== "Approved") {
         const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
         if (reqM && milestones[reqM.index] !== 1) {
-          anyUnpaidWarning = `⚠️ Payment Milestone Pending: ${reqM.label} is due for "${nc.stage}". ${h.paymentLockMode === 'STRICT' ? 'Document upload is temporarily locked until milestone clearance.' : 'Please clear your consultancy installment at the earliest.'}`;
+          anyUnpaidWarning = `⚠️ Payment Milestone Pending: ${reqM.label} is due for "${nc.stage}".`;
         }
       }
     });
-    if (anyUnpaidWarning) {
-      warnBanner.innerText = anyUnpaidWarning;
-      warnBanner.classList.remove("hidden");
-    } else {
-      warnBanner.classList.add("hidden");
-    }
+    warnBanner.innerText = anyUnpaidWarning;
+    warnBanner.classList.toggle("hidden", !anyUnpaidWarning);
 
     const container = document.getElementById("hospNcList");
     if (!total) {
@@ -1540,71 +1185,51 @@ if (!canSeeFeeInDirectView) {
       return;
     }
 
+    const badgeMap = {
+      "Pending": "bg-amber-100 text-amber-800",
+      "Submitted": "bg-blue-100 text-blue-800",
+      "Approved": "bg-emerald-100 text-emerald-800",
+      "Rejected": "bg-red-100 text-red-800",
+      "Unable to Provide": "bg-purple-100 text-purple-800"
+    };
+
     container.innerHTML = visibleList.map(nc => {
-      const badgeMap = {
-        "Pending": "bg-amber-100 text-amber-800",
-        "Submitted": "bg-blue-100 text-blue-800",
-        "Approved": "bg-emerald-100 text-emerald-800",
-        "Rejected": "bg-red-100 text-red-800",
-        "Unable to Provide": "bg-purple-100 text-purple-800"
-      };
       const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
       const isStagePaymentDue = hasPaySetup && reqM && milestones[reqM.index] !== 1;
       const isStrictLocked = isStagePaymentDue && (h.paymentLockMode === "STRICT");
       const canRespond = nc.status !== "Approved" && !isStrictLocked;
+      const safeJson = JSON.stringify(nc).replace(/'/g, "&#39;");
 
       return `
-        <div class="bg-white rounded-2xl border ${nc.status === 'Rejected' ? 'border-red-300' : 'border-slate-200'} p-5 shadow-sm space-y-3">
+        <div class="bg-white rounded-2xl border ${nc.status === "Rejected" ? "border-red-300" : "border-slate-200"} p-5 shadow-sm space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-wrap items-center gap-2">
               <span class="font-mono text-xs font-extrabold bg-slate-900 text-white px-2.5 py-1 rounded-lg">Sr. ${nc.srNo || nc.ncId}</span>
               <span class="text-xs font-bold text-slate-500">${nc.ncId}</span>
               <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">${escapeHtml(nc.stage)}</span>
             </div>
-            <span class="text-xs font-bold px-3 py-1 rounded-full ${badgeMap[nc.status] || 'bg-slate-100'}">${nc.status}</span>
+            <span class="text-xs font-bold px-3 py-1 rounded-full ${badgeMap[nc.status] || "bg-slate-100"}">${nc.status}</span>
           </div>
-
           <div>
             ${formatNcRichText(nc.correctiveAction)}
-            ${nc.adminNote ? `
-              <div class="mt-3 bg-blue-50 border-l-4 border-blue-500 p-2.5 rounded-r-lg text-xs text-blue-900">
-                <strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}
-              </div>
-            ` : ''}
+            ${nc.adminNote ? `<div class="mt-3 bg-blue-50 border-l-4 border-blue-500 p-2.5 rounded-r-lg text-xs text-blue-900"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</div>` : ""}
           </div>
-
-          ${nc.remark ? `<div class="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold p-2.5 rounded-lg">⚠ Admin Remark: ${escapeHtml(nc.remark)}</div>` : ''}
-          ${nc.status === 'Unable to Provide' && nc.hospitalResponse ? `<div class="bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold p-2.5 rounded-lg">📝 Your Response: ${escapeHtml(nc.hospitalResponse)}</div>` : ''}
-
+          ${nc.remark ? `<div class="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold p-2.5 rounded-lg">⚠ Admin Remark: ${escapeHtml(nc.remark)}</div>` : ""}
+          ${nc.status === "Unable to Provide" && nc.hospitalResponse ? `<div class="bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold p-2.5 rounded-lg">📝 Your Response: ${escapeHtml(nc.hospitalResponse)}</div>` : ""}
           <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-            <div>
-              ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold text-blue-600 underline">📑 View Submitted Merged PDF</a>` : `<span class="text-xs text-slate-400">Awaiting response</span>`}
-            </div>
-            ${isStrictLocked ? `
-              <span class="text-xs font-bold bg-red-100 text-red-800 px-3 py-2 rounded-xl border border-red-200">
-                🔒 Locked — Clear ${reqM.label}
-              </span>
-            ` : (canRespond ? `
-              <div class="flex flex-wrap gap-2">
-                <button type="button" onclick='openUnableModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
-                  class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 transition">
-                  Unable to Provide / देने में असमर्थ
-                </button>
-                <button type="button" onclick='openEvidenceModal(${JSON.stringify(nc).replace(/'/g, "&#39;")})'
-                  class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition">
-                  📸 Capture / Upload Proof
-                </button>
-              </div>
-            ` : '')}
+            <div>${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold text-blue-600 underline">📑 View Submitted Merged PDF</a>` : `<span class="text-xs text-slate-400">Awaiting response</span>`}</div>
+            ${isStrictLocked
+              ? `<span class="text-xs font-bold bg-red-100 text-red-800 px-3 py-2 rounded-xl border border-red-200">🔒 Locked — Clear ${reqM.label}</span>`
+              : (canRespond ? `
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" onclick='openUnableModal(${safeJson})' class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300">Unable to Provide</button>
+                  <button type="button" onclick='openEvidenceModal(${safeJson})' class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow">📸 Capture / Upload Proof</button>
+                </div>` : "")}
           </div>
-        </div>
-      `;
+        </div>`;
     }).join("");
   }
 
-  // =========================================================================
-  // MULTI-EVIDENCE QUEUE & AUTO PDF MERGER (With 15-item memory safety cap)
-  // =========================================================================
   function openEvidenceModal(nc) {
     activeNc = nc;
     evidenceQueue = [];
@@ -1625,7 +1250,7 @@ if (!canSeeFeeInDirectView) {
     badge.innerText = "📍 Detecting GPS...";
     if (!navigator.geolocation) {
       currentCoords = "GPS Unavailable";
-      badge.innerText = "📍 GPS Unavailable (Time Stamp Active)";
+      badge.innerText = "📍 GPS Unavailable";
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -1635,39 +1260,30 @@ if (!canSeeFeeInDirectView) {
       },
       () => {
         currentCoords = "Location Verified";
-        badge.innerText = "📍 Location Verified (Time Stamp Active)";
+        badge.innerText = "📍 Location Verified";
       },
       { enableHighAccuracy: true, timeout: 6000 }
     );
   }
 
   async function setCaptureMode(mode) {
-    if (mode === "camera") {
-      document.getElementById("modeCamBtn").className = "py-2 rounded-lg bg-white text-slate-900 shadow-sm";
-      document.getElementById("modeFileBtn").className = "py-2 rounded-lg text-slate-600";
-      document.getElementById("cameraViewBox").classList.remove("hidden");
-      document.getElementById("fileUploadBox").classList.add("hidden");
-      await startCamera();
-    } else {
-      stopCamera();
-      document.getElementById("modeFileBtn").className = "py-2 rounded-lg bg-white text-slate-900 shadow-sm";
-      document.getElementById("modeCamBtn").className = "py-2 rounded-lg text-slate-600";
-      document.getElementById("cameraViewBox").classList.add("hidden");
-      document.getElementById("fileUploadBox").classList.remove("hidden");
-    }
+    const isCam = mode === "camera";
+    document.getElementById("modeCamBtn").className = isCam ? "py-2 rounded-lg bg-white text-slate-900 shadow-sm" : "py-2 rounded-lg text-slate-600";
+    document.getElementById("modeFileBtn").className = !isCam ? "py-2 rounded-lg bg-white text-slate-900 shadow-sm" : "py-2 rounded-lg text-slate-600";
+    document.getElementById("cameraViewBox").classList.toggle("hidden", !isCam);
+    document.getElementById("fileUploadBox").classList.toggle("hidden", isCam);
+    if (isCam) await startCamera();
+    else stopCamera();
   }
 
   async function startCamera() {
     stopCamera();
     try {
-      cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
-        audio: false
-      });
-      const video = document.getElementById("cameraVideo");
-      video.srcObject = cameraStream;
-      video.style.transform = facingMode === "user" ? "scaleX(-1)" : "none";
-    } catch (err) {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+      const v = document.getElementById("cameraVideo");
+      v.srcObject = cameraStream;
+      v.style.transform = facingMode === "user" ? "scaleX(-1)" : "none";
+    } catch (e) {
       setCaptureMode("file");
     }
   }
@@ -1686,12 +1302,10 @@ if (!canSeeFeeInDirectView) {
 
   function processImageToStampedJpeg(imgObj, isScan, addStamp) {
     const canvas = document.getElementById("workCanvas");
-    const maxW = 1000; // Optimized for fast mobile PDF merging
-    const scale = Math.min(1, maxW / imgObj.width);
+    const scale = Math.min(1, 1000 / imgObj.width);
     const w = Math.round(imgObj.width * scale);
     const h = Math.round(imgObj.height * scale);
     const barH = addStamp ? Math.max(52, Math.round(h * 0.08)) : 0;
-
     canvas.width = w;
     canvas.height = h + barH;
     const ctx = canvas.getContext("2d");
@@ -1716,44 +1330,32 @@ if (!canSeeFeeInDirectView) {
       const fontSize = Math.max(13, Math.round(barH * 0.28));
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${fontSize}px Inter, sans-serif`;
-      ctx.fillText(`${session.hospital.hospitalName}  |  Sr. ${activeNc.srNo || activeNc.ncId} (${activeNc.stage})`, 14, h + fontSize + 6);
+      ctx.fillText(`${session.hospital.hospitalName} | Sr. ${activeNc.srNo || activeNc.ncId}`, 14, h + fontSize + 6);
       ctx.fillStyle = "#fde68a";
       ctx.font = `${Math.round(fontSize * 0.9)}px monospace`;
-      ctx.fillText(`${nowStr}  •  GPS: ${currentCoords}`, 14, h + barH - 10);
+      ctx.fillText(`${nowStr} • GPS: ${currentCoords}`, 14, h + barH - 10);
     }
-
     return canvas.toDataURL("image/jpeg", 0.72);
   }
 
   function captureAndQueuePhoto() {
-    if (evidenceQueue.length >= 15) return alert("Maximum 15 items per PDF batch. Please submit this batch first.");
-    const video = document.getElementById("cameraVideo");
-    if (!video.videoWidth) return;
-
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = video.videoWidth;
-    tempCanvas.height = video.videoHeight;
-    const tCtx = tempCanvas.getContext("2d");
-    if (facingMode === "user") {
-      tCtx.translate(tempCanvas.width, 0);
-      tCtx.scale(-1, 1);
-    }
-    tCtx.drawImage(video, 0, 0);
-
+    if (evidenceQueue.length >= 15) return alert("Maximum 15 items per PDF batch.");
+    const v = document.getElementById("cameraVideo");
+    if (!v.videoWidth) return;
+    const tc = document.createElement("canvas");
+    tc.width = v.videoWidth;
+    tc.height = v.videoHeight;
+    const tCtx = tc.getContext("2d");
+    if (facingMode === "user") { tCtx.translate(tc.width, 0); tCtx.scale(-1, 1); }
+    tCtx.drawImage(v, 0, 0);
     const isScan = document.getElementById("camDocScanToggle").checked;
     const addStamp = document.getElementById("camGpsStampToggle").checked;
-
     const img = new Image();
     img.onload = () => {
-      const stampedDataUrl = processImageToStampedJpeg(img, isScan, addStamp);
-      evidenceQueue.push({
-        type: "image",
-        label: `Live ${isScan ? "Scanned Doc" : "Photo"} #${evidenceQueue.length + 1}`,
-        dataUrl: stampedDataUrl
-      });
+      evidenceQueue.push({ type: "image", label: `Photo #${evidenceQueue.length + 1}`, dataUrl: processImageToStampedJpeg(img, isScan, addStamp) });
       renderQueueUI();
     };
-    img.src = tempCanvas.toDataURL("image/jpeg", 0.9);
+    img.src = tc.toDataURL("image/jpeg", 0.9);
   }
 
   async function handleQueueFilesSelect(e) {
@@ -1761,36 +1363,14 @@ if (!canSeeFeeInDirectView) {
     if (!files.length) return;
     const isScan = document.getElementById("fileDocScanToggle").checked;
     const addStamp = document.getElementById("fileGpsStampToggle").checked;
-
     for (const file of files) {
-      if (evidenceQueue.length >= 15) {
-        alert("Maximum 15 items allowed per merged PDF.");
-        break;
-      }
+      if (evidenceQueue.length >= 15) break;
       if (file.type === "application/pdf") {
-        const buf = await file.arrayBuffer();
-        evidenceQueue.push({
-          type: "pdf",
-          label: `PDF: ${file.name}`,
-          arrayBuffer: buf
-        });
+        evidenceQueue.push({ type: "pdf", label: `PDF: ${file.name}`, arrayBuffer: await file.arrayBuffer() });
       } else if (file.type.startsWith("image/")) {
-        const dataUrl = await new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-        const imgObj = await new Promise(resolve => {
-          const im = new Image();
-          im.onload = () => resolve(im);
-          im.src = dataUrl;
-        });
-        const processed = processImageToStampedJpeg(imgObj, isScan, addStamp);
-        evidenceQueue.push({
-          type: "image",
-          label: `Image: ${file.name}`,
-          dataUrl: processed
-        });
+        const dataUrl = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+        const im = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = dataUrl; });
+        evidenceQueue.push({ type: "image", label: `Image: ${file.name}`, dataUrl: processImageToStampedJpeg(im, isScan, addStamp) });
       }
     }
     e.target.value = "";
@@ -1806,32 +1386,18 @@ if (!canSeeFeeInDirectView) {
     document.getElementById("queueCount").innerText = evidenceQueue.length;
     document.getElementById("submitMergedBtn").disabled = evidenceQueue.length === 0;
     const listBox = document.getElementById("evidenceQueueList");
-
-    if (!evidenceQueue.length) {
-      listBox.innerHTML = `<p class="text-slate-400 text-center py-2">No photos or PDFs added yet.</p>`;
-      return;
-    }
-
-    listBox.innerHTML = evidenceQueue.map((item, idx) => `
-      <div class="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-200">
-        <div class="flex items-center gap-2 truncate">
-          <span>${item.type === 'pdf' ? '📑' : '🖼️'}</span>
-          <span class="font-semibold text-slate-700 truncate">${escapeHtml(item.label)}</span>
-        </div>
-        <button type="button" onclick="removeQueueItem(${idx})" class="text-red-600 hover:text-red-800 font-bold px-2">✕</button>
-      </div>
-    `).join("");
+    listBox.innerHTML = evidenceQueue.length
+      ? evidenceQueue.map((item, idx) => `<div class="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-200"><span class="truncate font-semibold text-slate-700">${item.type === "pdf" ? "📑" : "🖼️"} ${escapeHtml(item.label)}</span><button type="button" onclick="removeQueueItem(${idx})" class="text-red-600 font-bold px-2">✕</button></div>`).join("")
+      : `<p class="text-slate-400 text-center py-2">No photos or PDFs added yet.</p>`;
   }
 
   async function mergeAndUploadFinalPDF() {
     if (!evidenceQueue.length) return;
-    document.getElementById("loaderText").innerText = "Merging into Single PDF & Saving to UDCP...";
+    document.getElementById("loaderText").innerText = "Merging into Single PDF...";
     document.getElementById("globalLoader").classList.remove("hidden");
-
     try {
       const { PDFDocument } = PDFLib;
       const mergedPdf = await PDFDocument.create();
-
       for (const item of evidenceQueue) {
         if (item.type === "image") {
           const jpgBytes = await fetch(item.dataUrl).then(r => r.arrayBuffer());
@@ -1840,14 +1406,11 @@ if (!canSeeFeeInDirectView) {
           page.drawImage(jpgImage, { x: 0, y: 0, width: jpgImage.width, height: jpgImage.height });
         } else if (item.type === "pdf") {
           const srcPdf = await PDFDocument.load(item.arrayBuffer);
-          const copiedPages = await mergedPdf.copyPages(srcPdf, srcPdf.getPageIndices());
-          copiedPages.forEach(p => mergedPdf.addPage(p));
+          const pages = await mergedPdf.copyPages(srcPdf, srcPdf.getPageIndices());
+          pages.forEach(p => mergedPdf.addPage(p));
         }
       }
-
-      const pageCount = mergedPdf.getPageCount();
       const mergedBase64 = await mergedPdf.saveAsBase64({ dataUri: true });
-
       const res = await callApi({
         action: "uploadProof",
         userId: session.userId,
@@ -1855,10 +1418,9 @@ if (!canSeeFeeInDirectView) {
         ncId: activeNc.ncId,
         srNo: activeNc.srNo,
         gps: currentCoords,
-        pageCount: pageCount,
+        pageCount: mergedPdf.getPageCount(),
         fileBase64: mergedBase64
       }, "Uploading Merged PDF...");
-
       if (res && res.status === "ok") {
         session.ncs = res.ncs;
         closeEvidenceModal();
@@ -1881,33 +1443,17 @@ if (!canSeeFeeInDirectView) {
 
   async function submitUnableResponse() {
     const reason = document.getElementById("unableReasonInput").value.trim();
-    if (!reason) return alert("Please enter a reason / कृपया कारण लिखें।");
-
+    if (!reason) return alert("Please enter a reason.");
     document.getElementById("unableModal").classList.add("hidden");
-    const res = await callApi({
-      action: "markUnable",
-      userId: session.userId,
-      password: session.password,
-      ncId: activeNc.ncId,
-      reason: reason
-    }, "Submitting Response...");
-
+    const res = await callApi({ action: "markUnable", userId: session.userId, password: session.password, ncId: activeNc.ncId, reason }, "Submitting Response...");
     if (res && res.status === "ok") {
       session.ncs = res.ncs;
       renderHospitalDashboard();
     }
   }
 
-  // =========================================================================
-  // ADMIN & OPS TEAM DASHBOARD
-  // =========================================================================
   async function refreshAdminData() {
-    const res = await callApi({
-      action: "getAdminData",
-      adminUser: session.userId,
-      adminPass: session.password,
-      forceRefresh: true
-    }, "Refreshing UDCP Data...");
+    const res = await callApi({ action: "getAdminData", adminUser: session.userId, adminPass: session.password, forceRefresh: true }, "Refreshing UDCP Data...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
@@ -1915,116 +1461,39 @@ if (!canSeeFeeInDirectView) {
   }
 
   function switchAdminMainTab(tab) {
-    if (tab === "assign") {
-      document.getElementById("mainTabAssign").className = "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm";
-      document.getElementById("mainTabLogins").className = "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
-      document.getElementById("adminAssignView").classList.remove("hidden");
-      document.getElementById("adminLoginsView").classList.add("hidden");
-    } else {
-      document.getElementById("mainTabLogins").className = "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm";
-      document.getElementById("mainTabAssign").className = "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
-      document.getElementById("adminLoginsView").classList.remove("hidden");
-      document.getElementById("adminAssignView").classList.add("hidden");
-      renderActiveLoginsDirectory();
-    }
+    const isAssign = tab === "assign";
+    document.getElementById("mainTabAssign").className = isAssign ? "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm" : "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
+    document.getElementById("mainTabLogins").className = !isAssign ? "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm" : "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
+    document.getElementById("adminAssignView").classList.toggle("hidden", !isAssign);
+    document.getElementById("adminLoginsView").classList.toggle("hidden", isAssign);
+    if (!isAssign) renderActiveLoginsDirectory();
   }
 
-  let activeTemplateStageKey = "STAGE_1";
-  let loadedTemplateItems = [];
-  let tickedTemplateCodes = {};
-
   function switchEntryMode(mode) {
-    const btnTemplate = document.getElementById("tabTemplateBtn");
-    const btnBulk = document.getElementById("tabBulkBtn");
-    const btnSingle = document.getElementById("tabSingleBtn");
-
-    btnTemplate.className = "px-3 py-1.5 rounded-lg text-slate-700";
-    btnBulk.className = "px-3 py-1.5 rounded-lg text-slate-700";
-    btnSingle.className = "px-3 py-1.5 rounded-lg text-slate-700";
-
-    document.getElementById("templateChecklistBox").classList.add("hidden");
-    document.getElementById("bulkNcBox").classList.add("hidden");
-    document.getElementById("singleNcForm").classList.add("hidden");
-
-    if (mode === "template") {
-      btnTemplate.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
-      document.getElementById("templateChecklistBox").classList.remove("hidden");
-      loadReadyMadeTemplate(activeTemplateStageKey);
-    } else if (mode === "bulk") {
-      btnBulk.className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm";
-      document.getElementById("bulkNcBox").classList.remove("hidden");
-    } else {
-      btnSingle.className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm";
-      document.getElementById("singleNcForm").classList.remove("hidden");
-    }
+    document.getElementById("tabTemplateBtn").className = mode === "template" ? "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm" : "px-3 py-1.5 rounded-lg text-slate-700";
+    document.getElementById("tabBulkBtn").className = mode === "bulk" ? "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm" : "px-3 py-1.5 rounded-lg text-slate-700";
+    document.getElementById("tabSingleBtn").className = mode === "single" ? "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm" : "px-3 py-1.5 rounded-lg text-slate-700";
+    document.getElementById("templateChecklistBox").classList.toggle("hidden", mode !== "template");
+    document.getElementById("bulkNcBox").classList.toggle("hidden", mode !== "bulk");
+    document.getElementById("singleNcForm").classList.toggle("hidden", mode !== "single");
+    if (mode === "template") loadReadyMadeTemplate(activeTemplateStageKey);
   }
 
   async function loadReadyMadeTemplate(stageKey) {
     activeTemplateStageKey = stageKey;
-    const isS1 = (stageKey === "STAGE_1");
-    document.getElementById("tmplStage1Tab").className = isS1
-      ? "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm transition"
-      : "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition";
-    document.getElementById("tmplStage3Tab").className = !isS1
-      ? "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm transition"
-      : "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition";
-
-    // Sync Stage dropdown on top bar
+    const isS1 = stageKey === "STAGE_1";
+    document.getElementById("tmplStage1Tab").className = isS1 ? "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm" : "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700";
+    document.getElementById("tmplStage3Tab").className = !isS1 ? "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm" : "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700";
     document.getElementById("assignStageSelect").value = isS1 ? "1. Kickoff Docs" : "3. Audit Prep";
-
     const target = getSelectedHospitalTarget();
-    const res = await callApi({
-      action: "getTemplateChecklist",
-      adminUser: session.userId,
-      adminPass: session.password,
-      stageKey: stageKey,
-      hospitalName: target ? target.hospitalName : ""
-    }, `Loading ${isS1 ? 'Stage 1: Kickoff Docs' : 'Stage 3: Audit Prep'} Master Checklist...`);
-
+    const res = await callApi({ action: "getTemplateChecklist", adminUser: session.userId, adminPass: session.password, stageKey, hospitalName: target ? target.hospitalName : "" }, "Loading Checklist...");
     if (!res || res.status !== "ok") {
-      document.getElementById("tmplChecklistContainer").innerHTML =
-        `<div class="p-5 text-center text-xs font-bold text-red-600">${escapeHtml((res && res.message) || "Unable to load checklist.")}</div>`;
+      document.getElementById("tmplChecklistContainer").innerHTML = `<div class="p-5 text-center text-xs font-bold text-red-600">${escapeHtml((res && res.message) || "Unable to load checklist.")}</div>`;
       return;
     }
-
     loadedTemplateItems = res.items || [];
     tickedTemplateCodes = {};
-    loadedTemplateItems.forEach(it => {
-      if (!it.alreadyExists) tickedTemplateCodes[it.code] = true;
-    });
-
-    const srcLink = document.getElementById("tmplSourceSheetLink");
-    if (res.sourceSheetUrl) {
-      srcLink.href = res.sourceSheetUrl;
-      srcLink.classList.remove("hidden");
-    }
-
-    // Show Payment Milestone Preview if hospital already exists
-    const payBanner = document.getElementById("tmplPaymentPreviewBanner");
-    if (res.hospitalMeta && res.hospitalMeta.hasPaymentSetup) {
-      const mIdx = isS1 ? 0 : 1; // Stage 1 -> P1 (index 0), Stage 3 -> P2 (index 1)
-      const label = isS1 ? "1st Installment (P1 — 25%)" : "2nd Installment (P2 — 25%)";
-      const isPaid = (res.hospitalMeta.milestonesPaid || [0,0,0,0])[mIdx] === 1;
-      payBanner.classList.remove("hidden");
-      if (isPaid) {
-        payBanner.className = "text-xs font-bold px-3.5 py-2 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-800";
-        payBanner.innerText = `✓ Payment Check: ${label} is PAID for this hospital.`;
-      } else {
-        payBanner.className = "text-xs font-bold px-3.5 py-2 rounded-xl border bg-red-50 border-red-300 text-red-800";
-        payBanner.innerText = `⚠️ Payment Alert: ${label} is DUE (Mode: ${res.hospitalMeta.paymentLockMode}).`;
-      }
-    } else {
-      payBanner.classList.add("hidden");
-    }
-
-    const alreadyCount = loadedTemplateItems.filter(x => x.alreadyExists).length;
-    const dupEl = document.getElementById("tmplDuplicateSummary");
-    if (alreadyCount > 0) {
-      dupEl.innerText = `ℹ️ ${alreadyCount} of ${loadedTemplateItems.length} items already exist in UDCP for this hospital (only remaining ${loadedTemplateItems.length - alreadyCount} new items will be added).`;
-    } else {
-      dupEl.innerText = `Total ${loadedTemplateItems.length} clean items ready to push.`;
-    }
-
+    loadedTemplateItems.forEach(it => { if (!it.alreadyExists) tickedTemplateCodes[it.code] = true; });
     renderTemplateChecklistItems();
   }
 
@@ -2047,56 +1516,17 @@ if (!canSeeFeeInDirectView) {
     const q = (document.getElementById("tmplSearchInput")?.value || "").trim().toLowerCase();
     const box = document.getElementById("tmplChecklistContainer");
     document.getElementById("tmplTickedCount").innerText = Object.keys(tickedTemplateCodes).length;
-
-    const filtered = loadedTemplateItems.filter(it =>
-      !q || (`${it.code} ${it.srNo} ${it.description}`).toLowerCase().includes(q)
-    );
-
-    if (!filtered.length) {
-      box.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">No matching checklist items found.</div>`;
-      return;
-    }
-
-    box.innerHTML = filtered.map(it => {
-      const isTicked = !!tickedTemplateCodes[it.code];
-      return `
-        <label class="flex items-start gap-3 p-3 hover:bg-slate-50 cursor-pointer ${it.alreadyExists ? 'opacity-60 bg-slate-50' : ''}">
-          <input type="checkbox" ${it.alreadyExists ? 'checked disabled' : (isTicked ? 'checked' : '')}
-            onchange="toggleSingleTemplateItem('${it.code}', this.checked)"
-            class="mt-1 w-4 h-4 rounded text-emerald-600 cursor-pointer shrink-0" />
-          <div class="flex-1 text-xs">
-            <div class="flex flex-wrap items-center gap-1.5">
-              <span class="font-mono font-extrabold bg-slate-900 text-white px-2 py-0.5 rounded text-[10px]">${it.code}</span>
-              <span class="font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[10px]">Sr. ${escapeHtml(it.srNo)}</span>
-              ${it.alreadyExists
-                ? `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Already in UDCP (${escapeHtml(it.existingStatus)})</span>`
-                : (isTicked
-                    ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">✓ Will Assign as Pending</span>`
-                    : `<span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">Excluded (Skipped)</span>`
-                  )
-              }
-            </div>
-            <p class="text-slate-800 font-semibold mt-1 leading-relaxed">${escapeHtml(it.description)}</p>
-          </div>
-        </label>
-      `;
-    }).join("");
+    const filtered = loadedTemplateItems.filter(it => !q || `${it.code} ${it.srNo} ${it.description}`.toLowerCase().includes(q));
+    box.innerHTML = filtered.length
+      ? filtered.map(it => `<label class="flex items-start gap-3 p-3 hover:bg-slate-50 cursor-pointer ${it.alreadyExists ? "opacity-60" : ""}"><input type="checkbox" ${it.alreadyExists ? "checked disabled" : (tickedTemplateCodes[it.code] ? "checked" : "")} onchange="toggleSingleTemplateItem('${it.code}', this.checked)" class="mt-1 w-4 h-4 rounded text-emerald-600 shrink-0" /><div class="flex-1 text-xs"><span class="font-mono font-extrabold bg-slate-900 text-white px-2 py-0.5 rounded text-[10px]">${it.code}</span> <span class="font-bold text-slate-700">Sr. ${escapeHtml(it.srNo)}</span><p class="text-slate-800 font-semibold mt-1">${escapeHtml(it.description)}</p></div></label>`).join("")
+      : `<div class="p-6 text-center text-xs text-slate-400">No matching checklist items found.</div>`;
   }
 
   async function pushReadyMadeTemplateToHospital() {
     const target = getSelectedHospitalTarget();
-    if (!target) {
-      return alert("Please select a Hospital from the dropdown (or + ADD NEW HOSPITAL) first!");
-    }
-
-    const deadlineVal = document.getElementById("assignDeadlineInput").value;
-    const assocVal = document.getElementById("assignAssociateSelect").value || "UMBRELLA";
-    const baseUrl = window.location.href.split("?")[0];
+    if (!target) return alert("Please select a Hospital first.");
     const selectedCodes = Object.keys(tickedTemplateCodes);
-    if (!selectedCodes.length) {
-      return alert("Please select at least 1 checklist item to assign.");
-    }
-
+    if (!selectedCodes.length) return alert("Please select at least 1 checklist item.");
     const res = await callApi({
       action: "pushTemplateChecklist",
       adminUser: session.userId,
@@ -2104,106 +1534,64 @@ if (!canSeeFeeInDirectView) {
       stageKey: activeTemplateStageKey,
       hospitalName: target.hospitalName,
       city: target.city,
-      deadline: deadlineVal,
-      associate: assocVal,
-      selectedCodes: selectedCodes,
-      baseUrl: baseUrl
-    }, `Assigning ${selectedCodes.length} ${activeTemplateStageKey === 'STAGE_1' ? 'Kickoff Docs' : 'Audit Prep'} Items to ${target.hospitalName}...`);
-
-    if (!res || res.status !== "ok") {
-      return alert((res && res.message) || "Failed to push checklist.");
-    }
-
+      deadline: document.getElementById("assignDeadlineInput").value,
+      associate: document.getElementById("assignAssociateSelect").value || "UMBRELLA",
+      selectedCodes,
+      baseUrl: window.location.href.split("?")[0]
+    }, "Assigning Checklist...");
+    if (!res || res.status !== "ok") return alert((res && res.message) || "Failed to push checklist.");
     session.adminData = res.data;
     renderAdminDashboard();
     if (res.credentialCard) showCredentialShareCard(res.credentialCard);
-    await loadReadyMadeTemplate(activeTemplateStageKey);
-
-    alert(`✓ ${res.stageName} Checklist Assigned!
-• Added as Pending: ${res.addedCount} items (Hospital can now upload proofs for manual approval)
-• Skipped Already Existing: ${res.skippedCount}`);
+    alert(`✓ Assigned ${res.addedCount} items (${res.skippedCount} skipped).`);
   }
 
   function getHospitalResolvedStage(h) {
     if (h.currentStage) return h.currentStage;
-    if (h.stageMetrics && h.stageMetrics.latestStage && h.stageMetrics.latestStage !== "Not Started") {
-      return h.stageMetrics.latestStage;
-    }
+    if (h.stageMetrics && h.stageMetrics.latestStage && h.stageMetrics.latestStage !== "Not Started") return h.stageMetrics.latestStage;
     return "";
   }
 
   function filterHospitalDropdown() {
     const query = (document.getElementById("hospSearchBox").value || "").trim().toLowerCase();
-    const stageFilt = (document.getElementById("hospDropdownStageFilter")?.value || "ALL");
+    const stageFilt = document.getElementById("hospDropdownStageFilter")?.value || "ALL";
     const { hospitals } = session.adminData;
     const select = document.getElementById("adminHospSelect");
     const prevVal = select.value;
 
     const filtered = hospitals.filter(h => {
-      if (stageFilt !== "ALL") {
-        const hStage = getHospitalResolvedStage(h);
-        if (hStage !== stageFilt) return false;
-      }
-      if (query && !(
-        h.hospitalName.toLowerCase().includes(query) ||
-        (h.city && h.city.toLowerCase().includes(query)) ||
-        (h.userId && h.userId.toLowerCase().includes(query))
-      )) return false;
+      if (stageFilt !== "ALL" && getHospitalResolvedStage(h) !== stageFilt) return false;
+      if (query && !(`${h.hospitalName} ${h.city || ""} ${h.userId || ""}`).toLowerCase().includes(query)) return false;
       return true;
     });
 
-    let opts = `<option value="">-- Select Hospital (${filtered.length} matching) --</option>`;
-    opts += `<option value="__NEW__" class="font-bold text-red-600">+ ADD NEW HOSPITAL (Not in List)</option>`;
+    let opts = `<option value="">-- Select Hospital (${filtered.length} matching) --</option><option value="__NEW__" class="font-bold text-red-600">+ ADD NEW HOSPITAL</option>`;
     filtered.forEach(h => {
-      const tag = h.userId ? ` [${h.userId}]` : "";
-      const ag = h.associate ? ` • ${h.associate}` : "";
-      opts += `<option value="${h.hospitalName.replace(/"/g, '&quot;')}">${h.hospitalName}${h.city ? ' (' + h.city + ')' : ''}${tag}${ag}</option>`;
+      opts += `<option value="${escapeHtml(h.hospitalName)}">${escapeHtml(h.hospitalName)}${h.city ? " (" + escapeHtml(h.city) + ")" : ""}${h.userId ? " [" + h.userId + "]" : ""}</option>`;
     });
     select.innerHTML = opts;
-
-    if (prevVal && Array.from(select.options).some(o => o.value === prevVal)) {
-      select.value = prevVal;
-    } else if (query && filtered.length === 1) {
-      select.value = filtered[0].hospitalName;
-      toggleNewHospitalInput();
-    }
+    if (prevVal && Array.from(select.options).some(o => o.value === prevVal)) select.value = prevVal;
   }
 
   function renderAdminDashboard() {
     const { hospitals, ncs, inputSheetUrl, associates } = session.adminData;
+    if (inputSheetUrl) document.getElementById("openInputSheetLink").href = inputSheetUrl;
 
-    if (inputSheetUrl) {
-      document.getElementById("openInputSheetLink").href = inputSheetUrl;
-    }
-
-    // Populate Associate Dropdowns
     const assocSel = document.getElementById("assignAssociateSelect");
     const prevAssoc = assocSel.value;
-    let aOpts = `<option value="">-- Unassigned --</option>`;
-    (associates || []).forEach(ag => {
-      aOpts += `<option value="${ag}">${ag}</option>`;
-    });
-    assocSel.innerHTML = aOpts;
+    assocSel.innerHTML = `<option value="">-- Unassigned --</option>` + (associates || []).map(ag => `<option value="${escapeHtml(ag)}">${escapeHtml(ag)}</option>`).join("");
     if (prevAssoc) assocSel.value = prevAssoc;
 
     const dirAssocSel = document.getElementById("directoryAssocFilter");
     const prevDirAssoc = dirAssocSel.value;
-    let daOpts = `<option value="ALL">All Associates</option><option value="NONE">Unassigned Only</option>`;
-    (associates || []).forEach(ag => {
-      daOpts += `<option value="${ag}">${ag}</option>`;
-    });
-    dirAssocSel.innerHTML = daOpts;
+    dirAssocSel.innerHTML = `<option value="ALL">All Associates</option><option value="NONE">Unassigned Only</option>` + (associates || []).map(ag => `<option value="${escapeHtml(ag)}">${escapeHtml(ag)}</option>`).join("");
     if (prevDirAssoc) dirAssocSel.value = prevDirAssoc;
 
     filterHospitalDropdown();
 
     const filterSelect = document.getElementById("adminFilterHosp");
     const currentFilter = filterSelect.value;
-    let fOpts = `<option value="ALL">All Hospitals</option>`;
-    hospitals.filter(h => h.userId).forEach(h => {
-      fOpts += `<option value="${h.userId}">${h.hospitalName} (${h.userId})</option>`;
-    });
-    filterSelect.innerHTML = fOpts;
+    filterSelect.innerHTML = `<option value="ALL">All Hospitals</option>` + hospitals.filter(h => h.userId).map(h => `<option value="${h.userId}">${escapeHtml(h.hospitalName)} (${h.userId})</option>`).join("");
     if (currentFilter) filterSelect.value = currentFilter;
     onFilterHospChange();
 
@@ -2215,39 +1603,20 @@ if (!canSeeFeeInDirectView) {
     document.getElementById("adminProgressBar").style.width = pct + "%";
 
     renderAdminTable();
-    if (!document.getElementById("adminLoginsView").classList.contains("hidden")) {
-      renderActiveLoginsDirectory();
-    }
-    if (session.role === "admin" && !loadedTemplateItems.length && !document.getElementById("templateChecklistBox").classList.contains("hidden")) {
-      loadReadyMadeTemplate(activeTemplateStageKey);
-    }
+    if (!document.getElementById("adminLoginsView").classList.contains("hidden")) renderActiveLoginsDirectory();
   }
 
   function onFilterHospChange() {
     const val = document.getElementById("adminFilterHosp").value;
     const portalBtn = document.getElementById("filterOpenPortalBtn");
-    const pdfBtn = document.getElementById("filterAnalyticsPdfBtn");
     const driveBtn = document.getElementById("filterDriveLinkBtn");
-
-    if (val && val !== "ALL") {
-      const hosp = session.adminData.hospitals.find(h => h.userId === val);
-      if (session.role === "admin") {
-        portalBtn.classList.remove("hidden");
-        pdfBtn.classList.remove("hidden");
-      } else {
-        portalBtn.classList.add("hidden");
-        pdfBtn.classList.add("hidden");
-      }
-
-      if (hosp && hosp.driveUrl) {
-        driveBtn.href = hosp.driveUrl;
-        driveBtn.classList.remove("hidden");
-      } else {
-        driveBtn.classList.add("hidden");
-      }
+    const show = val && val !== "ALL";
+    portalBtn.classList.toggle("hidden", !(show && session.role === "admin"));
+    const hosp = show ? session.adminData.hospitals.find(h => h.userId === val) : null;
+    if (hosp && hosp.driveUrl) {
+      driveBtn.href = hosp.driveUrl;
+      driveBtn.classList.remove("hidden");
     } else {
-      portalBtn.classList.add("hidden");
-      pdfBtn.classList.add("hidden");
       driveBtn.classList.add("hidden");
     }
     renderAdminTable();
@@ -2258,18 +1627,12 @@ if (!canSeeFeeInDirectView) {
     if (val && val !== "ALL") openHospitalPortalAsAdmin(val);
   }
 
-  function openSelectedFilterHospitalPdf() {
-    const val = document.getElementById("adminFilterHosp").value;
-    if (val && val !== "ALL") generateHospitalAnalyticsPdf(val);
-  }
-
   function toggleNewHospitalInput() {
     const val = document.getElementById("adminHospSelect").value;
     const box = document.getElementById("newHospFields");
     const hint = document.getElementById("detectedAssocHint");
     const assocSel = document.getElementById("assignAssociateSelect");
     const stageSel = document.getElementById("assignStageSelect");
-
     if (val === "__NEW__") {
       box.classList.remove("hidden");
       hint.innerText = "Assign Associate & Stage";
@@ -2281,17 +1644,9 @@ if (!canSeeFeeInDirectView) {
       if (existing) {
         if (existing.deadline) document.getElementById("assignDeadlineInput").value = existing.deadline;
         if (existing.currentStage) stageSel.value = existing.currentStage;
-        if (existing.associate) {
-          assocSel.value = existing.associate;
-          hint.innerText = "✓ Associate: " + existing.associate;
-        } else {
-          assocSel.value = "";
-          hint.innerText = "⚠ Unassigned Associate";
-        }
+        assocSel.value = existing.associate || "";
+        hint.innerText = existing.associate ? "✓ Associate: " + existing.associate : "⚠ Unassigned Associate";
       }
-    }
-    if (!document.getElementById("templateChecklistBox").classList.contains("hidden")) {
-      loadReadyMadeTemplate(activeTemplateStageKey);
     }
   }
 
@@ -2301,111 +1656,83 @@ if (!canSeeFeeInDirectView) {
     if (sel === "__NEW__") {
       const name = document.getElementById("newHospNameInput").value.trim();
       const city = document.getElementById("newHospCityInput").value.trim();
-      if (!name) return null;
-      return { hospitalName: name, city: city };
+      return name ? { hospitalName: name, city } : null;
     }
     return { hospitalName: sel, city: "" };
   }
 
   async function fetchFromInputSheet() {
     const target = getSelectedHospitalTarget();
-    if (!target) {
-      return alert("Please select a Hospital from the list (or choose + ADD NEW HOSPITAL) first!");
-    }
-    const deadlineVal = document.getElementById("assignDeadlineInput").value;
-    const assocVal = document.getElementById("assignAssociateSelect").value;
-    const stageVal = document.getElementById("assignStageSelect").value;
-    const baseUrl = window.location.href.split("?")[0];
-
+    if (!target) return alert("Please select a Hospital first.");
     const res = await callApi({
       action: "fetchFromInputSheet",
       adminUser: session.userId,
       adminPass: session.password,
       hospitalName: target.hospitalName,
       city: target.city,
-      deadline: deadlineVal,
-      associate: assocVal,
-      stage: stageVal,
-      baseUrl: baseUrl
-    }, `Fetching ${stageVal} Items for ${target.hospitalName}...`);
-
-    if (!res) return;
-    if (res.status !== "ok") {
-      return alert(res.message || "Could not fetch items.");
-    }
-
+      deadline: document.getElementById("assignDeadlineInput").value,
+      associate: document.getElementById("assignAssociateSelect").value,
+      stage: document.getElementById("assignStageSelect").value,
+      baseUrl: window.location.href.split("?")[0]
+    }, "Fetching Items...");
+    if (!res || res.status !== "ok") return alert((res && res.message) || "Could not fetch items.");
     session.adminData = res.data;
     renderAdminDashboard();
-    if (res.credentialCard) {
-      showCredentialShareCard(res.credentialCard);
-    }
-    alert(`✓ Successfully imported ${res.fetchedCount} items under [${stageVal}] for ${target.hospitalName}!`);
+    if (res.credentialCard) showCredentialShareCard(res.credentialCard);
+    alert(`✓ Imported ${res.fetchedCount} items.`);
   }
 
   async function submitSingleNC(e) {
     if (e && e.preventDefault) e.preventDefault();
     const target = getSelectedHospitalTarget();
     if (!target) return alert("Please select or enter a Hospital Name first.");
-
     const actionText = document.getElementById("ncActionInput").value.trim();
-    if (!actionText) return alert("Please enter Requirement / Evidence description.");
-    const deadlineVal = document.getElementById("assignDeadlineInput").value;
-    const assocVal = document.getElementById("assignAssociateSelect").value;
-    const stageVal = document.getElementById("assignStageSelect").value;
-    const baseUrl = window.location.href.split("?")[0];
-
+    if (!actionText) return alert("Please enter Requirement details.");
     const res = await callApi({
       action: "addNC",
       adminUser: session.userId,
       adminPass: session.password,
       hospitalName: target.hospitalName,
       city: target.city,
-      deadline: deadlineVal,
-      associate: assocVal,
-      stage: stageVal,
-      baseUrl: baseUrl,
+      deadline: document.getElementById("assignDeadlineInput").value,
+      associate: document.getElementById("assignAssociateSelect").value,
+      stage: document.getElementById("assignStageSelect").value,
+      baseUrl: window.location.href.split("?")[0],
       srNo: document.getElementById("ncSrInput").value.trim(),
       correctiveAction: actionText,
       adminNote: document.getElementById("ncSimpleNoteInput").value.trim()
-    }, "Saving Item & Syncing UDCP...");
-
+    }, "Saving Item...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
       document.getElementById("ncSrInput").value = "";
       document.getElementById("ncActionInput").value = "";
       document.getElementById("ncSimpleNoteInput").value = "";
       renderAdminDashboard();
-      showCredentialShareCard(res.credentialCard);
+      if (res.credentialCard) showCredentialShareCard(res.credentialCard);
     }
   }
 
   function showCredentialShareCard(hosp) {
     const portalUrl = window.location.href.split("?")[0];
-    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.associate ? ` (Associate: ${hosp.associate})` : "");
+    document.getElementById("shareHospName").innerText = hosp.hospitalName + (hosp.associate ? ` (${hosp.associate})` : "");
     document.getElementById("sharePortalLink").innerText = portalUrl;
     document.getElementById("shareUserId").innerText = hosp.userId;
     document.getElementById("sharePass").innerText = hosp.password;
     document.getElementById("shareOpenPortalBtn").onclick = () => openHospitalPortalAsAdmin(hosp.userId);
-
     const dLine = document.getElementById("shareDeadlineLine");
-    let deadlineMsg = "";
     if (hosp.deadline) {
-      const fDate = formatDeadlineDisplay(hosp.deadline);
-      dLine.innerText = "⏳ Target Deadline: " + fDate + (hosp.associate ? ` (Calendar link pinned under ${hosp.associate})` : "");
+      dLine.innerText = "⏳ Target Deadline: " + formatDeadlineDisplay(hosp.deadline);
       dLine.classList.remove("hidden");
-      deadlineMsg = `\nTarget Deadline: *${fDate}*`;
     } else {
       dLine.classList.add("hidden");
     }
-
     document.getElementById("credShareBox").classList.remove("hidden");
-
-    lastShareText = `*UDCP — Umbrella Docs & Compliance Portal*\n_Umbrella Healthcare Consultancy_\n\nHospital: *${hosp.hospitalName}*\nStage: *${hosp.currentStage || 'Active Stage'}*\nPortal Link: ${portalUrl}\nUser ID: *${hosp.userId}*\nPassword: *${hosp.password}*${deadlineMsg}\n\nPlease login and upload live photo / compliance PDF before the deadline.`;
+    lastShareText = `Hospital: *${hosp.hospitalName}*\nPortal: ${portalUrl}\nUser ID: *${hosp.userId}*\nPassword: *${hosp.password}*`;
   }
 
   function copyShareMessage() {
     navigator.clipboard.writeText(lastShareText);
-    alert("UDCP Portal Link, User ID, Password & Deadline copied for WhatsApp!");
+    alert("Copied for WhatsApp!");
   }
 
   function renderAdminTable() {
@@ -2413,9 +1740,8 @@ if (!canSeeFeeInDirectView) {
     const fStage = document.getElementById("adminFilterStage").value;
     const fStat = document.getElementById("adminFilterStatus").value;
     const q = document.getElementById("adminSearchInput").value.trim().toLowerCase();
-
-    const isSuperAdmin = (session.role === "admin");
-    const canApprove = (session.role === "admin" || session.subRole === "OPERATOR");
+    const isSuperAdmin = session.role === "admin";
+    const canApprove = session.role === "admin" || session.subRole === "OPERATOR";
 
     const list = session.adminData.ncs.filter(n => {
       if (fHosp !== "ALL" && n.userId !== fHosp) return false;
@@ -2427,13 +1753,11 @@ if (!canSeeFeeInDirectView) {
 
     const container = document.getElementById("adminNcTableContainer");
     if (!list.length) {
-      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No items found for selected filters.</p>`;
+      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No items found.</p>`;
       return;
     }
 
-    container.innerHTML = list.map(nc => {
-      const hospObj = session.adminData.hospitals.find(h => h.userId === nc.userId);
-      return `
+    container.innerHTML = list.map(nc => `
       <div class="border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div class="space-y-2 flex-1">
           <div class="flex flex-wrap items-center gap-2">
@@ -2442,70 +1766,30 @@ if (!canSeeFeeInDirectView) {
             <span class="font-mono text-[11px] bg-slate-900 text-white px-2 py-0.5 rounded">Sr. ${nc.srNo || nc.ncId}</span>
             <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">${escapeHtml(nc.stage)}</span>
             <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-              nc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
-              nc.status === 'Submitted' ? 'bg-blue-100 text-blue-800' :
-              nc.status === 'Unable to Provide' ? 'bg-purple-100 text-purple-800' :
-              nc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+              nc.status === "Approved" ? "bg-emerald-100 text-emerald-800" :
+              nc.status === "Submitted" ? "bg-blue-100 text-blue-800" :
+              nc.status === "Unable to Provide" ? "bg-purple-100 text-purple-800" :
+              nc.status === "Rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
             }">${nc.status}</span>
-            ${hospObj && hospObj.driveUrl ? `<a href="${hospObj.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline ml-1">📁 Drive ↗</a>` : ''}
-            ${isSuperAdmin ? `<button type="button" onclick="openHospitalPortalAsAdmin('${nc.userId}')" class="text-[11px] font-bold text-slate-700 hover:text-red-600 underline ml-1">👁 Portal</button>` : ''}
           </div>
-
-          <div class="flex items-start gap-2">
-            <div class="flex-1">${formatNcRichText(nc.correctiveAction)}</div>
-            ${isSuperAdmin ? `
-              <button type="button" onclick='editSimplifiedNote("${nc.userId}", "${nc.ncId}", ${JSON.stringify(nc.adminNote || "")})'
-                title="Add or edit simplified guidance note"
-                class="shrink-0 w-6 h-6 rounded-full bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 font-extrabold text-xs flex items-center justify-center border border-slate-300">
-                +
-              </button>
-            ` : ''}
-          </div>
-
-          ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Simplified Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ''}
-          ${nc.status === 'Unable to Provide' ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ''}
-          ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ''}
-          ${nc.gps && nc.status !== 'Unable to Provide' ? `<p class="text-[11px] text-slate-400">📍 ${nc.gps} • ${nc.submittedAt}</p>` : ''}
+          <div>${formatNcRichText(nc.correctiveAction)}</div>
+          ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ""}
         </div>
-
         <div class="flex flex-wrap items-center gap-2 shrink-0">
-          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View Merged PDF</a>` : ''}
-          ${canApprove && (nc.status === 'Submitted' || nc.status === 'Unable to Provide') ? `
-            <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
-            <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg">✕ Reject</button>
-          ` : ''}
-          ${isSuperAdmin ? `<button type="button" onclick="deleteNC('${nc.userId}', '${nc.ncId}')" title="Delete Item" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>` : ''}
+          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View Merged PDF</a>` : ""}
+          ${canApprove && (nc.status === "Submitted" || nc.status === "Unable to Provide") ? `
+            <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
+            <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 text-white px-3 py-1.5 rounded-lg">✕ Reject</button>
+          ` : ""}
+          ${isSuperAdmin ? `<button type="button" onclick="deleteNC('${nc.userId}', '${nc.ncId}')" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>` : ""}
         </div>
       </div>
-    `}).join("");
-  }
-
-  async function editSimplifiedNote(userId, ncId, existingNote) {
-    const note = prompt("Enter simplified guidance note for hospital (Leave empty to remove):", existingNote);
-    if (note === null) return;
-    const res = await callApi({
-      action: "updateAdminNote",
-      adminUser: session.userId,
-      adminPass: session.password,
-      userId: userId,
-      ncId: ncId,
-      adminNote: note.trim()
-    }, "Updating Note...");
-    if (res && res.status === "ok") {
-      session.adminData = res.data;
-      renderAdminDashboard();
-    }
+    `).join("");
   }
 
   async function deleteNC(userId, ncId) {
     if (!confirm("Delete this item permanently?")) return;
-    const res = await callApi({
-      action: "deleteNC",
-      adminUser: session.userId,
-      adminPass: session.password,
-      userId: userId,
-      ncId: ncId
-    }, "Deleting Item...");
+    const res = await callApi({ action: "deleteNC", adminUser: session.userId, adminPass: session.password, userId, ncId }, "Deleting Item...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
@@ -2515,19 +1799,10 @@ if (!canSeeFeeInDirectView) {
   async function verifyNC(userId, ncId, decision) {
     let remark = "";
     if (decision === "Rejected") {
-      remark = prompt("Enter reason for rejection (Hospital will see this):");
+      remark = prompt("Enter reason for rejection:");
       if (remark === null) return;
     }
-    const res = await callApi({
-      action: "verifyNC",
-      adminUser: session.userId,
-      adminPass: session.password,
-      userId: userId,
-      ncId: ncId,
-      decision: decision,
-      remark: remark
-    }, `Updating to ${decision}...`);
-
+    const res = await callApi({ action: "verifyNC", adminUser: session.userId, adminPass: session.password, userId, ncId, decision, remark }, `Updating to ${decision}...`);
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
@@ -2536,28 +1811,13 @@ if (!canSeeFeeInDirectView) {
     }
   }
 
-  // =========================================================================
-  // TAB 2: EXCEL BULK GRID + INLINE CARDS + BATCH SAVE & SYNC ALL
-  // =========================================================================
-  let dirViewMode = "grid"; // "grid" or "card"
-  let dirPage = 1;
-  const DIR_PAGE_SIZE = 30;
-  let dirtyHospitals = {};      // KEY: UPPER_HOSP_NAME -> staged object
-  let selectedHospKeys = {};    // KEY: UPPER_HOSP_NAME -> true
-
   function switchDirectoryViewMode(mode) {
     dirViewMode = mode;
-    if (mode === "grid") {
-      document.getElementById("dirViewGridBtn").className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
-      document.getElementById("dirViewCardBtn").className = "px-3 py-1.5 rounded-lg text-slate-700";
-      document.getElementById("excelBulkGridWrapper").classList.remove("hidden");
-      document.getElementById("activeHospListContainer").classList.add("hidden");
-    } else {
-      document.getElementById("dirViewCardBtn").className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
-      document.getElementById("dirViewGridBtn").className = "px-3 py-1.5 rounded-lg text-slate-700";
-      document.getElementById("activeHospListContainer").classList.remove("hidden");
-      document.getElementById("excelBulkGridWrapper").classList.add("hidden");
-    }
+    const isGrid = mode === "grid";
+    document.getElementById("dirViewGridBtn").className = isGrid ? "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm" : "px-3 py-1.5 rounded-lg text-slate-700";
+    document.getElementById("dirViewCardBtn").className = !isGrid ? "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm" : "px-3 py-1.5 rounded-lg text-slate-700";
+    document.getElementById("excelBulkGridWrapper").classList.toggle("hidden", !isGrid);
+    document.getElementById("activeHospListContainer").classList.toggle("hidden", isGrid);
     renderActiveLoginsDirectory();
   }
 
@@ -2581,38 +1841,23 @@ if (!canSeeFeeInDirectView) {
     const key = hospName.toUpperCase();
     const base = session.adminData.hospitals.find(x => x.hospitalName.toUpperCase() === key);
     if (!base) return;
-
     if (!dirtyHospitals[key]) {
       dirtyHospitals[key] = {
         hospitalName: base.hospitalName,
         city: base.city || "",
         associate: base.associate || "",
-        currentStage: base.currentStage || (base.stageMetrics && base.stageMetrics.latestStage !== "Not Started" ? base.stageMetrics.latestStage : "1. Kickoff Docs"),
+        currentStage: base.currentStage || "1. Kickoff Docs",
         deadline: base.deadline || "",
         totalFee: Number(base.totalFee) || 0,
         milestonesPaid: [...(base.milestonesPaid || [0, 0, 0, 0])],
         paymentLockMode: base.paymentLockMode || "SOFT"
       };
     }
-
-    if (field === "milestone") {
-      dirtyHospitals[key].milestonesPaid[value.idx] = value.checked ? 1 : 0;
-    } else if (field === "totalFee") {
-      dirtyHospitals[key].totalFee = Number(value) || 0;
-    } else {
-      dirtyHospitals[key][field] = value;
-    }
+    if (field === "milestone") dirtyHospitals[key].milestonesPaid[value.idx] = value.checked ? 1 : 0;
+    else if (field === "totalFee") dirtyHospitals[key].totalFee = Number(value) || 0;
+    else dirtyHospitals[key][field] = value;
 
     updateStickySaveBar();
-    // Highlight row/card visually without losing focus
-    const safeId = key.replace(/[^A-Z0-9]/g, "_");
-    const rowEl = document.getElementById("gridRow_" + safeId);
-    if (rowEl) rowEl.classList.add("bg-amber-50");
-    const cardEl = document.getElementById("hospCard_" + safeId);
-    if (cardEl) {
-      cardEl.classList.remove("border-slate-200", "border-amber-300");
-      cardEl.classList.add("border-emerald-500", "ring-2", "ring-emerald-200");
-    }
   }
 
   function updateStickySaveBar() {
@@ -2653,7 +1898,6 @@ if (!canSeeFeeInDirectView) {
   function applyBatchToSelected() {
     const keys = Object.keys(selectedHospKeys);
     if (!keys.length) return alert("Please tick at least 1 hospital checkbox first.");
-
     const bAssoc = document.getElementById("batchAssocInput").value;
     const bStage = document.getElementById("batchStageInput").value;
     const bFeeRaw = document.getElementById("batchFeeInput").value;
@@ -2667,7 +1911,6 @@ if (!canSeeFeeInDirectView) {
       if (bFeeRaw !== "") stageHospitalChange(hObj.hospitalName, "totalFee", Number(bFeeRaw) || 0);
       if (bLock !== "__KEEP__") stageHospitalChange(hObj.hospitalName, "paymentLockMode", bLock);
     });
-
     renderActiveLoginsDirectory();
     updateStickySaveBar();
   }
@@ -2675,7 +1918,6 @@ if (!canSeeFeeInDirectView) {
   async function saveAndSyncAllBulk() {
     const keys = Object.keys(dirtyHospitals);
     if (!keys.length) return;
-
     const payloadItems = keys.map(k => {
       const d = dirtyHospitals[k];
       return {
@@ -2689,15 +1931,13 @@ if (!canSeeFeeInDirectView) {
         paymentLockMode: d.paymentLockMode
       };
     });
-
-    const baseUrl = window.location.href.split("?")[0];
     const res = await callApi({
       action: "bulkUpdateHospitals",
       adminUser: session.userId,
       adminPass: session.password,
       items: payloadItems,
-      baseUrl: baseUrl
-    }, `Saving & Syncing ${payloadItems.length} Hospital(s) to UDCP_MASTER_DB...`);
+      baseUrl: window.location.href.split("?")[0]
+    }, `Saving & Syncing ${payloadItems.length} Hospital(s)...`);
 
     if (res && res.status === "ok") {
       dirtyHospitals = {};
@@ -2705,7 +1945,7 @@ if (!canSeeFeeInDirectView) {
       session.adminData = res.data;
       updateStickySaveBar();
       renderAdminDashboard();
-      alert(`✓ Successfully saved & synced ${res.updatedCount} hospital(s) in UDCP_MASTER_DB!`);
+      alert(`✓ Saved & synced ${res.updatedCount} hospital(s).`);
     } else if (res && res.message) {
       alert(res.message);
     }
@@ -2723,74 +1963,30 @@ if (!canSeeFeeInDirectView) {
     const q = (document.getElementById("directorySearchInput")?.value || "").trim().toLowerCase();
     const assocFilter = document.getElementById("directoryAssocFilter")?.value || "ALL";
     const { hospitals, associates } = session.adminData;
-    const isSuperAdmin = (session.role === "admin");
-    const canSeeFee = (isSuperAdmin || session.role === "associate");
-    // Populate batch associate dropdown
+    const isSuperAdmin = session.role === "admin";
+    const canSeeFee = isSuperAdmin || session.role === "associate";
+
     const batchAssocSel = document.getElementById("batchAssocInput");
     if (batchAssocSel) {
       const prevB = batchAssocSel.value;
-      batchAssocSel.innerHTML = `<option value="__KEEP__">Associate (No Change)</option><option value="">-- Unassign --</option>` +
-        (associates || []).map(ag => `<option value="${ag}">${ag}</option>`).join("");
+      batchAssocSel.innerHTML = `<option value="__KEEP__">Associate (No Change)</option><option value="">-- Unassign --</option>` + (associates || []).map(ag => `<option value="${escapeHtml(ag)}">${escapeHtml(ag)}</option>`).join("");
       if (prevB) batchAssocSel.value = prevB;
     }
 
-    if (isSuperAdmin) {
-      document.getElementById("bulkBatchToolbar").classList.remove("hidden");
-    } else {
-      document.getElementById("bulkBatchToolbar").classList.add("hidden");
-    }
-
-    // Calculate counts for Smart Filter Chips
-    const activeUdcp = hospitals.filter(h => h.userId);
-    const unassignedList = hospitals.filter(h => !h.associate);
-    const noPaymentList = hospitals.filter(h => !h.hasPaymentSetup);
-    const payDueList = hospitals.filter(h => isHospitalPaymentDue(h));
-    const notStartedList = hospitals.filter(h => !h.userId);
+    document.getElementById("bulkBatchToolbar").classList.toggle("hidden", !isSuperAdmin);
 
     const chips = [
-      { id: "UNASSIGNED", label: `🚨 Unassigned Associate (${unassignedList.length})` },
-      { id: "NO_PAYMENT", label: `💳 Without Payment Setup (${noPaymentList.length})` },
-      { id: "ACTIVE_UDCP", label: `Active in UDCP (${activeUdcp.length})` },
-      { id: "PAYMENT_DUE", label: `⏳ Payment Due (${payDueList.length})` },
-      { id: "NOT_STARTED", label: `📋 Not Started Yet (${notStartedList.length})` },
-      { id: "ALL", label: `All Hospitals (${hospitals.length})` }
+      { id: "UNASSIGNED", label: `🚨 Unassigned (${hospitals.filter(h => !h.associate).length})` },
+      { id: "NO_PAYMENT", label: `💳 No Payment Setup (${hospitals.filter(h => !h.hasPaymentSetup).length})` },
+      { id: "ACTIVE_UDCP", label: `Active in UDCP (${hospitals.filter(h => h.userId).length})` },
+      { id: "PAYMENT_DUE", label: `⏳ Payment Due (${hospitals.filter(h => isHospitalPaymentDue(h)).length})` },
+      { id: "NOT_STARTED", label: `📋 Not Started (${hospitals.filter(h => !h.userId).length})` },
+      { id: "ALL", label: `All (${hospitals.length})` }
     ];
 
-    document.getElementById("smartFilterChipsBar").innerHTML = chips.map(c => {
-      const isAct = activeSmartChip === c.id;
-      return `
-        <button type="button" onclick="activeSmartChip='${c.id}'; dirPage=1; renderActiveLoginsDirectory();"
-          class="text-xs font-bold px-3 py-1.5 rounded-full transition ${isAct ? 'bg-slate-900 text-amber-300 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
-          ${c.label}
-        </button>
-      `;
-    }).join("");
-
-    const stageChipDefs = [
-      { id: "ALL", label: "All Stages" },
-      { id: "1. Kickoff Docs", label: "📋 1. Kickoff" },
-      { id: "2. Desktop NC", label: "🖥️ 2. DA NC" },
-      { id: "3. Audit Prep", label: "🏥 3. Audit Prep" },
-      { id: "4. Onsite NC", label: "🔍 4. OA NC" },
-      { id: "5. Final Clearance", label: "🏆 5. Final Clearance" }
-    ];
-
-    const stageChipsEl = document.getElementById("stageFilterChipsBar");
-    if (stageChipsEl) {
-      stageChipsEl.innerHTML = `<span class="text-[11px] font-extrabold text-slate-500 uppercase mr-1">Stage Filter:</span>` +
-        stageChipDefs.map(sc => {
-          const cnt = sc.id === "ALL"
-            ? hospitals.length
-            : hospitals.filter(h => getHospitalResolvedStage(h) === sc.id).length;
-          const isAct = (activeStageChip === sc.id);
-          return `
-            <button type="button" onclick="activeStageChip='${sc.id}'; if('${sc.id}' !== 'ALL' && activeSmartChip === 'NOT_STARTED') activeSmartChip='ALL'; dirPage=1; renderActiveLoginsDirectory();"
-              class="text-[11px] font-extrabold px-2.5 py-1 rounded-lg border transition ${isAct ? 'bg-red-600 text-white border-red-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-red-50'}">
-              ${sc.label} (${cnt})
-            </button>
-          `;
-        }).join("");
-    }
+    document.getElementById("smartFilterChipsBar").innerHTML = chips.map(c =>
+      `<button type="button" onclick="activeSmartChip='${c.id}'; dirPage=1; renderActiveLoginsDirectory();" class="text-xs font-bold px-3 py-1.5 rounded-full transition ${activeSmartChip === c.id ? "bg-slate-900 text-amber-300 shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}">${c.label}</button>`
+    ).join("");
 
     let filtered = hospitals.filter(h => {
       if (activeSmartChip === "ACTIVE_UDCP" && !h.userId) return false;
@@ -2798,15 +1994,10 @@ if (!canSeeFeeInDirectView) {
       if (activeSmartChip === "NO_PAYMENT" && h.hasPaymentSetup) return false;
       if (activeSmartChip === "PAYMENT_DUE" && !isHospitalPaymentDue(h)) return false;
       if (activeSmartChip === "NOT_STARTED" && h.userId) return false;
-
-      if (activeStageChip !== "ALL") {
-        if (getHospitalResolvedStage(h) !== activeStageChip) return false;
-      }
-
+      if (activeStageChip !== "ALL" && getHospitalResolvedStage(h) !== activeStageChip) return false;
       if (assocFilter === "NONE" && h.associate) return false;
       if (assocFilter !== "ALL" && assocFilter !== "NONE" && !String(h.associate || "").trim().includes(assocFilter.trim())) return false;
-
-      if (q && !(`${h.hospitalName} ${h.userId} ${h.associate} ${h.city}`).toLowerCase().includes(q)) return false;
+      if (q && !(`${h.hospitalName} ${h.userId || ""} ${h.associate || ""} ${h.city || ""}`).toLowerCase().includes(q)) return false;
       return true;
     });
 
@@ -2815,513 +2006,40 @@ if (!canSeeFeeInDirectView) {
     const startIdx = (dirPage - 1) * DIR_PAGE_SIZE;
     const pageItems = filtered.slice(startIdx, startIdx + DIR_PAGE_SIZE);
 
-    // Render Pagination Bar
-    const pagBar = document.getElementById("dirPaginationBar");
-    pagBar.innerHTML = `
-      <div>Showing <strong>${filtered.length ? startIdx + 1 : 0}–${Math.min(startIdx + DIR_PAGE_SIZE, filtered.length)}</strong> of <strong>${filtered.length}</strong> hospitals</div>
+    document.getElementById("dirPaginationBar").innerHTML = `
+      <div>Showing <strong>${filtered.length ? startIdx + 1 : 0}–${Math.min(startIdx + DIR_PAGE_SIZE, filtered.length)}</strong> of <strong>${filtered.length}</strong></div>
       <div class="flex items-center gap-2">
-        <button type="button" ${dirPage <= 1 ? 'disabled' : ''} onclick="dirPage--; renderActiveLoginsDirectory();"
-          class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold disabled:opacity-40">← Prev</button>
+        <button type="button" ${dirPage <= 1 ? "disabled" : ""} onclick="dirPage--; renderActiveLoginsDirectory();" class="px-3 py-1.5 rounded-lg border bg-white font-bold disabled:opacity-40">← Prev</button>
         <span class="font-bold">Page ${dirPage} of ${totalPages}</span>
-        <button type="button" ${dirPage >= totalPages ? 'disabled' : ''} onclick="dirPage++; renderActiveLoginsDirectory();"
-          class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold disabled:opacity-40">Next →</button>
-      </div>
-    `;
-
-    document.getElementById("selectedHospCountBadge").innerText = Object.keys(selectedHospKeys).length;
-    const bulkChk = document.getElementById("bulkSelectAllPageChk");
-    if (bulkChk) bulkChk.checked = false;
+        <button type="button" ${dirPage >= totalPages ? "disabled" : ""} onclick="dirPage++; renderActiveLoginsDirectory();" class="px-3 py-1.5 rounded-lg border bg-white font-bold disabled:opacity-40">Next →</button>
+      </div>`;
 
     const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
-
-    // 1. RENDER EXCEL BULK GRID
     const gridBody = document.getElementById("excelBulkGridBody");
-    if (!pageItems.length) {
-      gridBody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">No hospitals match this filter.</td></tr>`;
-    } else {
-      gridBody.innerHTML = pageItems.map(rawH => {
-        const h = getEffectiveHospitalState(rawH);
-        const key = h.hospitalName.toUpperCase();
-        const safeId = key.replace(/[^A-Z0-9]/g, "_");
-        const isChecked = !!selectedHospKeys[key];
-        const sm = h.stageMetrics || { latestStage: "Not Started", latestPercent: 0, latestApproved: 0, latestTotal: 0 };
-        const m = h.milestonesPaid || [0, 0, 0, 0];
-        const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
+    gridBody.innerHTML = pageItems.length ? pageItems.map(rawH => {
+      const h = getEffectiveHospitalState(rawH);
+      const m = h.milestonesPaid || [0, 0, 0, 0];
+      const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
+      const assocOpts = [`<option value="">-- Unassigned --</option>`].concat((associates || []).map(ag => `<option value="${escapeHtml(ag)}" ${h.associate === ag ? "selected" : ""}>${escapeHtml(ag)}</option>`)).join("");
+      const stageOpts = stageList.map(st => `<option value="${st}" ${(h.currentStage || "1. Kickoff Docs") === st ? "selected" : ""}>${st}</option>`).join("");
 
-        const assocOpts = [`<option value="">-- Unassigned --</option>`].concat(
-          (associates || []).map(ag => `<option value="${ag}" ${h.associate === ag ? "selected" : ""}>${ag}</option>`)
-        ).join("");
-
-        const activeStageVal = h.currentStage || (sm.latestStage !== "Not Started" ? sm.latestStage : "1. Kickoff Docs");
-        const stageOpts = stageList.map(st => `<option value="${st}" ${activeStageVal === st ? "selected" : ""}>${st}</option>`).join("");
-
-        return `
-          <tr id="gridRow_${safeId}" class="${h.isDirty ? 'bg-amber-50' : 'hover:bg-slate-50'} transition">
-            <td class="p-2.5 text-center">
-              <input type="checkbox" data-hosp=${escName} ${isChecked ? 'checked' : ''}
-                onchange='toggleHospitalRowSelect(${escName}, this.checked)'
-                class="hosp-batch-chk w-4 h-4 rounded text-red-600 cursor-pointer" />
-            </td>
-            <td class="p-2.5">
-              <div class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</div>
-              <div class="text-[10px] text-slate-500 font-mono">
-                ${h.userId ? `${h.userId}${isSuperAdmin ? ' • ' + h.password : ''}` : 'Not Active Yet'}
-                ${sm.latestTotal > 0 ? ` • <span class="text-emerald-700 font-bold">${sm.latestPercent}% (${sm.latestApproved}/${sm.latestTotal})</span>` : ''}
-              </div>
-            </td>
-            <td class="p-2">
-              ${isSuperAdmin ? `
-                <select onchange='stageHospitalChange(${escName}, "associate", this.value)'
-                  class="w-full text-xs font-bold border ${!h.associate ? 'border-amber-300 bg-amber-50/50' : 'border-slate-300 bg-white'} rounded-lg px-2 py-1.5 outline-none">
-                  ${assocOpts}
-                </select>
-              ` : `<span class="font-bold text-slate-700">${h.associate || 'Unassigned'}</span>`}
-            </td>
-            <td class="p-2">
-              ${isSuperAdmin ? `
-                <select onchange='stageHospitalChange(${escName}, "currentStage", this.value)'
-                  class="w-full text-xs font-bold border border-slate-300 bg-white rounded-lg px-2 py-1.5 outline-none">
-                  ${stageOpts}
-                </select>
-              ` : `<span class="font-bold text-slate-700">${escapeHtml(activeStageVal)}</span>`}
-            </td>
-            <td class="p-2">
-              ${isSuperAdmin ? `
-                <input type="datetime-local" value="${h.deadline || ''}"
-                  onchange='stageHospitalChange(${escName}, "deadline", this.value)'
-                  class="w-full text-[11px] border border-slate-300 bg-white rounded-lg px-2 py-1.5 outline-none" />
-              ` : `<span class="text-[11px] text-slate-600">${formatDeadlineDisplay(h.deadline) || '-'}</span>`}
-            </td>
-            <td class="p-2">
-              ${isSuperAdmin ? `
-                <input type="number" value="${h.totalFee || ''}" placeholder="₹ Fee"
-                  oninput='stageHospitalChange(${escName}, "totalFee", this.value)'
-                  class="w-full text-xs font-bold border border-slate-300 bg-white rounded-lg px-2 py-1.5 outline-none" />
-              ` : `<span class="text-[11px] font-bold text-slate-500">${isHospitalPaymentDue(h) ? '⏳ Hold' : '✓ Clear'}</span>`}
-            </td>
-            <td class="p-2">
-              ${isSuperAdmin ? `
-                <div class="flex items-center gap-1.5 font-bold text-[11px]">
-                  ${[0,1,2,3].map(idx => `
-                    <label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border border-slate-200 cursor-pointer">
-                      <input type="checkbox" ${m[idx] === 1 ? 'checked' : ''}
-                        onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })'
-                        class="w-3.5 h-3.5 rounded text-emerald-600" />
-                      <span>P${idx+1}</span>
-                    </label>
-                  `).join("")}
-                </div>
-              ` : `<span class="text-[11px] text-slate-400">Protected</span>`}
-            </td>
-            <td class="p-2">
-              ${isSuperAdmin ? `
-                <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)'
-                  class="w-full text-[11px] font-bold border border-slate-300 bg-white rounded-lg px-1.5 py-1.5 outline-none">
-                  <option value="SOFT" ${h.paymentLockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
-                  <option value="STRICT" ${h.paymentLockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
-                </select>
-              ` : `-`}
-            </td>
-            <td class="p-2 text-right whitespace-nowrap">
-              ${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ''}
-              ${isSuperAdmin && h.userId ? `<button type="button" onclick="generateHospitalAnalyticsPdf('${h.userId}')" class="text-[11px] font-bold text-red-600 hover:underline mr-2">📊 PDF</button>` : ''}
-              ${isSuperAdmin && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 hover:text-red-600 underline">👁 Portal</button>` : ''}
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    // 2. RENDER CARD VIEW (With Inline Payment — Zero Popups)
-    const box = document.getElementById("activeHospListContainer");
-    if (!pageItems.length) {
-      box.innerHTML = `<p class="text-xs text-slate-400 col-span-2 text-center py-8">No hospitals match this filter.</p>`;
-    } else {
-      box.innerHTML = pageItems.map(rawH => {
-        const h = getEffectiveHospitalState(rawH);
-        const key = h.hospitalName.toUpperCase();
-        const safeId = key.replace(/[^A-Z0-9]/g, "_");
-        const isChecked = !!selectedHospKeys[key];
-        const sm = h.stageMetrics || { latestStage: "Not Started", latestPercent: 0, latestApproved: 0, latestTotal: 0, latestRejected: 0 };
-        const m = h.milestonesPaid || [0, 0, 0, 0];
-        const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
-
-        const assocOptions = [`<option value="">-- Unassigned --</option>`].concat(
-          (associates || []).map(ag => `<option value="${ag}" ${h.associate === ag ? "selected" : ""}>${ag}</option>`)
-        ).join("");
-
-        const activeStageVal = h.currentStage || (sm.latestStage !== "Not Started" ? sm.latestStage : "1. Kickoff Docs");
-        const stageOptions = stageList.map(st => `<option value="${st}" ${activeStageVal === st ? "selected" : ""}>${st}</option>`).join("");
-
-        return `
-          <div id="hospCard_${safeId}" class="border ${h.isDirty ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50/10' : (!h.associate ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 bg-slate-50/40')} rounded-2xl p-4 space-y-3 shadow-sm">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex items-start gap-2.5">
-                ${isSuperAdmin ? `
-                  <input type="checkbox" data-hosp=${escName} ${isChecked ? 'checked' : ''}
-                    onchange='toggleHospitalRowSelect(${escName}, this.checked)'
-                    class="hosp-batch-chk w-4 h-4 mt-1 rounded text-red-600 cursor-pointer" />
-                ` : ''}
-                <div>
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <h4 class="font-extrabold text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
-                    ${!h.associate ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">Unassigned</span>` : `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">${h.associate}</span>`}
-                  </div>
-                  ${h.userId
-                    ? (isSuperAdmin
-                        ? `<p class="text-xs font-mono text-slate-600 mt-0.5">ID: <strong>${h.userId}</strong> &nbsp;|&nbsp; Pass: <strong>${h.password}</strong></p>`
-                        : `<p class="text-xs font-mono text-slate-500 mt-0.5">${h.userId}</p>`)
-                    : `<p class="text-[11px] text-slate-400 italic mt-0.5">Not active in UDCP yet (Edit & Save All below)</p>`
-                  }
-                  <p class="text-[11px] text-emerald-700 font-bold mt-1">
-                    Stage: ${escapeHtml(activeStageVal)} • ${sm.latestPercent}% (${sm.latestApproved}/${sm.latestTotal})
-                  </p>
-                </div>
-              </div>
-
-              ${h.deadline ? `
-                <div class="text-right shrink-0">
-                  <span data-countdown="${h.deadline}" class="inline-block bg-slate-900 text-emerald-300 font-mono text-[11px] font-extrabold px-2 py-1 rounded-lg">
-                    Calculating...
-                  </span>
-                </div>
-              ` : ''}
-            </div>
-
-            ${isSuperAdmin ? `
-              <!-- Line 1: Associate, Stage & Deadline -->
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
-                <div class="sm:col-span-4">
-                  <label class="block text-[9px] font-bold uppercase text-slate-400">Associate</label>
-                  <select onchange='stageHospitalChange(${escName}, "associate", this.value)'
-                    class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
-                    ${assocOptions}
-                  </select>
-                </div>
-                <div class="sm:col-span-4">
-                  <label class="block text-[9px] font-bold uppercase text-slate-400">Active Stage</label>
-                  <select onchange='stageHospitalChange(${escName}, "currentStage", this.value)'
-                    class="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
-                    ${stageOptions}
-                  </select>
-                </div>
-                <div class="sm:col-span-4">
-                  <label class="block text-[9px] font-bold uppercase text-slate-400">Deadline</label>
-                  <input type="datetime-local" value="${h.deadline || ''}"
-                    onchange='stageHospitalChange(${escName}, "deadline", this.value)'
-                    class="w-full text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" />
-                </div>
-              </div>
-${canSeeFee ? `
-              <!-- Line 2: Direct Inline Payment (Zero Popup) -->
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 items-center">
-                <div class="sm:col-span-4">
-                  <label class="block text-[9px] font-bold uppercase text-slate-400">Total Fee (₹)</label>
-                  <input type="number" value="${h.totalFee || ''}" placeholder="e.g. 120000"
-                  ${isSuperAdmin ? '' : 'disabled'}
-                    oninput='stageHospitalChange(${escName}, "totalFee", this.value)'
-                    class="w-full text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none" />
-                </div>
-                <div class="sm:col-span-5">
-                  <label class="block text-[9px] font-bold uppercase text-slate-400 mb-0.5">25% × 4 Paid</label>
-                  <div class="flex items-center gap-1.5 text-[11px] font-extrabold">
-                    ${[0,1,2,3].map(idx => `
-                      <label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border border-slate-200 cursor-pointer">
-                      ${isSuperAdmin ? '' : 'disabled'}
-                        <input type="checkbox" ${m[idx] === 1 ? 'checked' : ''}
-                          onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })'
-                          class="w-3.5 h-3.5 rounded text-emerald-600" />
-                        <span>P${idx+1}</span>
-                      </label>
-                    `).join("")}
-                  </div>
-                </div>
-                <div class="sm:col-span-3">
-                  <label class="block text-[9px] font-bold uppercase text-slate-400">Gate Mode</label>
-                  <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)'
-                    class="w-full text-[11px] font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" ${isSuperAdmin ? '' : 'disabled'}>
-                    <option value="SOFT" ${h.paymentLockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
-                   
-                    <option value="STRICT" ${h.paymentLockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
-                  </select>
-                </div>
-              </div>
-              ` : ''}
-              <div class="bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold ${isHospitalPaymentDue(h) ? 'text-red-600' : 'text-emerald-700'}">
-                ${isHospitalPaymentDue(h) ? '⏳ Payment Milestone Hold' : '✓ Payment Milestone Clear'}
-              </div>
-            <div class="flex flex-wrap gap-2 pt-1">
-              ${h.driveUrl ? `
-                <a href="${h.driveUrl}" target="_blank"
-                  class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                  📁 Drive Folder ↗
-                </a>
-              ` : ''}
-              ${isSuperAdmin && h.userId ? `
-                <button type="button" onclick="generateHospitalAnalyticsPdf('${h.userId}')"
-                  class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                  📊 Analytics PDF
-                </button>
-                <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
-                  class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                  👁 Open Portal
-                </button>
-                <button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")}); copyShareMessage();'
-                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-                  📋 Copy Login
-                </button>
-              ` : ''}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
+      return `
+        <tr class="${h.isDirty ? "bg-amber-50" : "hover:bg-slate-50"}">
+          <td class="p-2.5 text-center"><input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk w-4 h-4 rounded text-red-600" /></td>
+          <td class="p-2.5"><div class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
+          <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "associate", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${assocOpts}</select>` : `<span class="font-bold">${escapeHtml(h.associate || "Unassigned")}</span>`}</td>
+          <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "currentStage", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${stageOpts}</select>` : `<span class="font-bold">${escapeHtml(h.currentStage || "1. Kickoff Docs")}</span>`}</td>
+          <td class="p-2">${isSuperAdmin ? `<input type="datetime-local" value="${h.deadline || ""}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px]">${formatDeadlineDisplay(h.deadline) || "-"}</span>`}</td>
+          <td class="p-2">${canSeeFee ? `<input type="number" value="${h.totalFee || ""}" placeholder="₹ Fee" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
+          <td class="p-2">${canSeeFee ? `<div class="flex items-center gap-1 text-[11px] font-bold">${[0,1,2,3].map(idx => `<label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border"><input type="checkbox" ${m[idx] === 1 ? "checked" : ""} ${isSuperAdmin ? "" : "disabled"} onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })' class="w-3.5 h-3.5" /><span>P${idx+1}</span></label>`).join("")}</div>` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
+          <td class="p-2">${canSeeFee ? `<select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)' ${isSuperAdmin ? "" : "disabled"} class="w-full text-[11px] font-bold border rounded-lg px-1.5 py-1.5"><option value="SOFT" ${h.paymentLockMode === "SOFT" ? "selected" : ""}>SOFT</option><option value="STRICT" ${h.paymentLockMode === "STRICT" ? "selected" : ""}>STRICT</option></select>` : `-`}</td>
+          <td class="p-2 text-right whitespace-nowrap">${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ""}${isSuperAdmin && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 underline">👁 Portal</button>` : ""}</td>
+        </tr>`;
+    }).join("") : `<tr><td colspan="9" class="p-8 text-center text-slate-400">No hospitals match this filter.</td></tr>`;
 
     updateStickySaveBar();
     updateAllCountdowns();
   }
-
-  // =========================================================================
-  // EXECUTIVE HOSPITAL COMPLIANCE & STAGE ANALYTICS PDF (Pure SVG Charts)
-  // =========================================================================
-  function generateHospitalAnalyticsPdf(hospUserId) {
-    const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
-    if (!hosp) return alert("Hospital record not found.");
-
-    const items = session.adminData.ncs.filter(n => n.userId === hospUserId).slice().reverse();
-    const total = items.length;
-    const approved = items.filter(n => n.status === "Approved").length;
-    const submitted = items.filter(n => n.status === "Submitted").length;
-    const rejected = items.filter(n => n.status === "Rejected").length;
-    const unable = items.filter(n => n.status === "Unable to Provide").length;
-    const pending = items.filter(n => n.status === "Pending").length;
-    const overallPct = total ? Math.round((approved / total) * 100) : 0;
-
-    const stageNames = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
-    const stageStats = stageNames.map(st => {
-      const sub = items.filter(n => n.stage === st);
-      const t = sub.length;
-      const a = sub.filter(n => n.status === "Approved").length;
-      const s = sub.filter(n => n.status === "Submitted").length;
-      const r = sub.filter(n => n.status === "Rejected").length;
-      const u = sub.filter(n => n.status === "Unable to Provide").length;
-      const p = sub.filter(n => n.status === "Pending").length;
-      const pct = t ? Math.round((a / t) * 100) : 0;
-      return { stage: st, total: t, approved: a, submitted: s, rejected: r, unable: u, pending: p, pct: pct };
-    });
-
-    // Build Pure SVG Horizontal Stacked Bar Chart across all 5 Stages
-    const svgRows = stageStats.map((st, idx) => {
-      const y = 18 + idx * 44;
-      const barMaxW = 310;
-      const t = Math.max(1, st.total);
-      const wAppr = st.total ? (st.approved / t) * barMaxW : 0;
-      const wSubm = st.total ? (st.submitted / t) * barMaxW : 0;
-      const wPend = st.total ? ((st.pending + st.unable) / t) * barMaxW : 0;
-      const wRej  = st.total ? (st.rejected / t) * barMaxW : 0;
-
-      return `
-        <text x="0" y="${y + 13}" font-size="11" font-weight="700" fill="#1e293b">${st.stage}</text>
-        <rect x="145" y="${y}" width="${barMaxW}" height="18" rx="4" fill="#f1f5f9" />
-        ${wAppr > 0 ? `<rect x="145" y="${y}" width="${wAppr}" height="18" fill="#10b981" />` : ''}
-        ${wSubm > 0 ? `<rect x="${145 + wAppr}" y="${y}" width="${wSubm}" height="18" fill="#3b82f6" />` : ''}
-        ${wPend > 0 ? `<rect x="${145 + wAppr + wSubm}" y="${y}" width="${wPend}" height="18" fill="#f59e0b" />` : ''}
-        ${wRej > 0  ? `<rect x="${145 + wAppr + wSubm + wPend}" y="${y}" width="${wRej}" height="18" fill="#ef4444" />` : ''}
-        <text x="465" y="${y + 13}" font-size="11" font-weight="800" fill="#0f172a">${st.total ? `${st.pct}% (${st.approved}/${st.total})` : 'Not Started'}</text>
-      `;
-    }).join("");
-
-    // Build Pure SVG Donut Chart for Overall Status Distribution
-    const radius = 48;
-    const circumference = 2 * Math.PI * radius;
-    const denom = Math.max(1, total);
-    const segs = [
-      { val: approved, color: "#10b981" },
-      { val: submitted, color: "#3b82f6" },
-      { val: pending + unable, color: "#f59e0b" },
-      { val: rejected, color: "#ef4444" }
-    ];
-    let offsetAcc = 0;
-    const donutCircles = total ? segs.map(seg => {
-      const len = (seg.val / denom) * circumference;
-      if (len <= 0) return "";
-      const c = `<circle cx="65" cy="65" r="${radius}" fill="transparent" stroke="${seg.color}" stroke-width="16" stroke-dasharray="${len} ${circumference - len}" stroke-dashoffset="${-offsetAcc}" transform="rotate(-90 65 65)" />`;
-      offsetAcc += len;
-      return c;
-    }).join("") : `<circle cx="65" cy="65" r="${radius}" fill="transparent" stroke="#e2e8f0" stroke-width="16" />`;
-
-    const generatedAt = new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
-
-    const tableRowsHtml = items.map(n => `
-      <tr>
-        <td style="font-weight:700;">${escapeHtml(n.stage)}</td>
-        <td style="font-family:monospace;">${escapeHtml(n.srNo || n.ncId)}</td>
-        <td>${escapeHtml(n.correctiveAction)}</td>
-        <td><span class="st-badge st-${n.status.replace(/\s+/g, '')}">${escapeHtml(n.status)}</span></td>
-        <td>${escapeHtml(n.submittedAt || '-')}</td>
-        <td>${escapeHtml(n.remark || n.hospitalResponse || '-')}</td>
-      </tr>
-    `).join("");
-
-    const win = window.open("", "_blank");
-    if (!win) return alert("Please allow popups in your browser to generate the Analytics PDF.");
-
-    win.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${escapeHtml(hosp.hospitalName)} — UDCP Compliance Analytics Report</title>
-        <style>
-          @page { size: A4; margin: 14mm; }
-          body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; margin: 0; padding: 0; font-size: 11px; }
-          .header { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; padding: 16px 20px; border-radius: 10px; border-bottom: 4px solid #fbbf24; display: flex; justify-content: space-between; align-items: center; }
-          .header h1 { margin: 0; font-size: 18px; letter-spacing: 0.3px; }
-          .header p { margin: 3px 0 0; font-size: 11px; color: #fef3c7; }
-          .meta-bar { display: flex; flex-wrap: wrap; gap: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 11px; }
-          .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
-          .kpi { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; background: #fff; }
-          .kpi .num { font-size: 18px; font-weight: 800; }
-          .kpi .lbl { font-size: 9px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 2px; }
-          .charts-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; margin-top: 14px; }
-          .card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background: #fff; }
-          .card h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; color: #334155; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
-          .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; font-weight: 700; margin-top: 6px; }
-          .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 4px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
-          th { background: #0f172a; color: #fff; text-align: left; padding: 7px 8px; font-size: 9.5px; text-transform: uppercase; }
-          td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
-          tr:nth-child(even) td { background: #f8fafc; }
-          .st-badge { padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; white-space: nowrap; }
-          .st-Approved { background: #d1fae5; color: #065f46; }
-          .st-Submitted { background: #dbeafe; color: #1e40af; }
-          .st-Pending { background: #fef3c7; color: #92400e; }
-          .st-Rejected { background: #fee2e2; color: #991b1b; }
-          .st-UnabletoProvide { background: #f3e8ff; color: #6b21a8; }
-          .no-print { text-align: right; margin-bottom: 10px; }
-          @media print { .no-print { display: none; } }
-        </style>
-      </head>
-      <body>
-        <div class="no-print">
-          <button onclick="window.print()" style="background:#dc2626;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">🖨️ Print / Save as PDF</button>
-        </div>
-
-        <div class="header">
-          <div>
-            <h1>UMBRELLA HEALTHCARE CONSULTANCY</h1>
-            <p>UDCP — Stage-Wise Compliance & Document Analytics Report • Always and Anywhere With You</p>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:11px;font-weight:700;">Generated: ${generatedAt}</div>
-            <div style="font-size:12px;font-weight:800;color:#fde68a;">ID: ${escapeHtml(hosp.userId)}</div>
-          </div>
-        </div>
-
-        <div class="meta-bar">
-          <div><strong>Hospital:</strong> ${escapeHtml(hosp.hospitalName)} ${hosp.city ? '(' + escapeHtml(hosp.city) + ')' : ''}</div>
-          <div><strong>Assigned Associate:</strong> ${escapeHtml(hosp.associate || 'Unassigned')}</div>
-          <div><strong>Active Stage:</strong> ${escapeHtml(hosp.currentStage || '1. Kickoff Docs')}</div>
-          <div><strong>Target Deadline:</strong> ${escapeHtml(formatDeadlineDisplay(hosp.deadline) || 'Not Set')}</div>
-        </div>
-
-        <div class="kpi-grid">
-          <div class="kpi"><div class="num" style="color:#0f172a;">${total}</div><div class="lbl">Total Docs</div></div>
-          <div class="kpi"><div class="num" style="color:#059669;">${approved} (${overallPct}%)</div><div class="lbl">Approved</div></div>
-          <div class="kpi"><div class="num" style="color:#2563eb;">${submitted}</div><div class="lbl">Under Review</div></div>
-          <div class="kpi"><div class="num" style="color:#d97706;">${pending + unable}</div><div class="lbl">Pending / Unable</div></div>
-          <div class="kpi"><div class="num" style="color:#dc2626;">${rejected}</div><div class="lbl">Rejected</div></div>
-        </div>
-
-        <div class="charts-grid">
-          <div class="card">
-            <h3>Stage-Wise Document Completion Graph</h3>
-            <svg width="100%" height="235" viewBox="0 0 560 235">
-              ${svgRows}
-            </svg>
-            <div class="legend">
-              <span><i class="dot" style="background:#10b981;"></i>Approved</span>
-              <span><i class="dot" style="background:#3b82f6;"></i>Submitted</span>
-              <span><i class="dot" style="background:#f59e0b;"></i>Pending/Unable</span>
-              <span><i class="dot" style="background:#ef4444;"></i>Rejected</span>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Overall Status Distribution</h3>
-            <div style="display:flex;align-items:center;gap:14px;padding-top:14px;">
-              <svg width="130" height="130" viewBox="0 0 130 130">
-                ${donutCircles}
-                <text x="65" y="69" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">${overallPct}%</text>
-              </svg>
-              <div style="font-size:11px;line-height:1.9;">
-                <div><strong style="color:#059669;">Approved:</strong> ${approved}</div>
-                <div><strong style="color:#2563eb;">Submitted:</strong> ${submitted}</div>
-                <div><strong style="color:#d97706;">Pending:</strong> ${pending}</div>
-                <div><strong style="color:#7c3aed;">Unable:</strong> ${unable}</div>
-                <div><strong style="color:#dc2626;">Rejected:</strong> ${rejected}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:14px;">
-          <h3>Stage-by-Stage Numerical Summary</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Project Stage</th>
-                <th>Total Assigned</th>
-                <th>Approved</th>
-                <th>Submitted</th>
-                <th>Pending</th>
-                <th>Rejected</th>
-                <th>Completion %</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${stageStats.map(s => `
-                <tr>
-                  <td style="font-weight:700;">${s.stage}</td>
-                  <td>${s.total}</td>
-                  <td style="color:#059669;font-weight:700;">${s.approved}</td>
-                  <td style="color:#2563eb;font-weight:700;">${s.submitted}</td>
-                  <td style="color:#d97706;font-weight:700;">${s.pending + s.unable}</td>
-                  <td style="color:#dc2626;font-weight:700;">${s.rejected}</td>
-                  <td style="font-weight:800;">${s.total ? s.pct + '%' : '-'}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card" style="margin-top:14px;">
-          <h3>Detailed Item-by-Item Compliance Audit Log (${total} Items)</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Stage</th>
-                <th>Sr No</th>
-                <th>Document / Requirement</th>
-                <th>Status</th>
-                <th>Submitted At</th>
-                <th>Remark / Response</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRowsHtml || '<tr><td colspan="6" style="text-align:center;">No items assigned yet.</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-
-        <script>
-          window.onload = function() { setTimeout(function() { window.print(); }, 350); };
-        <\/script>
-      </body>
-      </html>
-    `);
-    win.document.close();
-  }
-
 </script>
 </body>
 </html>
