@@ -163,7 +163,7 @@
             <span id="opsViewHospId" class="font-mono text-xs font-extrabold bg-red-600 text-white px-2.5 py-0.5 rounded"></span>
             <span id="opsViewAssociateBadge" class="hidden text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full"></span>
             <span id="opsViewStageBadge" class="text-xs font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full"></span>
-            <span id="opsViewPayBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full"></span>
+            <span id="opsViewPayBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full"></span>
           </div>
           <h2 id="opsViewHospName" class="text-xl sm:text-2xl font-black text-slate-900 mt-1"></h2>
           <p id="opsViewDeadlineText" class="text-xs font-semibold text-slate-500 mt-0.5"></p>
@@ -683,10 +683,13 @@
   }
 
   function formatNcRichText(rawText) {
-    const clean = String(rawText || "").replace(/\r\n/g, "\n").trim();
+    const clean = String(rawText || "").replace(/
+/g, "
+").trim();
     if (!clean) return "";
-    const lines = clean.split("\n");
-    const hasHindi = s => /[\u0900-\u097F]/.test(s);
+    const lines = clean.split("
+");
+    const hasHindi = s => /[ऀ-ॿ]/.test(s);
     let html = `<div class="space-y-2 text-xs sm:text-sm leading-relaxed">`;
     let prevEng = false;
     let divDone = false;
@@ -968,9 +971,12 @@
     const { hospital, ncs } = opsPublicViewData;
     if (!hospital || !ncs.length) return alert("No items available.");
     const headers = ["Doc_ID", "Stage", "Sr_No", "Hospital_Name", "Status", "Requirement", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
-    const esc = v => `"${String(v || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+    const esc = v => `"${String(v || "").replace(/"/g, '""').replace(/
+?
+/g, " ")}"`;
     const rows = [headers.join(",")].concat(ncs.map(n => [esc(n.ncId), esc(n.stage), esc(n.srNo), esc(n.hospitalName), esc(n.status), esc(n.correctiveAction), esc(n.adminNote), esc(n.hospitalResponse), esc(n.submittedAt), esc(n.proofUrl), esc(n.remark)].join(",")));
-    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["﻿" + rows.join("
+")], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_UDCP_Report.csv`;
@@ -1727,7 +1733,10 @@
       dLine.classList.add("hidden");
     }
     document.getElementById("credShareBox").classList.remove("hidden");
-    lastShareText = `Hospital: *${hosp.hospitalName}*\nPortal: ${portalUrl}\nUser ID: *${hosp.userId}*\nPassword: *${hosp.password}*`;
+    lastShareText = `Hospital: *${hosp.hospitalName}*
+Portal: ${portalUrl}
+User ID: *${hosp.userId}*
+Password: *${hosp.password}*`;
   }
 
   function copyShareMessage() {
