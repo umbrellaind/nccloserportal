@@ -1034,7 +1034,16 @@
   // DIRECT CALENDAR LINK VIEW (?hosp=HOSP-101)
   // =========================================================================
   async function loadDirectHospitalOpsView(hospId) {
-    const res = await callApi({ action: "getPublicHospitalView", hospId: hospId }, `Loading ${hospId} UDCP Tracker...`);
+    const payload = { action: "getPublicHospitalView", hospId: hospId };
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (parsed && parsed.userId) payload.userId = parsed.userId;
+    if (parsed && parsed.password) payload.password = parsed.password;
+  }
+} catch (e) {}
+    const res = await callApi(payload, `Loading ${hospId} UDCP Tracker...`);
     if (!res || res.status !== "ok") {
       alert((res && res.message) || "Hospital not found.");
       return;
@@ -1064,12 +1073,27 @@
     stBadge.innerText = hospital.currentStage || "1. Kickoff Docs";
 
     const payBadge = document.getElementById("opsViewPayBadge");
+    let currentRole = (typeof session !== "undefined" && session && session.role) ? String(session.role).toLowerCase() : "";
+if (!currentRole) {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) currentRole = String(JSON.parse(saved).role || "").toLowerCase();
+  } catch (e) {}
+}
+const canSeeFeeInDirectView = (!currentRole || currentRole === "admin" || currentRole === "associate");
+if (!canSeeFeeInDirectView) {
+  if (payBadge) payBadge.classList.add("hidden");
+} else if (payBadge) {
+  payBadge.classList.remove("hidden");
+}
     if (hospital.isPaymentClear) {
       payBadge.innerText = "✓ Payment Milestone Clear";
       payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+      if (!canSeeFeeInDirectView && payBadge) payBadge.classList.add("hidden");
     } else {
       payBadge.innerText = "⏳ Payment Milestone Hold";
       payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800";
+      if (!canSeeFeeInDirectView && payBadge) payBadge.classList.add("hidden");
     }
 
     const timerBox = document.getElementById("opsViewTimerBox");
@@ -1288,24 +1312,29 @@
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("navUserBox").classList.remove("hidden");
 
-    if (res.role === "admin" || res.role === "ops_team") {
-      const isSuperAdmin = (res.role === "admin");
-      if (isSuperAdmin) {
-        session.adminCredentials = { userId: uid, password: pass };
-        document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
-        document.getElementById("adminHeaderTitle").innerText = "UDCP — Super Admin Control Center";
-        document.getElementById("superAdminAssignBox").classList.remove("hidden");
-      } else {
-        document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
-        document.getElementById("adminHeaderTitle").innerText = `UDCP — Ops Team Desk (${session.subRole})`;
-        document.getElementById("superAdminAssignBox").classList.add("hidden");
-      }
-      document.getElementById("backToAdminBtn").classList.add("hidden");
-      session.adminData = res.data;
-      document.getElementById("hospitalSection").classList.add("hidden");
-      document.getElementById("adminSection").classList.remove("hidden");
-      renderAdminDashboard();
+    if (res.role === "admin" || res.role === "ops_team" || res.role === "associate") {
+    const isSuperAdmin = (res.role === "admin");
+    const isAssociate = (res.role === "associate");
+    if (isSuperAdmin) {
+      session.adminCredentials = { userId: uid, password: pass };
+      document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
+      document.getElementById("adminHeaderTitle").innerText = "UDCP – Super Admin Control Center";
+      document.getElementById("superAdminAssignBox").classList.remove("hidden");
+    } else if (isAssociate) {
+      document.getElementById("navRoleBadge").innerText = `${session.fullName} (ASSOCIATE)`;
+      document.getElementById("adminHeaderTitle").innerText = `UDCP – Associate Desk (${session.fullName})`;
+      document.getElementById("superAdminAssignBox").classList.add("hidden");
     } else {
+      document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
+      document.getElementById("adminHeaderTitle").innerText = `UDCP – Ops Team Desk (${session.subRole})`;
+      document.getElementById("superAdminAssignBox").classList.add("hidden");
+    }
+    document.getElementById("backToAdminBtn").classList.add("hidden");
+    session.adminData = res.data;
+    document.getElementById("hospitalSection").classList.add("hidden");
+    document.getElementById("adminSection").classList.remove("hidden");
+    renderAdminDashboard();
+  }    } else {
       document.getElementById("navRoleBadge").innerText = uid;
       if (isImpersonate) {
         document.getElementById("backToAdminBtn").classList.remove("hidden");
@@ -2695,7 +2724,7 @@
     const assocFilter = document.getElementById("directoryAssocFilter")?.value || "ALL";
     const { hospitals, associates } = session.adminData;
     const isSuperAdmin = (session.role === "admin");
-
+    const canSeeFee = (isSuperAdmin || session.role === "associate");
     // Populate batch associate dropdown
     const batchAssocSel = document.getElementById("batchAssocInput");
     if (batchAssocSel) {
@@ -2983,12 +3012,13 @@
                     class="w-full text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" />
                 </div>
               </div>
-
+${canSeeFee ? `
               <!-- Line 2: Direct Inline Payment (Zero Popup) -->
               <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 items-center">
                 <div class="sm:col-span-4">
                   <label class="block text-[9px] font-bold uppercase text-slate-400">Total Fee (₹)</label>
                   <input type="number" value="${h.totalFee || ''}" placeholder="e.g. 120000"
+                  ${isSuperAdmin ? '' : 'disabled'}
                     oninput='stageHospitalChange(${escName}, "totalFee", this.value)'
                     class="w-full text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 outline-none" />
                 </div>
@@ -2997,6 +3027,7 @@
                   <div class="flex items-center gap-1.5 text-[11px] font-extrabold">
                     ${[0,1,2,3].map(idx => `
                       <label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border border-slate-200 cursor-pointer">
+                      ${isSuperAdmin ? '' : 'disabled'}
                         <input type="checkbox" ${m[idx] === 1 ? 'checked' : ''}
                           onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })'
                           class="w-3.5 h-3.5 rounded text-emerald-600" />
@@ -3008,13 +3039,14 @@
                 <div class="sm:col-span-3">
                   <label class="block text-[9px] font-bold uppercase text-slate-400">Gate Mode</label>
                   <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)'
-                    class="w-full text-[11px] font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none">
+                    class="w-full text-[11px] font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 outline-none" ${isSuperAdmin ? '' : 'disabled'}>
                     <option value="SOFT" ${h.paymentLockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
+                   
                     <option value="STRICT" ${h.paymentLockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
                   </select>
                 </div>
               </div>
-            ` : `
+              ` : ''}
               <div class="bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold ${isHospitalPaymentDue(h) ? 'text-red-600' : 'text-emerald-700'}">
                 ${isHospitalPaymentDue(h) ? '⏳ Payment Milestone Hold' : '✓ Payment Milestone Clear'}
               </div>
