@@ -683,13 +683,10 @@
   }
 
   function formatNcRichText(rawText) {
-    const clean = String(rawText || "").replace(/
-/g, "
-").trim();
+    const clean = String(rawText || "").replace(/\r\n/g, "\n").trim();
     if (!clean) return "";
-    const lines = clean.split("
-");
-    const hasHindi = s => /[ऀ-ॿ]/.test(s);
+    const lines = clean.split("\n");
+    const hasHindi = s => /[\u0900-\u097F]/.test(s);
     let html = `<div class="space-y-2 text-xs sm:text-sm leading-relaxed">`;
     let prevEng = false;
     let divDone = false;
@@ -971,12 +968,9 @@
     const { hospital, ncs } = opsPublicViewData;
     if (!hospital || !ncs.length) return alert("No items available.");
     const headers = ["Doc_ID", "Stage", "Sr_No", "Hospital_Name", "Status", "Requirement", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
-    const esc = v => `"${String(v || "").replace(/"/g, '""').replace(/
-?
-/g, " ")}"`;
+    const esc = v => `"${String(v || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
     const rows = [headers.join(",")].concat(ncs.map(n => [esc(n.ncId), esc(n.stage), esc(n.srNo), esc(n.hospitalName), esc(n.status), esc(n.correctiveAction), esc(n.adminNote), esc(n.hospitalResponse), esc(n.submittedAt), esc(n.proofUrl), esc(n.remark)].join(",")));
-    const blob = new Blob(["﻿" + rows.join("
-")], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_UDCP_Report.csv`;
@@ -1733,10 +1727,7 @@
       dLine.classList.add("hidden");
     }
     document.getElementById("credShareBox").classList.remove("hidden");
-    lastShareText = `Hospital: *${hosp.hospitalName}*
-Portal: ${portalUrl}
-User ID: *${hosp.userId}*
-Password: *${hosp.password}*`;
+    lastShareText = `Hospital: *${hosp.hospitalName}*\nPortal: ${portalUrl}\nUser ID: *${hosp.userId}*\nPassword: *${hosp.password}*`;
   }
 
   function copyShareMessage() {
