@@ -265,9 +265,10 @@
       <div id="superAdminAssignBox" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <h3 class="font-bold text-slate-900 text-base">Assign Stage Requirements / Compliance Docs</h3>
-          <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-            <button type="button" id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">Copy-Paste & Fetch from Sheet</button>
-            <button type="button" id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-600">One-by-One Entry</button>
+          <div class="flex flex-wrap bg-slate-100 p-1 rounded-xl text-xs font-bold gap-1">
+            <button type="button" id="tabTemplateBtn" onclick="switchEntryMode('template')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm">⚡ Ready-Made Checklist (Stage 1 / Stage 3)</button>
+            <button type="button" id="tabBulkBtn" onclick="switchEntryMode('bulk')" class="px-3 py-1.5 rounded-lg text-slate-700">Copy-Paste & Fetch (NCs)</button>
+            <button type="button" id="tabSingleBtn" onclick="switchEntryMode('single')" class="px-3 py-1.5 rounded-lg text-slate-700">One-by-One Entry</button>
           </div>
         </div>
 
@@ -330,7 +331,62 @@
           </div>
         </div>
 
-        <div id="bulkNcBox" class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 text-center space-y-3">
+        <!-- READY-MADE CHECKLIST PANEL (STAGE 1: KICKOFF DOCS & STAGE 3: AUDIT PREP) -->
+        <div id="templateChecklistBox" class="bg-amber-50/50 border border-amber-300 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-amber-200 pb-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" id="tmplStage1Tab" onclick="loadReadyMadeTemplate('STAGE_1')"
+                class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm transition">
+                📋 Stage 1: Kickoff Docs (37 Items)
+              </button>
+              <button type="button" id="tmplStage3Tab" onclick="loadReadyMadeTemplate('STAGE_3')"
+                class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition">
+                🏥 Stage 3: Audit Prep (34 Items)
+              </button>
+              <a id="tmplSourceSheetLink" href="#" target="_blank"
+                class="hidden text-[11px] font-bold text-blue-700 underline ml-1">
+                Open Master Template Sheet ↗
+              </a>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="tmplSearchInput" type="text" oninput="renderTemplateChecklistItems()"
+                placeholder="🔍 Filter checklist items..."
+                class="text-xs border border-slate-300 rounded-xl px-3 py-1.5 bg-white outline-none focus:border-red-500" />
+              <button type="button" onclick="toggleAllTemplateItems(true)"
+                class="text-xs font-extrabold bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-xl transition">
+                ☑️ Select All
+              </button>
+              <button type="button" onclick="toggleAllTemplateItems(false)"
+                class="text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl transition">
+                ☐ Clear All
+              </button>
+            </div>
+          </div>
+
+          <div id="tmplPaymentPreviewBanner" class="hidden text-xs font-bold px-3.5 py-2 rounded-xl border"></div>
+
+          <div class="flex items-center justify-between text-xs text-slate-600">
+            <span>Tick items <strong>already collected offline</strong> (saved as <em>Approved</em>); unticked items stay <em>Pending</em> for hospital upload:</span>
+            <span class="font-extrabold text-slate-900"><span id="tmplTickedCount">0</span> Pre-Collected Selected</span>
+          </div>
+
+          <div id="tmplChecklistContainer" class="max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+            <div class="p-6 text-center text-xs text-slate-500">
+              Select a Hospital above and click <strong>Stage 1: Kickoff Docs</strong> or <strong>Stage 3: Audit Prep</strong> to load items.
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <span id="tmplDuplicateSummary" class="text-[11px] font-semibold text-slate-500"></span>
+            <button type="button" onclick="pushReadyMadeTemplateToHospital()"
+              class="bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md transition">
+              ✓ Push Checklist to Selected Hospital & Sync UDCP
+            </button>
+          </div>
+        </div>
+
+        <div id="bulkNcBox" class="hidden bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 text-center space-y-3">
           <p class="text-xs text-slate-700">
             <strong>Zero Upload Hassle:</strong> Paste your items (<code>Sr No</code> in Col A, <code>Requirement / Evidence</code> in Col B) into the Input Sheet, select Hospital, Stage & Associate above, and click Fetch!
           </p>
@@ -1753,18 +1809,193 @@
     }
   }
 
+  let activeTemplateStageKey = "STAGE_1";
+  let loadedTemplateItems = [];
+  let tickedTemplateCodes = {};
+
   function switchEntryMode(mode) {
-    if (mode === "bulk") {
-      document.getElementById("tabBulkBtn").className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm";
-      document.getElementById("tabSingleBtn").className = "px-3 py-1.5 rounded-lg text-slate-600";
+    const btnTemplate = document.getElementById("tabTemplateBtn");
+    const btnBulk = document.getElementById("tabBulkBtn");
+    const btnSingle = document.getElementById("tabSingleBtn");
+
+    btnTemplate.className = "px-3 py-1.5 rounded-lg text-slate-700";
+    btnBulk.className = "px-3 py-1.5 rounded-lg text-slate-700";
+    btnSingle.className = "px-3 py-1.5 rounded-lg text-slate-700";
+
+    document.getElementById("templateChecklistBox").classList.add("hidden");
+    document.getElementById("bulkNcBox").classList.add("hidden");
+    document.getElementById("singleNcForm").classList.add("hidden");
+
+    if (mode === "template") {
+      btnTemplate.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
+      document.getElementById("templateChecklistBox").classList.remove("hidden");
+      loadReadyMadeTemplate(activeTemplateStageKey);
+    } else if (mode === "bulk") {
+      btnBulk.className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm";
       document.getElementById("bulkNcBox").classList.remove("hidden");
-      document.getElementById("singleNcForm").classList.add("hidden");
     } else {
-      document.getElementById("tabSingleBtn").className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm";
-      document.getElementById("tabBulkBtn").className = "px-3 py-1.5 rounded-lg text-slate-600";
+      btnSingle.className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm";
       document.getElementById("singleNcForm").classList.remove("hidden");
-      document.getElementById("bulkNcBox").classList.add("hidden");
     }
+  }
+
+  async function loadReadyMadeTemplate(stageKey) {
+    activeTemplateStageKey = stageKey;
+    const isS1 = (stageKey === "STAGE_1");
+    document.getElementById("tmplStage1Tab").className = isS1
+      ? "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm transition"
+      : "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition";
+    document.getElementById("tmplStage3Tab").className = !isS1
+      ? "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm transition"
+      : "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition";
+
+    // Sync Stage dropdown on top bar
+    document.getElementById("assignStageSelect").value = isS1 ? "1. Kickoff Docs" : "3. Audit Prep";
+
+    const target = getSelectedHospitalTarget();
+    const res = await callApi({
+      action: "getTemplateChecklist",
+      adminUser: session.userId,
+      adminPass: session.password,
+      stageKey: stageKey,
+      hospitalName: target ? target.hospitalName : ""
+    }, `Loading ${isS1 ? 'Stage 1: Kickoff Docs' : 'Stage 3: Audit Prep'} Master Checklist...`);
+
+    if (!res || res.status !== "ok") {
+      document.getElementById("tmplChecklistContainer").innerHTML =
+        `<div class="p-5 text-center text-xs font-bold text-red-600">${escapeHtml((res && res.message) || "Unable to load checklist.")}</div>`;
+      return;
+    }
+
+    loadedTemplateItems = res.items || [];
+    tickedTemplateCodes = {}; // Default unchecked (Pending) so user can pick or click Select All
+
+    const srcLink = document.getElementById("tmplSourceSheetLink");
+    if (res.sourceSheetUrl) {
+      srcLink.href = res.sourceSheetUrl;
+      srcLink.classList.remove("hidden");
+    }
+
+    // Show Payment Milestone Preview if hospital already exists
+    const payBanner = document.getElementById("tmplPaymentPreviewBanner");
+    if (res.hospitalMeta && res.hospitalMeta.hasPaymentSetup) {
+      const mIdx = isS1 ? 0 : 1; // Stage 1 -> P1 (index 0), Stage 3 -> P2 (index 1)
+      const label = isS1 ? "1st Installment (P1 — 25%)" : "2nd Installment (P2 — 25%)";
+      const isPaid = (res.hospitalMeta.milestonesPaid || [0,0,0,0])[mIdx] === 1;
+      payBanner.classList.remove("hidden");
+      if (isPaid) {
+        payBanner.className = "text-xs font-bold px-3.5 py-2 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-800";
+        payBanner.innerText = `✓ Payment Check: ${label} is PAID for this hospital.`;
+      } else {
+        payBanner.className = "text-xs font-bold px-3.5 py-2 rounded-xl border bg-red-50 border-red-300 text-red-800";
+        payBanner.innerText = `⚠️ Payment Alert: ${label} is DUE (Mode: ${res.hospitalMeta.paymentLockMode}).`;
+      }
+    } else {
+      payBanner.classList.add("hidden");
+    }
+
+    const alreadyCount = loadedTemplateItems.filter(x => x.alreadyExists).length;
+    const dupEl = document.getElementById("tmplDuplicateSummary");
+    if (alreadyCount > 0) {
+      dupEl.innerText = `ℹ️ ${alreadyCount} of ${loadedTemplateItems.length} items already exist in UDCP for this hospital (only remaining ${loadedTemplateItems.length - alreadyCount} new items will be added).`;
+    } else {
+      dupEl.innerText = `Total ${loadedTemplateItems.length} clean items ready to push.`;
+    }
+
+    renderTemplateChecklistItems();
+  }
+
+  function toggleAllTemplateItems(checked) {
+    loadedTemplateItems.forEach(it => {
+      if (it.alreadyExists) return;
+      if (checked) tickedTemplateCodes[it.code] = true;
+      else delete tickedTemplateCodes[it.code];
+    });
+    renderTemplateChecklistItems();
+  }
+
+  function toggleSingleTemplateItem(code, checked) {
+    if (checked) tickedTemplateCodes[code] = true;
+    else delete tickedTemplateCodes[code];
+    document.getElementById("tmplTickedCount").innerText = Object.keys(tickedTemplateCodes).length;
+  }
+
+  function renderTemplateChecklistItems() {
+    const q = (document.getElementById("tmplSearchInput")?.value || "").trim().toLowerCase();
+    const box = document.getElementById("tmplChecklistContainer");
+    document.getElementById("tmplTickedCount").innerText = Object.keys(tickedTemplateCodes).length;
+
+    const filtered = loadedTemplateItems.filter(it =>
+      !q || (`${it.code} ${it.srNo} ${it.description}`).toLowerCase().includes(q)
+    );
+
+    if (!filtered.length) {
+      box.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">No matching checklist items found.</div>`;
+      return;
+    }
+
+    box.innerHTML = filtered.map(it => {
+      const isTicked = !!tickedTemplateCodes[it.code];
+      return `
+        <label class="flex items-start gap-3 p-3 hover:bg-slate-50 cursor-pointer ${it.alreadyExists ? 'opacity-60 bg-slate-50' : ''}">
+          <input type="checkbox" ${it.alreadyExists ? 'checked disabled' : (isTicked ? 'checked' : '')}
+            onchange="toggleSingleTemplateItem('${it.code}', this.checked)"
+            class="mt-1 w-4 h-4 rounded text-emerald-600 cursor-pointer shrink-0" />
+          <div class="flex-1 text-xs">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="font-mono font-extrabold bg-slate-900 text-white px-2 py-0.5 rounded text-[10px]">${it.code}</span>
+              <span class="font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[10px]">Sr. ${escapeHtml(it.srNo)}</span>
+              ${it.alreadyExists
+                ? `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Already in UDCP (${escapeHtml(it.existingStatus)})</span>`
+                : (isTicked
+                    ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">✓ Pre-Collected (Approved)</span>`
+                    : `<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Pending Upload</span>`
+                  )
+              }
+            </div>
+            <p class="text-slate-800 font-semibold mt-1 leading-relaxed">${escapeHtml(it.description)}</p>
+          </div>
+        </label>
+      `;
+    }).join("");
+  }
+
+  async function pushReadyMadeTemplateToHospital() {
+    const target = getSelectedHospitalTarget();
+    if (!target) {
+      return alert("Please select a Hospital from the dropdown (or + ADD NEW HOSPITAL) first!");
+    }
+
+    const deadlineVal = document.getElementById("assignDeadlineInput").value;
+    const assocVal = document.getElementById("assignAssociateSelect").value || "UMBRELLA";
+    const baseUrl = window.location.href.split("?")[0];
+    const preCodes = Object.keys(tickedTemplateCodes);
+
+    const res = await callApi({
+      action: "pushTemplateChecklist",
+      adminUser: session.userId,
+      adminPass: session.password,
+      stageKey: activeTemplateStageKey,
+      hospitalName: target.hospitalName,
+      city: target.city,
+      deadline: deadlineVal,
+      associate: assocVal,
+      preCollectedCodes: preCodes,
+      baseUrl: baseUrl
+    }, `Pushing ${activeTemplateStageKey === 'STAGE_1' ? 'Kickoff Docs' : 'Audit Prep'} Checklist for ${target.hospitalName}...`);
+
+    if (!res || res.status !== "ok") {
+      return alert((res && res.message) || "Failed to push checklist.");
+    }
+
+    session.adminData = res.data;
+    renderAdminDashboard();
+    if (res.credentialCard) showCredentialShareCard(res.credentialCard);
+    await loadReadyMadeTemplate(activeTemplateStageKey);
+
+    alert(`✓ ${res.stageName} Checklist Synced!
+• Added: ${res.addedCount} items (${res.preCollectedCount} Pre-Collected Approved, ${res.addedCount - res.preCollectedCount} Pending)
+• Skipped Duplicates: ${res.skippedCount}`);
   }
 
   function filterHospitalDropdown() {
@@ -1846,6 +2077,9 @@
     if (!document.getElementById("adminLoginsView").classList.contains("hidden")) {
       renderActiveLoginsDirectory();
     }
+    if (session.role === "admin" && !loadedTemplateItems.length && !document.getElementById("templateChecklistBox").classList.contains("hidden")) {
+      loadReadyMadeTemplate(activeTemplateStageKey);
+    }
   }
 
   function onFilterHospChange() {
@@ -1902,6 +2136,9 @@
           hint.innerText = "⚠ Unassigned Associate";
         }
       }
+    }
+    if (!document.getElementById("templateChecklistBox").classList.contains("hidden")) {
+      loadReadyMadeTemplate(activeTemplateStageKey);
     }
   }
 
