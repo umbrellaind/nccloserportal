@@ -141,8 +141,22 @@
         <div id="hospPaymentWarningBanner" class="hidden bg-red-50 border border-red-300 text-red-800 text-xs font-bold p-3 rounded-xl"></div>
       </div>
 
-      <!-- Stage Filter Pills for Hospital -->
-      <div id="hospStageFilterPills" class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100"></div>
+      <!-- STAGE-WISE BREAKDOWN CARDS & SELECTOR (Shows Submitted/Approved/Pending per Stage) -->
+      <div class="pt-3 border-t border-slate-100 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wide">📊 Stage-Wise Document Progress (Click a Stage to Filter):</span>
+          <select id="hospStageDropdown" onchange="hospStageFilter=this.value; renderHospitalDashboard();"
+            class="text-xs font-bold border border-slate-300 rounded-xl px-3 py-1.5 bg-slate-50 outline-none focus:border-red-500">
+            <option value="ALL">All Stages</option>
+            <option value="1. Kickoff Docs">1. Kickoff Docs</option>
+            <option value="2. Desktop NC">2. Desktop NC</option>
+            <option value="3. Audit Prep">3. Audit Prep</option>
+            <option value="4. Onsite NC">4. Onsite NC</option>
+            <option value="5. Final Clearance">5. Final Clearance</option>
+          </select>
+        </div>
+        <div id="hospStageSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+      </div>
     </div>
 
     <div id="hospNcList" class="space-y-4"></div>
@@ -367,8 +381,8 @@
           <div id="tmplPaymentPreviewBanner" class="hidden text-xs font-bold px-3.5 py-2 rounded-xl border"></div>
 
           <div class="flex items-center justify-between text-xs text-slate-600">
-            <span>Tick items <strong>already collected offline</strong> (saved as <em>Approved</em>); unticked items stay <em>Pending</em> for hospital upload:</span>
-            <span class="font-extrabold text-slate-900"><span id="tmplTickedCount">0</span> Pre-Collected Selected</span>
+            <span>All selected items will be assigned to the hospital as <strong>Pending</strong> (Manual verification & approval after hospital upload):</span>
+            <span class="font-extrabold text-slate-900"><span id="tmplTickedCount">0</span> Items Selected to Assign</span>
           </div>
 
           <div id="tmplChecklistContainer" class="max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
@@ -448,6 +462,10 @@
               class="hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
               📁 Drive Folder ↗
             </a>
+            <button id="filterAnalyticsPdfBtn" type="button" onclick="openSelectedFilterHospitalPdf()"
+              class="hidden text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
+              📊 Analytics PDF
+            </button>
             <button id="filterOpenPortalBtn" type="button" onclick="openSelectedFilterHospitalPortal()"
               class="hidden text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg shadow-sm">
               👁 Open Hospital Portal
@@ -941,10 +959,19 @@
         method: "POST",
         mode: "no-cors",
         body: JSON.stringify(payload)
-      }).then(() => {
-        return new Promise(r => setTimeout(r, 4000)).then(() => {
-          return callApi({ action: "login", userId: session.userId, password: session.password }, "Verifying Uploaded PDF...");
-        });
+      }).then(async () => {
+        // Smart polling: checks at 1.5s, 3.0s, 4.5s until status becomes Submitted
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          await new Promise(r => setTimeout(r, 1500));
+          const verifyRes = await callApi({ action: "login", userId: session.userId, password: session.password }, `Confirming PDF Upload (${attempt}/3)...`);
+          if (verifyRes && verifyRes.status === "ok" && Array.isArray(verifyRes.ncs)) {
+            const updatedItem = verifyRes.ncs.find(x => x.ncId === payload.ncId);
+            if (updatedItem && updatedItem.status === "Submitted") {
+              return verifyRes;
+            }
+          }
+          if (attempt === 3) return verifyRes;
+        }
       }).catch(err => {
         document.getElementById("globalLoader").classList.add("hidden");
         alert("Upload Error: " + err.message);
@@ -1370,31 +1397,80 @@
       payBar.classList.add("hidden");
     }
 
-    // Stage Filter Pills
-    const stages = ["ALL", "1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
-    const pillsBox = document.getElementById("hospStageFilterPills");
-    pillsBox.innerHTML = stages.map(st => {
-      const cnt = st === "ALL" ? session.ncs.length : session.ncs.filter(n => n.stage === st).length;
-      if (st !== "ALL" && cnt === 0) return "";
-      const active = hospStageFilter === st;
-      return `
-        <button type="button" onclick="hospStageFilter='${st}'; renderHospitalDashboard();"
-          class="text-xs font-bold px-3 py-1.5 rounded-full transition ${active ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
-          ${st === "ALL" ? "All Stages" : st} (${cnt})
-        </button>
+    // Stage-Wise Summary Cards + Dropdown Sync
+    const stageDropdown = document.getElementById("hospStageDropdown");
+    if (stageDropdown) stageDropdown.value = hospStageFilter;
+
+    const stages = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+    const cardsBox = document.getElementById("hospStageSummaryCards");
+
+    const allTotal = session.ncs.length;
+    const allSubmitted = session.ncs.filter(n => n.status === "Submitted").length;
+    const allApproved = session.ncs.filter(n => n.status === "Approved").length;
+    const allPending = session.ncs.filter(n => n.status === "Pending" || n.status === "Rejected").length;
+    const allPct = allTotal ? Math.round((allApproved / allTotal) * 100) : 0;
+
+    let cardsHtml = `
+      <div onclick="hospStageFilter='ALL'; renderHospitalDashboard();"
+        class="cursor-pointer rounded-xl border-2 p-3 transition ${hospStageFilter === 'ALL' ? 'border-red-600 bg-red-50/40 shadow-sm' : 'border-slate-200 bg-slate-50/60 hover:border-slate-300'}">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black text-slate-900">All Stages Combined</span>
+          <span class="text-xs font-black text-emerald-700">${allPct}% Approved</span>
+        </div>
+        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1.5">
+          <div class="bg-emerald-500 h-full" style="width:${allPct}%"></div>
+        </div>
+        <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600">
+          <span>Total: ${allTotal}</span>
+          <span class="text-emerald-700">✓ Appr: ${allApproved}</span>
+          <span class="text-blue-700">📤 Subm: ${allSubmitted}</span>
+          <span class="text-amber-700">⏳ Pend: ${allPending}</span>
+        </div>
+      </div>
+    `;
+
+    stages.forEach(st => {
+      const list = session.ncs.filter(n => n.stage === st);
+      if (!list.length) return;
+      const tot = list.length;
+      const appr = list.filter(n => n.status === "Approved").length;
+      const subm = list.filter(n => n.status === "Submitted").length;
+      const pend = list.filter(n => n.status === "Pending" || n.status === "Rejected").length;
+      const stPct = tot ? Math.round((appr / tot) * 100) : 0;
+      const isAct = (hospStageFilter === st);
+
+      cardsHtml += `
+        <div onclick="hospStageFilter='${st}'; renderHospitalDashboard();"
+          class="cursor-pointer rounded-xl border-2 p-3 transition ${isAct ? 'border-red-600 bg-red-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-slate-900">${st}</span>
+            <span class="text-xs font-black text-emerald-700">${stPct}%</span>
+          </div>
+          <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1.5">
+            <div class="bg-emerald-500 h-full" style="width:${stPct}%"></div>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600">
+            <span>Total: ${tot}</span>
+            <span class="text-emerald-700">✓ Appr: ${appr}</span>
+            <span class="text-blue-700">📤 Subm: ${subm}</span>
+            <span class="text-amber-700">⏳ Pend: ${pend}</span>
+          </div>
+        </div>
       `;
-    }).join("");
+    });
+    cardsBox.innerHTML = cardsHtml;
 
     const visibleList = hospStageFilter === "ALL"
       ? session.ncs
       : session.ncs.filter(n => n.stage === hospStageFilter);
 
     const total = visibleList.length;
-    const completed = visibleList.filter(n => n.status === "Approved" || n.status === "Submitted").length;
-    const pct = total ? Math.round((completed / total) * 100) : 0;
+    const approvedCnt = visibleList.filter(n => n.status === "Approved").length;
+    const submittedCnt = visibleList.filter(n => n.status === "Submitted").length;
+    const pct = total ? Math.round((approvedCnt / total) * 100) : 0;
 
     document.getElementById("hospPercentText").innerText = pct + "%";
-    document.getElementById("hospCountSummary").innerText = `${completed} of ${total} Submitted / Approved`;
+    document.getElementById("hospCountSummary").innerText = `${approvedCnt} Approved • ${submittedCnt} Under Review • ${total} Total`;
     document.getElementById("hospProgressBar").style.width = pct + "%";
 
     // Check if any due milestone triggers Soft Warning or Strict Lock
@@ -1868,7 +1944,10 @@
     }
 
     loadedTemplateItems = res.items || [];
-    tickedTemplateCodes = {}; // Default unchecked (Pending) so user can pick or click Select All
+    tickedTemplateCodes = {};
+    loadedTemplateItems.forEach(it => {
+      if (!it.alreadyExists) tickedTemplateCodes[it.code] = true;
+    });
 
     const srcLink = document.getElementById("tmplSourceSheetLink");
     if (res.sourceSheetUrl) {
@@ -1948,8 +2027,8 @@
               ${it.alreadyExists
                 ? `<span class="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Already in UDCP (${escapeHtml(it.existingStatus)})</span>`
                 : (isTicked
-                    ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">✓ Pre-Collected (Approved)</span>`
-                    : `<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Pending Upload</span>`
+                    ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">✓ Will Assign as Pending</span>`
+                    : `<span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">Excluded (Skipped)</span>`
                   )
               }
             </div>
@@ -1969,7 +2048,10 @@
     const deadlineVal = document.getElementById("assignDeadlineInput").value;
     const assocVal = document.getElementById("assignAssociateSelect").value || "UMBRELLA";
     const baseUrl = window.location.href.split("?")[0];
-    const preCodes = Object.keys(tickedTemplateCodes);
+    const selectedCodes = Object.keys(tickedTemplateCodes);
+    if (!selectedCodes.length) {
+      return alert("Please select at least 1 checklist item to assign.");
+    }
 
     const res = await callApi({
       action: "pushTemplateChecklist",
@@ -1980,9 +2062,9 @@
       city: target.city,
       deadline: deadlineVal,
       associate: assocVal,
-      preCollectedCodes: preCodes,
+      selectedCodes: selectedCodes,
       baseUrl: baseUrl
-    }, `Pushing ${activeTemplateStageKey === 'STAGE_1' ? 'Kickoff Docs' : 'Audit Prep'} Checklist for ${target.hospitalName}...`);
+    }, `Assigning ${selectedCodes.length} ${activeTemplateStageKey === 'STAGE_1' ? 'Kickoff Docs' : 'Audit Prep'} Items to ${target.hospitalName}...`);
 
     if (!res || res.status !== "ok") {
       return alert((res && res.message) || "Failed to push checklist.");
@@ -1993,9 +2075,9 @@
     if (res.credentialCard) showCredentialShareCard(res.credentialCard);
     await loadReadyMadeTemplate(activeTemplateStageKey);
 
-    alert(`✓ ${res.stageName} Checklist Synced!
-• Added: ${res.addedCount} items (${res.preCollectedCount} Pre-Collected Approved, ${res.addedCount - res.preCollectedCount} Pending)
-• Skipped Duplicates: ${res.skippedCount}`);
+    alert(`✓ ${res.stageName} Checklist Assigned!
+• Added as Pending: ${res.addedCount} items (Hospital can now upload proofs for manual approval)
+• Skipped Already Existing: ${res.skippedCount}`);
   }
 
   function filterHospitalDropdown() {
@@ -2085,12 +2167,18 @@
   function onFilterHospChange() {
     const val = document.getElementById("adminFilterHosp").value;
     const portalBtn = document.getElementById("filterOpenPortalBtn");
+    const pdfBtn = document.getElementById("filterAnalyticsPdfBtn");
     const driveBtn = document.getElementById("filterDriveLinkBtn");
 
     if (val && val !== "ALL") {
       const hosp = session.adminData.hospitals.find(h => h.userId === val);
-      if (session.role === "admin") portalBtn.classList.remove("hidden");
-      else portalBtn.classList.add("hidden");
+      if (session.role === "admin") {
+        portalBtn.classList.remove("hidden");
+        pdfBtn.classList.remove("hidden");
+      } else {
+        portalBtn.classList.add("hidden");
+        pdfBtn.classList.add("hidden");
+      }
 
       if (hosp && hosp.driveUrl) {
         driveBtn.href = hosp.driveUrl;
@@ -2100,6 +2188,7 @@
       }
     } else {
       portalBtn.classList.add("hidden");
+      pdfBtn.classList.add("hidden");
       driveBtn.classList.add("hidden");
     }
     renderAdminTable();
@@ -2108,6 +2197,11 @@
   function openSelectedFilterHospitalPortal() {
     const val = document.getElementById("adminFilterHosp").value;
     if (val && val !== "ALL") openHospitalPortalAsAdmin(val);
+  }
+
+  function openSelectedFilterHospitalPdf() {
+    const val = document.getElementById("adminFilterHosp").value;
+    if (val && val !== "ALL") generateHospitalAnalyticsPdf(val);
   }
 
   function toggleNewHospitalInput() {
@@ -2741,6 +2835,7 @@
             </td>
             <td class="p-2 text-right whitespace-nowrap">
               ${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ''}
+              ${isSuperAdmin && h.userId ? `<button type="button" onclick="generateHospitalAnalyticsPdf('${h.userId}')" class="text-[11px] font-bold text-red-600 hover:underline mr-2">📊 PDF</button>` : ''}
               ${isSuperAdmin && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 hover:text-red-600 underline">👁 Portal</button>` : ''}
             </td>
           </tr>
@@ -2873,6 +2968,10 @@
                 </a>
               ` : ''}
               ${isSuperAdmin && h.userId ? `
+                <button type="button" onclick="generateHospitalAnalyticsPdf('${h.userId}')"
+                  class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                  📊 Analytics PDF
+                </button>
                 <button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')"
                   class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
                   👁 Open Portal
@@ -2891,6 +2990,248 @@
     updateStickySaveBar();
     updateAllCountdowns();
   }
+
+  // =========================================================================
+  // EXECUTIVE HOSPITAL COMPLIANCE & STAGE ANALYTICS PDF (Pure SVG Charts)
+  // =========================================================================
+  function generateHospitalAnalyticsPdf(hospUserId) {
+    const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
+    if (!hosp) return alert("Hospital record not found.");
+
+    const items = session.adminData.ncs.filter(n => n.userId === hospUserId).slice().reverse();
+    const total = items.length;
+    const approved = items.filter(n => n.status === "Approved").length;
+    const submitted = items.filter(n => n.status === "Submitted").length;
+    const rejected = items.filter(n => n.status === "Rejected").length;
+    const unable = items.filter(n => n.status === "Unable to Provide").length;
+    const pending = items.filter(n => n.status === "Pending").length;
+    const overallPct = total ? Math.round((approved / total) * 100) : 0;
+
+    const stageNames = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+    const stageStats = stageNames.map(st => {
+      const sub = items.filter(n => n.stage === st);
+      const t = sub.length;
+      const a = sub.filter(n => n.status === "Approved").length;
+      const s = sub.filter(n => n.status === "Submitted").length;
+      const r = sub.filter(n => n.status === "Rejected").length;
+      const u = sub.filter(n => n.status === "Unable to Provide").length;
+      const p = sub.filter(n => n.status === "Pending").length;
+      const pct = t ? Math.round((a / t) * 100) : 0;
+      return { stage: st, total: t, approved: a, submitted: s, rejected: r, unable: u, pending: p, pct: pct };
+    });
+
+    // Build Pure SVG Horizontal Stacked Bar Chart across all 5 Stages
+    const svgRows = stageStats.map((st, idx) => {
+      const y = 18 + idx * 44;
+      const barMaxW = 310;
+      const t = Math.max(1, st.total);
+      const wAppr = st.total ? (st.approved / t) * barMaxW : 0;
+      const wSubm = st.total ? (st.submitted / t) * barMaxW : 0;
+      const wPend = st.total ? ((st.pending + st.unable) / t) * barMaxW : 0;
+      const wRej  = st.total ? (st.rejected / t) * barMaxW : 0;
+
+      return `
+        <text x="0" y="${y + 13}" font-size="11" font-weight="700" fill="#1e293b">${st.stage}</text>
+        <rect x="145" y="${y}" width="${barMaxW}" height="18" rx="4" fill="#f1f5f9" />
+        ${wAppr > 0 ? `<rect x="145" y="${y}" width="${wAppr}" height="18" fill="#10b981" />` : ''}
+        ${wSubm > 0 ? `<rect x="${145 + wAppr}" y="${y}" width="${wSubm}" height="18" fill="#3b82f6" />` : ''}
+        ${wPend > 0 ? `<rect x="${145 + wAppr + wSubm}" y="${y}" width="${wPend}" height="18" fill="#f59e0b" />` : ''}
+        ${wRej > 0  ? `<rect x="${145 + wAppr + wSubm + wPend}" y="${y}" width="${wRej}" height="18" fill="#ef4444" />` : ''}
+        <text x="465" y="${y + 13}" font-size="11" font-weight="800" fill="#0f172a">${st.total ? `${st.pct}% (${st.approved}/${st.total})` : 'Not Started'}</text>
+      `;
+    }).join("");
+
+    // Build Pure SVG Donut Chart for Overall Status Distribution
+    const radius = 48;
+    const circumference = 2 * Math.PI * radius;
+    const denom = Math.max(1, total);
+    const segs = [
+      { val: approved, color: "#10b981" },
+      { val: submitted, color: "#3b82f6" },
+      { val: pending + unable, color: "#f59e0b" },
+      { val: rejected, color: "#ef4444" }
+    ];
+    let offsetAcc = 0;
+    const donutCircles = total ? segs.map(seg => {
+      const len = (seg.val / denom) * circumference;
+      if (len <= 0) return "";
+      const c = `<circle cx="65" cy="65" r="${radius}" fill="transparent" stroke="${seg.color}" stroke-width="16" stroke-dasharray="${len} ${circumference - len}" stroke-dashoffset="${-offsetAcc}" transform="rotate(-90 65 65)" />`;
+      offsetAcc += len;
+      return c;
+    }).join("") : `<circle cx="65" cy="65" r="${radius}" fill="transparent" stroke="#e2e8f0" stroke-width="16" />`;
+
+    const generatedAt = new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+
+    const tableRowsHtml = items.map(n => `
+      <tr>
+        <td style="font-weight:700;">${escapeHtml(n.stage)}</td>
+        <td style="font-family:monospace;">${escapeHtml(n.srNo || n.ncId)}</td>
+        <td>${escapeHtml(n.correctiveAction)}</td>
+        <td><span class="st-badge st-${n.status.replace(/\s+/g, '')}">${escapeHtml(n.status)}</span></td>
+        <td>${escapeHtml(n.submittedAt || '-')}</td>
+        <td>${escapeHtml(n.remark || n.hospitalResponse || '-')}</td>
+      </tr>
+    `).join("");
+
+    const win = window.open("", "_blank");
+    if (!win) return alert("Please allow popups in your browser to generate the Analytics PDF.");
+
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${escapeHtml(hosp.hospitalName)} — UDCP Compliance Analytics Report</title>
+        <style>
+          @page { size: A4; margin: 14mm; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; margin: 0; padding: 0; font-size: 11px; }
+          .header { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; padding: 16px 20px; border-radius: 10px; border-bottom: 4px solid #fbbf24; display: flex; justify-content: space-between; align-items: center; }
+          .header h1 { margin: 0; font-size: 18px; letter-spacing: 0.3px; }
+          .header p { margin: 3px 0 0; font-size: 11px; color: #fef3c7; }
+          .meta-bar { display: flex; flex-wrap: wrap; gap: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 11px; }
+          .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+          .kpi { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; background: #fff; }
+          .kpi .num { font-size: 18px; font-weight: 800; }
+          .kpi .lbl { font-size: 9px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 2px; }
+          .charts-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; margin-top: 14px; }
+          .card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background: #fff; }
+          .card h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; color: #334155; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
+          .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; font-weight: 700; margin-top: 6px; }
+          .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
+          th { background: #0f172a; color: #fff; text-align: left; padding: 7px 8px; font-size: 9.5px; text-transform: uppercase; }
+          td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+          tr:nth-child(even) td { background: #f8fafc; }
+          .st-badge { padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; white-space: nowrap; }
+          .st-Approved { background: #d1fae5; color: #065f46; }
+          .st-Submitted { background: #dbeafe; color: #1e40af; }
+          .st-Pending { background: #fef3c7; color: #92400e; }
+          .st-Rejected { background: #fee2e2; color: #991b1b; }
+          .st-UnabletoProvide { background: #f3e8ff; color: #6b21a8; }
+          .no-print { text-align: right; margin-bottom: 10px; }
+          @media print { .no-print { display: none; } }
+        </style>
+      </head>
+      <body>
+        <div class="no-print">
+          <button onclick="window.print()" style="background:#dc2626;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">🖨️ Print / Save as PDF</button>
+        </div>
+
+        <div class="header">
+          <div>
+            <h1>UMBRELLA HEALTHCARE CONSULTANCY</h1>
+            <p>UDCP — Stage-Wise Compliance & Document Analytics Report • Always and Anywhere With You</p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;font-weight:700;">Generated: ${generatedAt}</div>
+            <div style="font-size:12px;font-weight:800;color:#fde68a;">ID: ${escapeHtml(hosp.userId)}</div>
+          </div>
+        </div>
+
+        <div class="meta-bar">
+          <div><strong>Hospital:</strong> ${escapeHtml(hosp.hospitalName)} ${hosp.city ? '(' + escapeHtml(hosp.city) + ')' : ''}</div>
+          <div><strong>Assigned Associate:</strong> ${escapeHtml(hosp.associate || 'Unassigned')}</div>
+          <div><strong>Active Stage:</strong> ${escapeHtml(hosp.currentStage || '1. Kickoff Docs')}</div>
+          <div><strong>Target Deadline:</strong> ${escapeHtml(formatDeadlineDisplay(hosp.deadline) || 'Not Set')}</div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi"><div class="num" style="color:#0f172a;">${total}</div><div class="lbl">Total Docs</div></div>
+          <div class="kpi"><div class="num" style="color:#059669;">${approved} (${overallPct}%)</div><div class="lbl">Approved</div></div>
+          <div class="kpi"><div class="num" style="color:#2563eb;">${submitted}</div><div class="lbl">Under Review</div></div>
+          <div class="kpi"><div class="num" style="color:#d97706;">${pending + unable}</div><div class="lbl">Pending / Unable</div></div>
+          <div class="kpi"><div class="num" style="color:#dc2626;">${rejected}</div><div class="lbl">Rejected</div></div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card">
+            <h3>Stage-Wise Document Completion Graph</h3>
+            <svg width="100%" height="235" viewBox="0 0 560 235">
+              ${svgRows}
+            </svg>
+            <div class="legend">
+              <span><i class="dot" style="background:#10b981;"></i>Approved</span>
+              <span><i class="dot" style="background:#3b82f6;"></i>Submitted</span>
+              <span><i class="dot" style="background:#f59e0b;"></i>Pending/Unable</span>
+              <span><i class="dot" style="background:#ef4444;"></i>Rejected</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Overall Status Distribution</h3>
+            <div style="display:flex;align-items:center;gap:14px;padding-top:14px;">
+              <svg width="130" height="130" viewBox="0 0 130 130">
+                ${donutCircles}
+                <text x="65" y="69" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">${overallPct}%</text>
+              </svg>
+              <div style="font-size:11px;line-height:1.9;">
+                <div><strong style="color:#059669;">Approved:</strong> ${approved}</div>
+                <div><strong style="color:#2563eb;">Submitted:</strong> ${submitted}</div>
+                <div><strong style="color:#d97706;">Pending:</strong> ${pending}</div>
+                <div><strong style="color:#7c3aed;">Unable:</strong> ${unable}</div>
+                <div><strong style="color:#dc2626;">Rejected:</strong> ${rejected}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h3>Stage-by-Stage Numerical Summary</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Project Stage</th>
+                <th>Total Assigned</th>
+                <th>Approved</th>
+                <th>Submitted</th>
+                <th>Pending</th>
+                <th>Rejected</th>
+                <th>Completion %</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stageStats.map(s => `
+                <tr>
+                  <td style="font-weight:700;">${s.stage}</td>
+                  <td>${s.total}</td>
+                  <td style="color:#059669;font-weight:700;">${s.approved}</td>
+                  <td style="color:#2563eb;font-weight:700;">${s.submitted}</td>
+                  <td style="color:#d97706;font-weight:700;">${s.pending + s.unable}</td>
+                  <td style="color:#dc2626;font-weight:700;">${s.rejected}</td>
+                  <td style="font-weight:800;">${s.total ? s.pct + '%' : '-'}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h3>Detailed Item-by-Item Compliance Audit Log (${total} Items)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>Sr No</th>
+                <th>Document / Requirement</th>
+                <th>Status</th>
+                <th>Submitted At</th>
+                <th>Remark / Response</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRowsHtml || '<tr><td colspan="6" style="text-align:center;">No items assigned yet.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+
+        <script>
+          window.onload = function() { setTimeout(function() { window.print(); }, 350); };
+        </script>
+      </body>
+      </html>
+    `);
+    win.document.close();
+  }
+
 </script>
 </body>
 </html>
