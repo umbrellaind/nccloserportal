@@ -1280,8 +1280,8 @@
   async function openHospitalPortalAsAdmin(hospUserId) {
     const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
     if (!hosp) return alert("Hospital not found.");
-    if (session.role === "associate") {
-      if (!isAssociateAllowedForHospital(hosp, { sheetColumn: session.sheetColumn, fullName: session.fullName, userId: session.userId })) {
+    if (session.role === "associate" || session.role === "ops_team") {
+      if (session.role === "associate" && !isAssociateAllowedForHospital(hosp, { sheetColumn: session.sheetColumn, fullName: session.fullName, userId: session.userId })) {
         return alert("Access Denied: You can only open your own assigned hospitals.");
       }
       window.location.href = `${window.location.href.split("?")[0]}?hosp=${encodeURIComponent(hosp.userId)}`;
@@ -1913,7 +1913,7 @@
     const portalBtn = document.getElementById("filterOpenPortalBtn");
     const driveBtn = document.getElementById("filterDriveLinkBtn");
     const show = val && val !== "ALL";
-    portalBtn.classList.toggle("hidden", !(show && (session.role === "admin" || session.role === "associate")));
+    portalBtn.classList.toggle("hidden", !(show && (session.role === "admin" || session.role === "associate" || session.role === "ops_team")));
     const hosp = show ? session.adminData.hospitals.find(h => h.userId === val) : null;
     if (hosp && hosp.driveUrl) {
       driveBtn.href = hosp.driveUrl;
@@ -2044,6 +2044,7 @@
     const q = document.getElementById("adminSearchInput").value.trim().toLowerCase();
     const isSuperAdmin = session.role === "admin";
     const isAssociate = session.role === "associate";
+    const isOpsTeam = session.role === "ops_team";
     const canApprove = session.role === "admin" || session.subRole === "OPERATOR";
 
     const list = session.adminData.ncs.filter(n => {
@@ -2080,7 +2081,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2 shrink-0">
           ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View Merged PDF</a>` : ""}
-          ${isAssociate && nc.userId ? `<a href="?hosp=${encodeURIComponent(nc.userId)}" class="text-xs font-bold bg-red-600 text-white px-3 py-1.5 rounded-lg">📸 Upload / Open</a>` : ""}
+          ${(isAssociate || isOpsTeam) && nc.userId ? `<a href="?hosp=${encodeURIComponent(nc.userId)}" class="text-xs font-bold bg-red-600 text-white px-3 py-1.5 rounded-lg">📸 Upload / Open</a>` : ""}
           ${canApprove && (nc.status === "Submitted" || nc.status === "Unable to Provide") ? `
             <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
             <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Rejected')" class="text-xs font-bold bg-red-600 text-white px-3 py-1.5 rounded-lg">✕ Reject</button>
@@ -2269,6 +2270,7 @@
     const { hospitals, associates } = session.adminData;
     const isSuperAdmin = session.role === "admin";
     const isAssociate = session.role === "associate";
+    const isOpsTeam = session.role === "ops_team";
     const canSeeFee = isSuperAdmin || isAssociate;
 
     document.getElementById("dirSubHeaderText").innerHTML = isSuperAdmin
@@ -2360,7 +2362,7 @@
           <td class="p-2">${canSeeFee ? `<input type="number" value="${h.totalFee || ""}" placeholder="₹ Fee" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
           <td class="p-2">${canSeeFee ? `<div class="flex items-center gap-1 text-[11px] font-bold">${[0,1,2,3].map(idx => `<label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border"><input type="checkbox" ${m[idx] === 1 ? "checked" : ""} ${isSuperAdmin ? "" : "disabled"} onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })' class="w-3.5 h-3.5" /><span>P${idx+1}</span></label>`).join("")}</div>` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
           <td class="p-2">${canSeeFee ? `<select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)' ${isSuperAdmin ? "" : "disabled"} class="w-full text-[11px] font-bold border rounded-lg px-1.5 py-1.5"><option value="SOFT" ${h.paymentLockMode === "SOFT" ? "selected" : ""}>SOFT</option><option value="STRICT" ${h.paymentLockMode === "STRICT" ? "selected" : ""}>STRICT</option></select>` : `-`}</td>
-          <td class="p-2 text-right whitespace-nowrap">${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ""}${(isSuperAdmin || isAssociate) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 underline">👁 Portal</button>` : ""}</td>
+          <td class="p-2 text-right whitespace-nowrap">${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ""}${(isSuperAdmin || isAssociate || isOpsTeam) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 underline">👁 Portal</button>` : ""}</td>
         </tr>`;
     }).join("") : `<tr><td colspan="9" class="p-8 text-center text-slate-400">No hospitals match this filter.</td></tr>`;
 
@@ -2423,7 +2425,7 @@
               <span class="text-[11px] font-semibold text-slate-500">${canSeeFee ? (isHospitalPaymentDue(h) ? "⏳ Payment Milestone Hold" : "✓ Payment Clear / Active") : "✓ Umbrella Ops Access"}</span>
               <div class="flex items-center gap-2">
                 ${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg">📁 Drive</a>` : ""}
-                ${(isSuperAdmin || isAssociate) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="font-bold bg-slate-900 text-white px-2.5 py-1 rounded-lg">👁 Portal</button>` : ""}
+                ${(isSuperAdmin || isAssociate || isOpsTeam) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="font-bold bg-slate-900 text-white px-2.5 py-1 rounded-lg">👁 Portal</button>` : ""}
                 ${(isSuperAdmin || isAssociate) && h.userId ? `<button type="button" onclick='showCredentialShareCard(${JSON.stringify(h).replace(/'/g, "&#39;")})' class="font-bold bg-emerald-600 text-white px-2.5 py-1 rounded-lg">📋 Login</button>` : ""}
               </div>
             </div>
