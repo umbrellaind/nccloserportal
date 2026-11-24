@@ -65,7 +65,7 @@
           Umbrella Healthcare Consultancy
         </span>
         <h2 class="text-2xl font-black tracking-tight">Sign In to UDCP</h2>
-        <p class="text-xs text-red-100 mt-1">Umbrella Docs & Compliance Portal</p>
+        <p id="loginRedirectHint" class="text-xs text-red-100 mt-1">Umbrella Docs & Compliance Portal</p>
       </div>
 
       <div class="p-6 sm:p-8 space-y-4">
@@ -92,18 +92,18 @@
     </div>
   </main>
 
-  <!-- 1B. ACCESS DENIED SCREEN (For Unauthorized ?hosp= URLs) -->
+  <!-- 1B. ACCESS DENIED SCREEN (Unauthorized Associate ?hosp= Link) -->
   <section id="accessDeniedSection" class="hidden flex-1 flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border-2 border-red-300 p-6 sm:p-8 text-center space-y-4">
       <div class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl font-black">🔒</div>
       <h2 class="text-xl font-black text-slate-900">Access Denied / अनुमति नहीं है</h2>
       <p id="accessDeniedMsg" class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-        You are not authorized to view this hospital's records. Only the assigned Associate or authorized staff can access this portal link.
+        You are not authorized to view this hospital's records. Only the assigned Associate or Umbrella Admin/Ops team can open this link.
       </p>
       <div class="pt-2 flex flex-wrap justify-center gap-2">
         <button type="button" onclick="window.location.href = window.location.href.split('?')[0]"
           class="bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-5 py-2.5 rounded-xl shadow transition">
-          ← Go to Main UDCP Login
+          ← Go to My Dashboard
         </button>
       </div>
     </div>
@@ -171,7 +171,7 @@
     <div id="hospNcList" class="space-y-4"></div>
   </section>
 
-  <!-- 2B. DIRECT HOSPITAL VIEW (?hosp=...) — Role-Aware (ASSOCIATE / FIELD / OPERATOR / ADMIN) -->
+  <!-- 2B. CALENDAR / DIRECT HOSPITAL VIEW (?hosp=HOSP-xxx) -->
   <section id="opsHospitalViewSection" class="hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -197,7 +197,7 @@
         </div>
       </div>
 
-      <!-- Role-Restricted Fee & Milestones Bar (Visible ONLY to ADMIN or Assigned ASSOCIATE) -->
+      <!-- Fee & Milestones Bar (Visible ONLY to ADMIN or Assigned ASSOCIATE) -->
       <div id="opsViewFeeBar" class="hidden pt-3 border-t border-slate-100 space-y-2">
         <div class="flex items-center justify-between text-xs">
           <span class="font-extrabold text-slate-700 uppercase">Consultancy Fee Milestones (25% × 4 Stages)</span>
@@ -374,7 +374,6 @@
                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 transition">
                 🏥 Stage 3: Audit Prep
               </button>
-              <a id="tmplSourceSheetLink" href="#" target="_blank" class="hidden text-[11px] font-bold text-blue-700 underline ml-1">Open Master Template Sheet ↗</a>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <input id="tmplSearchInput" type="text" oninput="renderTemplateChecklistItems()" placeholder="🔍 Filter checklist items..."
@@ -384,7 +383,6 @@
             </div>
           </div>
 
-          <div id="tmplPaymentPreviewBanner" class="hidden text-xs font-bold px-3.5 py-2 rounded-xl border"></div>
           <div class="flex items-center justify-between text-xs text-slate-600">
             <span>Selected items will be assigned as <strong>Pending</strong>:</span>
             <span class="font-extrabold text-slate-900"><span id="tmplTickedCount">0</span> Items Selected</span>
@@ -646,14 +644,15 @@
     adminData: { hospitals: [], ncs: [], inputSheetUrl: "", associates: [] }
   };
 
+  let pendingDirectHospId = "";
   let hospStageFilter = "ALL";
   let activeSmartChip = "ACTIVE_UDCP";
   let activeStageChip = "ALL";
-  let opsPublicViewData = { hospital: null, ncs: [], viewerRole: "", canSeeFee: false };
+  let opsPublicViewData = { hospital: null, ncs: [], viewerRole: "", canSeeFee: false, canUpload: false };
   let opsUnlockedUser = null;
 
   let activeNc = null;
-  let activeUploadContext = "HOSPITAL"; // "HOSPITAL" or "OPS_VIEW"
+  let activeUploadContext = "HOSPITAL";
   let cameraStream = null;
   let facingMode = "environment";
   let currentCoords = "Location Verified";
@@ -752,6 +751,25 @@
     document.getElementById("accessDeniedSection").classList.remove("hidden");
   }
 
+  // Matches Associate's Sheet Column (Col E, e.g., ABHISEK, ALOK) OR Full Name against Hospital's Associate (Col H)
+  function isAssociateAllowedForHospital(hosp, assocObj) {
+    if (!hosp || !assocObj) return false;
+    const hAssoc = normKey(hosp.associate);
+    if (!hAssoc) return false;
+    const keys = [
+      normKey(assocObj.sheetColumn),
+      normKey(assocObj.fullName),
+      normKey(assocObj.userId),
+      normKey(assocObj.loginId)
+    ].filter(Boolean);
+
+    return keys.some(k =>
+      k === hAssoc ||
+      k.split(/\s+/)[0] === hAssoc.split(/\s+/)[0] ||
+      (k.length >= 4 && hAssoc.length >= 4 && k.slice(0, 4) === hAssoc.slice(0, 4))
+    );
+  }
+
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const savedOps = localStorage.getItem(OPS_AUTH_KEY);
@@ -776,7 +794,8 @@
     const params = new URLSearchParams(window.location.search);
     const directHospId = params.get("hosp");
     if (directHospId) {
-      await loadDirectHospitalOpsView(directHospId.trim().toUpperCase());
+      pendingDirectHospId = directHospId.trim().toUpperCase();
+      await loadDirectHospitalOpsView(pendingDirectHospId);
       return;
     }
 
@@ -857,17 +876,16 @@
       }));
   }
 
-  function isAssociateAllowedForHospital(hosp, assocObj) {
-    if (!hosp || !assocObj) return false;
-    const hAssoc = normKey(hosp.associate);
-    if (!hAssoc) return false;
-    const keys = [normKey(assocObj.sheetColumn), normKey(assocObj.fullName), normKey(assocObj.userId), normKey(assocObj.loginId)].filter(Boolean);
-    return keys.includes(hAssoc);
-  }
-
   async function loadDirectHospitalOpsView(hospId) {
     const payload = { action: "getPublicHospitalView", hospId };
-    const activeAuth = opsUnlockedUser || (session.userId ? { loginId: session.userId, password: session.password, role: session.subRole || session.role, sheetColumn: session.sheetColumn, fullName: session.fullName } : null);
+    const activeAuth = opsUnlockedUser || (session.userId ? {
+      loginId: session.userId,
+      password: session.password,
+      role: normKey(session.subRole || session.role),
+      sheetColumn: session.sheetColumn,
+      fullName: session.fullName
+    } : null);
+
     if (activeAuth && activeAuth.loginId) {
       payload.userId = activeAuth.loginId;
       payload.password = activeAuth.password || "";
@@ -880,10 +898,9 @@
       return;
     }
 
-    // Extra client-side guard: if logged in as ASSOCIATE, verify Ops_Agent matches this Associate
     const roleChk = normKey(res.viewerRole || (activeAuth && activeAuth.role));
     if (roleChk === "ASSOCIATE" && activeAuth && !isAssociateAllowedForHospital(res.hospital, activeAuth)) {
-      showAccessDeniedScreen(`Access Denied: ${res.hospital.hospitalName} (${hospId}) is not assigned to your Associate account.`);
+      showAccessDeniedScreen(`Access Denied: ${res.hospital.hospitalName} (${hospId}) is not assigned to Associate ${activeAuth.fullName || activeAuth.sheetColumn}.`);
       return;
     }
 
@@ -891,7 +908,8 @@
       hospital: res.hospital,
       ncs: res.ncs || [],
       viewerRole: res.viewerRole || "",
-      canSeeFee: Boolean(res.canSeeFee)
+      canSeeFee: Boolean(res.canSeeFee),
+      canUpload: Boolean(res.canUpload)
     };
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("accessDeniedSection").classList.add("hidden");
@@ -900,7 +918,7 @@
   }
 
   function renderDirectHospitalOpsView() {
-    const { hospital, ncs, viewerRole, canSeeFee } = opsPublicViewData;
+    const { hospital, ncs, viewerRole, canSeeFee, canUpload } = opsPublicViewData;
     if (!hospital) return;
 
     document.getElementById("opsViewHospId").innerText = hospital.userId;
@@ -916,16 +934,20 @@
 
     document.getElementById("opsViewStageBadge").innerText = hospital.currentStage || "1. Kickoff Docs";
 
-    // Determine effective staff auth (either unlocked via modal or active session)
-    const effectiveStaff = opsUnlockedUser || (session.userId && (session.role === "admin" || session.role === "associate" || session.role === "ops_team")
-      ? { loginId: session.userId, password: session.password, fullName: session.fullName || session.userId, role: normKey(session.subRole || session.role), sheetColumn: session.sheetColumn }
+    const effectiveStaff = opsUnlockedUser || (session.userId && (normKey(session.role) === "ADMIN" || normKey(session.role) === "ASSOCIATE" || normKey(session.role) === "OPS_TEAM" || normKey(session.subRole) === "ASSOCIATE" || normKey(session.subRole) === "OPERATOR" || normKey(session.subRole) === "FIELD")
+      ? {
+          loginId: session.userId,
+          password: session.password,
+          fullName: session.fullName || session.userId,
+          role: normKey(session.subRole || session.role),
+          sheetColumn: session.sheetColumn
+        }
       : null);
 
     const effRole = normKey(viewerRole || (effectiveStaff && effectiveStaff.role));
     const isAssocAllowed = effRole === "ASSOCIATE" && effectiveStaff && isAssociateAllowedForHospital(hospital, effectiveStaff);
-    const canViewFees = canSeeFee || effRole === "ADMIN" || isAssocAllowed;
+    const canViewFees = Boolean(canSeeFee) || effRole === "ADMIN" || isAssocAllowed;
 
-    // Payment Milestone Badge & Grid (Strictly hidden for FIELD & OPERATOR)
     const payBadge = document.getElementById("opsViewPayBadge");
     const feeBar = document.getElementById("opsViewFeeBar");
     if (payBadge) {
@@ -993,10 +1015,13 @@
     document.getElementById("opsViewPercent").innerText = metrics.latestPercent + "%";
     document.getElementById("opsViewSummary").innerText = `${metrics.latestApproved} of ${metrics.latestTotal} Approved (${metrics.latestStage || ""})`;
 
-    // Role Permissions in Direct View:
-    // FIELD, OPERATOR, ADMIN, or assigned ASSOCIATE can Upload/Unable
-    // OPERATOR or ADMIN can Approve/Reject
-    const canUploadOrUnable = Boolean(effectiveStaff) && (effRole === "FIELD" || effRole === "OPERATOR" || effRole === "ADMIN" || isAssocAllowed);
+    const canUploadOrUnable = Boolean(canUpload) || (Boolean(effectiveStaff) && (
+      effRole === "FIELD" ||
+      effRole === "OPERATOR" ||
+      effRole === "ADMIN" ||
+      effRole === "ASSOCIATE" ||
+      isAssocAllowed
+    ));
     const canVerify = Boolean(effectiveStaff) && (effRole === "OPERATOR" || effRole === "ADMIN");
 
     const authBox = document.getElementById("opsAuthStatusBox");
@@ -1068,7 +1093,6 @@
       sheetColumn: res.user.sheetColumn || ""
     };
 
-    // If ASSOCIATE logs into ?hosp=..., verify they are assigned to this hospital
     if (candidate.role === "ASSOCIATE" && opsPublicViewData.hospital && !isAssociateAllowedForHospital(opsPublicViewData.hospital, candidate)) {
       document.getElementById("opsAuthModal").classList.add("hidden");
       showAccessDeniedScreen(`Access Denied: ${opsPublicViewData.hospital.hospitalName} (${opsPublicViewData.hospital.userId}) is not assigned to Associate ${candidate.fullName}.`);
@@ -1079,7 +1103,6 @@
     localStorage.setItem(OPS_AUTH_KEY, JSON.stringify(opsUnlockedUser));
     document.getElementById("opsAuthModal").classList.add("hidden");
 
-    // Re-fetch with staff credentials so backend sends role-appropriate Fee visibility
     if (opsPublicViewData.hospital && opsPublicViewData.hospital.userId) {
       await loadDirectHospitalOpsView(opsPublicViewData.hospital.userId);
     } else {
@@ -1174,8 +1197,12 @@
       return;
     }
 
-    session.role = res.role;
-    session.subRole = res.user ? res.user.role : "";
+    const subRoleUpper = normStr(res.user ? res.user.role : "");
+    const isAssocRole = (res.role === "associate" || subRoleUpper === "ASSOCIATE");
+    const resolvedRole = isAssocRole ? "associate" : res.role;
+
+    session.role = resolvedRole;
+    session.subRole = subRoleUpper;
     session.sheetColumn = res.user ? (res.user.sheetColumn || "") : "";
     session.fullName = res.user ? res.user.fullName : "";
     session.userId = uid;
@@ -1193,25 +1220,31 @@
       }));
     }
 
+    if (pendingDirectHospId && !isImpersonate) {
+      const target = pendingDirectHospId;
+      pendingDirectHospId = "";
+      await loadDirectHospitalOpsView(target);
+      return;
+    }
+
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("accessDeniedSection").classList.add("hidden");
     document.getElementById("navUserBox").classList.remove("hidden");
 
-    if (res.role === "admin" || res.role === "ops_team" || res.role === "associate") {
-      if (res.role === "admin") {
+    if (resolvedRole === "admin" || resolvedRole === "ops_team" || resolvedRole === "associate") {
+      if (resolvedRole === "admin") {
         session.adminCredentials = { userId: uid, password: pass };
         document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
         document.getElementById("adminHeaderTitle").innerText = "UDCP — Super Admin Control Center";
         document.getElementById("adminHeaderSub").innerHTML = "Stage-wise Compliance, 25%×4 Payment Gates & <strong>WORKING TARGETS</strong> Calendar Sync";
         document.getElementById("superAdminAssignBox").classList.remove("hidden");
         session.adminData = res.data;
-      } else if (res.role === "associate") {
+      } else if (resolvedRole === "associate") {
         session.adminCredentials = { userId: uid, password: pass };
         document.getElementById("navRoleBadge").innerText = `${session.fullName} (ASSOCIATE)`;
         document.getElementById("adminHeaderTitle").innerText = `UDCP — Associate Desk (${session.fullName})`;
         document.getElementById("adminHeaderSub").innerText = "Showing ONLY your assigned hospitals, documents, upload portals & fee milestones";
         document.getElementById("superAdminAssignBox").classList.add("hidden");
-        // Strictly scope to only this Associate's hospitals
         session.adminData = scopeDataForAssociate(res.data, {
           sheetColumn: session.sheetColumn,
           fullName: session.fullName,
@@ -1219,8 +1252,8 @@
         });
       } else {
         document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
-        document.getElementById("adminHeaderTitle").innerText = `UDCP — Ops Team Desk (${session.subRole})`;
-        document.getElementById("adminHeaderSub").innerText = "Document Verification & Compliance Tracking (Fee details hidden)";
+        document.getElementById("adminHeaderTitle").innerText = `UDCP — Umbrella Ops Desk (${session.subRole})`;
+        document.getElementById("adminHeaderSub").innerText = "All hospitals visible for document upload & verification (Fee details hidden)";
         document.getElementById("superAdminAssignBox").classList.add("hidden");
         session.adminData = res.data;
       }
@@ -1240,10 +1273,13 @@
     }
   }
 
+  function normStr(v) {
+    return String(v || "").trim().toUpperCase();
+  }
+
   async function openHospitalPortalAsAdmin(hospUserId) {
     const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
-    if (!hosp) return alert("Hospital not found in your assigned list.");
-    // If Associate clicks Open Portal, open the role-aware ?hosp= view or impersonate if allowed
+    if (!hosp) return alert("Hospital not found.");
     if (session.role === "associate") {
       if (!isAssociateAllowedForHospital(hosp, { sheetColumn: session.sheetColumn, fullName: session.fullName, userId: session.userId })) {
         return alert("Access Denied: You can only open your own assigned hospitals.");
@@ -2237,7 +2273,7 @@
 
     document.getElementById("dirSubHeaderText").innerHTML = isSuperAdmin
       ? "Edit hospitals inline and click <strong>Save & Sync All</strong>"
-      : (isAssociate ? "Your assigned hospitals, fee milestones & upload links" : "Assigned hospitals & progress status");
+      : (isAssociate ? "Your assigned hospitals, fee milestones & upload links" : "All hospitals (Fee details hidden for Ops team)");
 
     const batchAssocSel = document.getElementById("batchAssocInput");
     if (batchAssocSel) {
@@ -2248,7 +2284,6 @@
 
     document.getElementById("bulkBatchToolbar").classList.toggle("hidden", !isSuperAdmin);
 
-    // Filter chips: hide "Unassigned" chip for Associate since Associate only sees their own hospitals
     const chips = [];
     if (!isAssociate) {
       chips.push({ id: "UNASSIGNED", label: `🚨 Unassigned (${hospitals.filter(h => !h.associate).length})` });
@@ -2385,7 +2420,7 @@
             </div>` : ""}
 
             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
-              <span class="text-[11px] font-semibold text-slate-500">${canSeeFee ? (isHospitalPaymentDue(h) ? "⏳ Payment Milestone Hold" : "✓ Payment Clear / Active") : "✓ Assigned Hospital"}</span>
+              <span class="text-[11px] font-semibold text-slate-500">${canSeeFee ? (isHospitalPaymentDue(h) ? "⏳ Payment Milestone Hold" : "✓ Payment Clear / Active") : "✓ Umbrella Ops Access"}</span>
               <div class="flex items-center gap-2">
                 ${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg">📁 Drive</a>` : ""}
                 ${(isSuperAdmin || isAssociate) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="font-bold bg-slate-900 text-white px-2.5 py-1 rounded-lg">👁 Portal</button>` : ""}
