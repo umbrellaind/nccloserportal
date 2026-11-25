@@ -142,12 +142,10 @@
         <div id="hospProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
       </div>
 
-      <div id="hospPaymentBar" class="hidden pt-3 border-t border-slate-100 space-y-2">
-        <div class="flex items-center justify-between text-xs">
-          <span class="font-extrabold text-slate-700 uppercase">Consultancy Fee Milestones (25% × 4 Stages)</span>
-          <span id="hospFeeSummaryText" class="font-bold text-slate-600"></span>
-        </div>
-        <div id="hospMilestoneGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      <!-- COMPACT DUAL WORK vs PAYMENT METER (Hospital Dashboard) -->
+      <div id="hospDualMeterBox" class="pt-2 border-t border-slate-100"></div>
+
+      <div id="hospPaymentBar" class="hidden pt-2 space-y-2">
         <div id="hospPaymentWarningBanner" class="hidden bg-red-50 border border-red-300 text-red-800 text-xs font-bold p-3 rounded-xl"></div>
       </div>
 
@@ -163,6 +161,7 @@
             <option value="4. Onsite NC">4. Onsite NC</option>
             <option value="5. Final Clearance">5. Final Clearance</option>
             <option value="Certified">✓ Certified</option>
+            <option value="Dropped project">✕ Dropped project</option>
           </select>
         </div>
         <div id="hospStageSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
@@ -198,14 +197,11 @@
         </div>
       </div>
 
-      <!-- Fee & Milestones Bar (Visible ONLY to ADMIN or Assigned ASSOCIATE) -->
-      <div id="opsViewFeeBar" class="hidden pt-3 border-t border-slate-100 space-y-2">
-        <div class="flex items-center justify-between text-xs">
-          <span class="font-extrabold text-slate-700 uppercase">Consultancy Fee Milestones (25% × 4 Stages)</span>
-          <span id="opsViewFeeSummaryText" class="font-bold text-slate-600"></span>
-        </div>
-        <div id="opsViewMilestoneGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-      </div>
+      <!-- COMPACT DUAL WORK vs PAYMENT METER (Direct ?hosp= View) -->
+      <div id="opsViewDualMeterBox" class="pt-2 border-t border-slate-100"></div>
+
+      <!-- Associate Add Payment Request Box (Direct ?hosp= View) -->
+      <div id="opsViewAssocPaymentBox" class="hidden bg-amber-50/70 border border-amber-300 rounded-xl p-3 space-y-2"></div>
 
       <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
         <div class="flex flex-wrap gap-2">
@@ -253,6 +249,9 @@
         <div id="adminProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
       </div>
     </div>
+
+    <!-- PENDING ASSOCIATE PAYMENT APPROVALS QUEUE (SUPER ADMIN ONLY) -->
+    <div id="adminPendingPaymentsBox" class="hidden bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3"></div>
 
     <div id="credShareBox" class="hidden bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-5 shadow-md">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -312,6 +311,8 @@
                 <option value="3. Audit Prep">3. Audit Prep</option>
                 <option value="4. Onsite NC">4. OA NC</option>
                 <option value="5. Final Clearance">5. Final Clear.</option>
+                <option value="Certified">✓ Certified</option>
+                <option value="Dropped project">✕ Dropped project</option>
               </select>
             </div>
             <div>
@@ -324,7 +325,7 @@
           </div>
 
           <div class="md:col-span-3 space-y-1.5">
-            <label class="block text-xs font-bold text-slate-700">2. Project Stage *</label>
+            <label class="block text-xs font-bold text-slate-700">2. Project Stage / Status *</label>
             <select id="assignStageSelect"
               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-amber-50/60 focus:ring-2 focus:ring-red-500 outline-none font-bold text-slate-900">
               <option value="1. Kickoff Docs">1. Kickoff Docs</option>
@@ -332,7 +333,8 @@
               <option value="3. Audit Prep">3. Audit Prep</option>
               <option value="4. Onsite NC">4. Onsite NC</option>
               <option value="5. Final Clearance">5. Final Clearance</option>
-            <option value="Certified">✓ Certified</option>
+              <option value="Certified">✓ Certified</option>
+              <option value="Dropped project">✕ Dropped project</option>
             </select>
           </div>
 
@@ -440,7 +442,8 @@
               <option value="3. Audit Prep">3. Audit Prep</option>
               <option value="4. Onsite NC">4. Onsite NC</option>
               <option value="5. Final Clearance">5. Final Clearance</option>
-            <option value="Certified">✓ Certified</option>
+              <option value="Certified">✓ Certified</option>
+              <option value="Dropped project">✕ Dropped project</option>
             </select>
             <a id="filterDriveLinkBtn" href="#" target="_blank" class="hidden text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg">📁 Drive Folder ↗</a>
             <button id="filterOpenPortalBtn" type="button" onclick="openSelectedFilterHospitalPortal()" class="hidden text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg">👁 Open Hospital Portal</button>
@@ -492,13 +495,14 @@
             <option value="__KEEP__">Associate (No Change)</option>
           </select>
           <select id="batchStageInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
-            <option value="__KEEP__">Stage (No Change)</option>
+            <option value="__KEEP__">Stage / Status (No Change)</option>
             <option value="1. Kickoff Docs">1. Kickoff Docs</option>
             <option value="2. Desktop NC">2. Desktop NC</option>
             <option value="3. Audit Prep">3. Audit Prep</option>
             <option value="4. Onsite NC">4. Onsite NC</option>
             <option value="5. Final Clearance">5. Final Clearance</option>
             <option value="Certified">✓ Certified</option>
+            <option value="Dropped project">✕ Dropped project</option>
           </select>
           <input id="batchFeeInput" type="number" placeholder="Total Fee ₹" class="w-32 text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white" />
           <select id="batchLockInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
@@ -519,10 +523,10 @@
               <th class="p-2.5 w-8 text-center">✓</th>
               <th class="p-2.5 min-w-[200px]">Hospital Name & Status</th>
               <th class="p-2.5 min-w-[130px]">Associate</th>
-              <th class="p-2.5 min-w-[145px]">Active Stage</th>
+              <th class="p-2.5 min-w-[145px]">Active Stage / Status</th>
               <th class="p-2.5 min-w-[160px]">Target Deadline</th>
               <th class="p-2.5 min-w-[115px]">Total Fee (₹)</th>
-              <th class="p-2.5 min-w-[175px]">25% × 4 Paid (P1–P4)</th>
+              <th class="p-2.5 min-w-[125px]">Actual Paid (₹)</th>
               <th class="p-2.5 min-w-[95px]">Gate</th>
               <th class="p-2.5 text-right">Quick Links</th>
             </tr>
@@ -591,6 +595,12 @@
           </div>
           <div id="evidenceQueueList" class="max-h-36 overflow-y-auto space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs"></div>
         </div>
+        <!-- OPTIONAL SHORT REMARK INPUT -->
+        <div class="space-y-1">
+          <label class="block text-xs font-extrabold text-slate-700">📝 Short Document Remark <span class="text-slate-400 font-semibold">(Optional — e.g. Signed copy, Valid till 2027)</span></label>
+          <input id="uploadShortRemarkInput" type="text" maxlength="140" placeholder="Write a short note about this document (optional)..."
+            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium bg-slate-50 focus:bg-white focus:border-red-500 outline-none" />
+        </div>
         <button id="submitMergedBtn" type="button" onclick="mergeAndUploadFinalPDF()" disabled class="w-full bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow text-sm">✓ Merge All & Submit Final PDF</button>
       </div>
     </div>
@@ -616,7 +626,7 @@
         <h3 class="font-bold text-slate-900 text-base">🔐 Staff / Associate Verification</h3>
         <button type="button" onclick="document.getElementById('opsAuthModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
-      <p class="text-[11px] text-slate-500">Login with your registered Mobile Number & Password (USERS_AUTH) to unlock Upload, Unable to Provide, or Approve/Reject controls.</p>
+      <p class="text-[11px] text-slate-500">Login with your registered Mobile Number & Password (USERS_AUTH) to unlock Upload, Payment Entry, or Approve/Reject controls.</p>
       <div class="space-y-3">
         <input id="opsModalMobile" type="text" placeholder="Registered Mobile Number" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
         <input id="opsModalPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter') submitOpsModalLogin()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
@@ -645,14 +655,14 @@
     adminCredentials: null,
     hospital: null,
     ncs: [],
-    adminData: { hospitals: [], ncs: [], inputSheetUrl: "", associates: [] }
+    adminData: { hospitals: [], ncs: [], inputSheetUrl: "", associates: [], pendingPaymentRequests: [] }
   };
 
   let pendingDirectHospId = "";
   let hospStageFilter = "ALL";
   let activeSmartChip = "ACTIVE_UDCP";
   let activeStageChip = "ALL";
-  let opsPublicViewData = { hospital: null, ncs: [], viewerRole: "", canSeeFee: false, canUpload: false };
+  let opsPublicViewData = { hospital: null, ncs: [], viewerRole: "", canSeeFee: false, canUpload: false, pendingPayments: [] };
   let opsUnlockedUser = null;
 
   let activeNc = null;
@@ -679,111 +689,129 @@
     return String(str || "").trim().toUpperCase();
   }
 
-  const WORKING_TARGETS_SPREADSHEET_ID = "1iz2lbBlhmuIFlfV1NIwNFtZcZ0vaU6RNpR2ZpU7Gq-g";
-
-  function extractHospCodeFromText(raw) {
-    const m = String(raw || "").toUpperCase().match(/\bHOSP[-_]?\d+\b/);
-    return m ? m[0].replace("_", "-") : "";
+  function normStr(v) {
+    return String(v || "").trim().toUpperCase();
   }
 
-  function cleanHospitalNameForMatch(raw) {
-    return String(raw || "")
-      .replace(/⏳/g, " ")
-      .replace(/\bHOSP[-_]?\d+\b/gi, " ")
-      .replace(/\?hosp=[A-Za-z0-9_-]+/gi, " ")
-      .replace(/https?:\/\/\S+/gi, " ")
-      .replace(/[-–—]?\s*UDCP Target\b[^\n]*/gi, " ")
-      .replace(/[-–—]?\s*NC Closure Target\b[^\n]*/gi, " ")
-      .replace(/\(\d{1,2}:\d{2}\s*(AM|PM)\)/gi, " ")
-      .replace(/\([^)]*\)/g, " ")
-      .replace(/[^A-Za-z0-9\s]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
-  }
+  /* ================= COMPACT DUAL WORK vs PAYMENT METER ================= */
 
-  function extractCoreHospitalTokens(cleanName) {
-    const stopWords = new Set([
-      "hospital", "hosp", "nursing", "home", "medical", "centre", "center",
-      "clinic", "poly", "polyclinic", "super", "speciality", "specialty",
-      "multi", "multispeciality", "multispecialty", "health", "healthcare",
-      "care", "institute", "trust", "foundation", "pvt", "ltd", "limited",
-      "and", "the", "of", "for", "in", "at", "gkp", "knp", "cnb", "lko",
-      "kanpur", "gorakhpur", "lucknow", "varanasi", "agra", "delhi", "ncr"
-    ]);
-    return cleanName
-      .split(/\s+/)
-      .map(t => t.trim())
-      .filter(t => t.length >= 3 && !stopWords.has(t));
-  }
-
-  function parseCalendarDateToIso2300(rawDate) {
-    if (!rawDate) return "";
-    if (rawDate instanceof Date && !isNaN(rawDate.getTime())) {
-      const pad = n => String(n).padStart(2, "0");
-      return `${rawDate.getFullYear()}-${pad(rawDate.getMonth() + 1)}-${pad(rawDate.getDate())}T23:00`;
+  function getWorkStepInfo(h) {
+    const st = String((h && h.currentStage) || "").trim();
+    const u = st.toUpperCase();
+    if (u === "DROPPED PROJECT" || u.indexOf("DROPPED") !== -1) {
+      return { stepNum: 0, label: "Dropped project", workPct: 0, isDropped: true, isCertified: false };
     }
-    const s = String(rawDate).trim();
-    if (!s) return "";
-    const ymd = s.match(/(\d{4})-(\d{2})-(\d{2})/);
-    if (ymd) return `${ymd[1]}-${ymd[2]}-${ymd[3]}T23:00`;
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      const pad = n => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T23:00`;
+    if (u === "CERTIFIED" || u.indexOf("CERTIFIED") !== -1) {
+      return { stepNum: 4, label: "Certified (100% Work)", workPct: 100, isDropped: false, isCertified: true };
     }
-    return "";
+    if (st.indexOf("5.") === 0 || u.indexOf("FINAL") !== -1) {
+      return { stepNum: 4, label: "Step 4: Final Clearance", workPct: 100, isDropped: false, isCertified: false };
+    }
+    if (st.indexOf("4.") === 0 || u.indexOf("ONSITE") !== -1) {
+      return { stepNum: 3, label: "Step 3: OA NC", workPct: 75, isDropped: false, isCertified: false };
+    }
+    if (st.indexOf("2.") === 0 || st.indexOf("3.") === 0 || u.indexOf("DESKTOP") !== -1 || u.indexOf("AUDIT") !== -1) {
+      return { stepNum: 2, label: "Step 2: DA NC Close", workPct: 50, isDropped: false, isCertified: false };
+    }
+    return { stepNum: 1, label: "Step 1: Kickoff", workPct: 25, isDropped: false, isCertified: false };
   }
 
-  function pickFurthestDeadline2300(a, b) {
-    const da = parseCalendarDateToIso2300(a);
-    const db = parseCalendarDateToIso2300(b);
-    if (!da) return db;
-    if (!db) return da;
-    return da >= db ? da : db;
+  function computeHospitalPaymentStats(h) {
+    const totalFee = Number(h && h.totalFee) || 0;
+    const milestones = (h && h.milestonesPaid) || [0, 0, 0, 0];
+    const paidSteps = milestones.filter(x => x === 1).length;
+    let paidAmount = Number(h && h.paidAmount) || 0;
+    if (paidAmount <= 0 && totalFee > 0 && paidSteps > 0) {
+      paidAmount = Math.round(totalFee * (paidSteps * 0.25));
+    }
+    let payPct = 0;
+    if (totalFee > 0) {
+      payPct = Math.min(100, Math.max(0, Math.round((paidAmount / totalFee) * 100)));
+    } else if (paidSteps > 0) {
+      payPct = paidSteps * 25;
+    }
+    const balanceDue = totalFee > 0 ? Math.max(0, totalFee - paidAmount) : 0;
+    const hasSetup = totalFee > 0 || paidAmount > 0 || paidSteps > 0;
+    return { totalFee, paidAmount, payPct, balanceDue, hasSetup };
   }
 
-  function matchHospitalToWorkingTarget(hosp, targetEntries) {
-    if (!hosp || !Array.isArray(targetEntries) || !targetEntries.length) return "";
-    const hCode = normKey(hosp.userId);
-    const hClean = cleanHospitalNameForMatch(hosp.hospitalName);
-    const hCompact = hClean.replace(/\s+/g, "");
-    const hTokens = extractCoreHospitalTokens(hClean);
+  function renderCompactDualMeterHtml(h, options = {}) {
+    const showPay = options.showPay !== false;
+    const compactCard = Boolean(options.compactCard);
+    const work = getWorkStepInfo(h);
+    const pay = computeHospitalPaymentStats(h);
+    const isBehind = showPay && pay.hasSetup && !work.isDropped && (work.workPct > pay.payPct);
 
-    let bestIso = "";
-    let bestScore = 0;
+    const stepNames = [
+      { n: 1, short: "Kickoff", pct: 25 },
+      { n: 2, short: "DA NC Close", pct: 50 },
+      { n: 3, short: "OA NC", pct: 75 },
+      { n: 4, short: "Certificate", pct: 100 }
+    ];
 
-    for (const entry of targetEntries) {
-      if (!entry.iso2300) continue;
-      let score = 0;
+    const workSegmentsHtml = stepNames.map(s => {
+      const done = !work.isDropped && work.stepNum >= s.n;
+      const active = !work.isDropped && work.stepNum === s.n;
+      const cls = work.isDropped
+        ? "bg-slate-200 text-slate-400"
+        : (done
+            ? (active ? "bg-amber-500 text-slate-950 font-black" : "bg-emerald-600 text-white font-bold")
+            : "bg-slate-100 text-slate-500");
+      return `<div class="flex-1 text-center py-1 px-1 rounded ${cls} text-[10px] truncate" title="${s.short} (${s.pct}%)">${s.short}</div>`;
+    }).join("");
 
-      if (hCode && entry.hospCode && hCode === entry.hospCode) {
-        score = 100;
-      } else if (hClean && entry.cleanName && (hClean === entry.cleanName || hCompact === entry.compactName)) {
-        score = 90;
-      } else if (hClean && entry.cleanName && hClean.length >= 5 && entry.cleanName.length >= 5 &&
-                 (entry.cleanName.includes(hClean) || hClean.includes(entry.cleanName))) {
-        score = 75;
-      } else if (hTokens.length && entry.tokens && entry.tokens.length) {
-        const overlap = hTokens.filter(t => entry.tokens.includes(t));
-        const hasSpecificToken = overlap.some(t => t.length >= 4);
-        if (hasSpecificToken) {
-          score = 50 + overlap.length * 10;
-        }
-      }
-
-      if (score >= 50) {
-        if (score > bestScore) {
-          bestScore = score;
-          bestIso = entry.iso2300;
-        } else if (score === bestScore) {
-          bestIso = pickFurthestDeadline2300(bestIso, entry.iso2300);
-        }
-      }
+    if (!showPay || !pay.hasSetup) {
+      return `
+        <div class="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-extrabold text-slate-700">🧭 Work Stage: <span class="${work.isDropped ? "text-rose-700" : "text-slate-900"}">${escapeHtml(work.label)}</span></span>
+            <span class="font-black ${work.isDropped ? "text-rose-600" : "text-emerald-700"}">${work.isDropped ? "DROPPED" : work.workPct + "%"}</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1">${workSegmentsHtml}</div>
+        </div>
+      `;
     }
 
-    return bestIso;
+    const fmt = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+    const payBarColor = isBehind ? "bg-red-600" : "bg-emerald-600";
+
+    return `
+      <div class="rounded-xl border ${isBehind ? "border-red-300 bg-red-50/50" : "border-slate-200 bg-slate-50/90"} p-2.5 sm:p-3 space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+          <span class="font-extrabold text-slate-800">🧭 Work: <span class="${work.isDropped ? "text-rose-700" : "text-slate-950"}">${escapeHtml(work.label)} (${work.isDropped ? "Dropped" : work.workPct + "%"})</span></span>
+          ${isBehind
+            ? `<span class="text-[10px] font-black bg-red-600 text-white px-2 py-0.5 rounded-full">⚠️ Payment Behind Work (${pay.payPct}% vs ${work.workPct}%)</span>`
+            : `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">✓ Payment Aligned (${pay.payPct}%)</span>`}
+        </div>
+
+        <div class="grid grid-cols-4 gap-1">${workSegmentsHtml}</div>
+
+        <div class="pt-1 space-y-1">
+          <div class="flex flex-wrap items-center justify-between gap-1 text-[11px]">
+            <span class="font-extrabold text-slate-700">💳 Fee Paid: <span class="${isBehind ? "text-red-700" : "text-emerald-700"}">${fmt(pay.paidAmount)}</span>${pay.totalFee ? " / " + fmt(pay.totalFee) : ""} <span class="font-black">(${pay.payPct}%)</span></span>
+            ${pay.totalFee > 0 ? `<span class="font-extrabold ${pay.balanceDue > 0 ? "text-red-700" : "text-emerald-700"}">${pay.balanceDue > 0 ? "Balance Due: " + fmt(pay.balanceDue) : "✓ Full Paid"}</span>` : ""}
+          </div>
+
+          <div class="relative w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div class="${payBarColor} h-full transition-all duration-500" style="width:${pay.payPct}%"></div>
+            <div class="absolute inset-y-0 left-1/4 w-[2px] bg-white/90" title="25% Kickoff"></div>
+            <div class="absolute inset-y-0 left-2/4 w-[2px] bg-white/90" title="50% DA NC Close"></div>
+            <div class="absolute inset-y-0 left-3/4 w-[2px] bg-white/90" title="75% OA NC"></div>
+          </div>
+
+          ${!compactCard ? `
+          <div class="grid grid-cols-4 text-[9px] font-bold text-slate-500 pt-0.5">
+            <span class="text-right pr-1">25% Kickoff</span>
+            <span class="text-right pr-1">50% DA NC</span>
+            <span class="text-right pr-1">75% OA NC</span>
+            <span class="text-right">100% Cert.</span>
+          </div>` : ""}
+        </div>
+      </div>
+    `;
   }
+
+  /* ================= DATE / COUNTDOWN HELPERS ================= */
 
   function toDateTimeLocalValue(raw) {
     if (!raw) return "";
@@ -875,7 +903,6 @@
     document.getElementById("accessDeniedSection").classList.remove("hidden");
   }
 
-  // Matches Associate's Sheet Column (Col E, e.g., ABHISEK, ALOK) OR Full Name against Hospital's Associate (Col H)
   function isAssociateAllowedForHospital(hosp, assocObj) {
     if (!hosp || !assocObj) return false;
     const hAssoc = normKey(hosp.associate);
@@ -1000,6 +1027,8 @@
       }));
   }
 
+  /* ================= DIRECT ?hosp= VIEW ================= */
+
   async function loadDirectHospitalOpsView(hospId) {
     const payload = { action: "getPublicHospitalView", hospId };
     const activeAuth = opsUnlockedUser || (session.userId ? {
@@ -1033,7 +1062,8 @@
       ncs: res.ncs || [],
       viewerRole: res.viewerRole || "",
       canSeeFee: Boolean(res.canSeeFee),
-      canUpload: Boolean(res.canUpload)
+      canUpload: Boolean(res.canUpload),
+      pendingPayments: res.pendingPayments || []
     };
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("accessDeniedSection").classList.add("hidden");
@@ -1042,7 +1072,7 @@
   }
 
   function renderDirectHospitalOpsView() {
-    const { hospital, ncs, viewerRole, canSeeFee, canUpload } = opsPublicViewData;
+    const { hospital, ncs, viewerRole, canSeeFee, canUpload, pendingPayments } = opsPublicViewData;
     if (!hospital) return;
 
     document.getElementById("opsViewHospId").innerText = hospital.userId;
@@ -1073,7 +1103,6 @@
     const canViewFees = Boolean(canSeeFee) || effRole === "ADMIN" || isAssocAllowed;
 
     const payBadge = document.getElementById("opsViewPayBadge");
-    const feeBar = document.getElementById("opsViewFeeBar");
     if (payBadge) {
       if (!canViewFees) {
         payBadge.classList.add("hidden");
@@ -1082,37 +1111,39 @@
         payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
         payBadge.classList.remove("hidden");
       } else {
-        payBadge.innerText = "⏳ Payment Milestone Hold";
+        payBadge.innerText = "⏳ Payment Due";
         payBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800";
         payBadge.classList.remove("hidden");
       }
     }
 
-    if (feeBar) {
-      const milestones = hospital.milestonesPaid || [0, 0, 0, 0];
-      const totalFee = Number(hospital.totalFee) || 0;
-      const hasPaySetup = totalFee > 0 || milestones.some(x => x === 1);
-      if (canViewFees && hasPaySetup) {
-        feeBar.classList.remove("hidden");
-        const paidCount = milestones.filter(x => x === 1).length;
-        const eachAmt = totalFee ? Math.round(totalFee * 0.25) : 0;
-        document.getElementById("opsViewFeeSummaryText").innerText = totalFee
-          ? `Paid: ₹${(paidCount * eachAmt).toLocaleString("en-IN")} / ₹${totalFee.toLocaleString("en-IN")} (${paidCount * 25}%)`
-          : `${paidCount * 25}% Completed`;
-        const mLabels = [
-          { title: "P1 (25%)", sub: "Stage 1: Kickoff", paid: milestones[0] === 1 },
-          { title: "P2 (25%)", sub: "Stage 3: Audit Prep", paid: milestones[1] === 1 },
-          { title: "P3 (25%)", sub: "Stage 4: Onsite NC", paid: milestones[2] === 1 },
-          { title: "P4 (25%)", sub: "Stage 5: Certificate", paid: milestones[3] === 1 }
-        ];
-        document.getElementById("opsViewMilestoneGrid").innerHTML = mLabels.map(m => `
-          <div class="p-2.5 rounded-xl border text-xs ${m.paid ? "bg-emerald-50 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"}">
-            <div class="font-extrabold flex items-center justify-between"><span>${m.title}</span><span>${m.paid ? "✓ PAID" : "⏳ DUE"}</span></div>
-            <div class="text-[10px] mt-0.5">${m.sub}${eachAmt ? " • ₹" + eachAmt.toLocaleString("en-IN") : ""}</div>
+    // Compact Dual Meter in ?hosp= View
+    const dualMeterBox = document.getElementById("opsViewDualMeterBox");
+    if (dualMeterBox) {
+      dualMeterBox.innerHTML = renderCompactDualMeterHtml(hospital, { showPay: canViewFees, compactCard: false });
+    }
+
+    // Associate Add Payment Box in ?hosp= View
+    const assocPayBox = document.getElementById("opsViewAssocPaymentBox");
+    if (assocPayBox) {
+      if (isAssocAllowed) {
+        const pendingHtml = (pendingPayments && pendingPayments.length)
+          ? `<div class="text-[11px] font-bold text-amber-900 bg-white/80 px-2.5 py-1.5 rounded-lg border border-amber-300">⏳ Pending Admin Approval: ${pendingPayments.map(p => `₹${Number(p.amount).toLocaleString("en-IN")}${p.note ? " (" + escapeHtml(p.note) + ")" : ""}`).join(", ")}</div>`
+          : "";
+        assocPayBox.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-extrabold text-amber-950">💰 Submit New Received Payment (Requires Admin Approval)</span>
           </div>
-        `).join("");
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="opsAssocAddPayAmt" type="number" min="1" placeholder="New Amount Received ₹" class="w-44 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-bold outline-none" />
+            <input id="opsAssocAddPayNote" type="text" placeholder="Note (e.g. UPI / Cash / Cheque)" class="flex-1 min-w-[160px] px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs outline-none" />
+            <button type="button" onclick="submitAssociatePaymentFromOpsView()" class="bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-extrabold px-4 py-1.5 rounded-lg shadow">+ Send for Approval</button>
+          </div>
+          ${pendingHtml}
+        `;
+        assocPayBox.classList.remove("hidden");
       } else {
-        feeBar.classList.add("hidden");
+        assocPayBox.classList.add("hidden");
       }
     }
 
@@ -1178,6 +1209,7 @@
           </div>
           <div>${formatNcRichText(nc.correctiveAction)}</div>
           ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ""}
+          ${nc.uploadRemark ? `<p class="text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded"><strong>📝 Upload Remark:</strong> ${escapeHtml(nc.uploadRemark)}</p>` : ""}
           ${nc.status === "Unable to Provide" ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital / Staff Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ""}
           ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Verification Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ""}
         </div>
@@ -1194,6 +1226,29 @@
         </div>
       </div>
     `}).join("");
+  }
+
+  async function submitAssociatePaymentFromOpsView() {
+    const staff = opsUnlockedUser || (session.userId ? { loginId: session.userId, password: session.password } : null);
+    if (!staff || !opsPublicViewData.hospital) return openOpsAuthModal();
+    const amt = Number(document.getElementById("opsAssocAddPayAmt").value) || 0;
+    const note = (document.getElementById("opsAssocAddPayNote").value || "").trim();
+    if (amt <= 0) return alert("Please enter a valid payment amount greater than ₹0.");
+    const res = await callApi({
+      action: "submitPaymentRequest",
+      userId: staff.loginId,
+      password: staff.password,
+      hospId: opsPublicViewData.hospital.userId,
+      hospitalName: opsPublicViewData.hospital.hospitalName,
+      amount: amt,
+      note
+    }, "Submitting Payment Request...");
+    if (res && res.status === "ok") {
+      alert("✓ Payment request submitted! It will reflect in the main balance once Admin approves it.");
+      await loadDirectHospitalOpsView(opsPublicViewData.hospital.userId);
+    } else if (res && res.message) {
+      alert(res.message);
+    }
   }
 
   function openOpsAuthModal() {
@@ -1274,15 +1329,17 @@
   function downloadOpsHospitalCsv() {
     const { hospital, ncs } = opsPublicViewData;
     if (!hospital || !ncs.length) return alert("No items available.");
-    const headers = ["Doc_ID", "Stage", "Sr_No", "Hospital_Name", "Status", "Requirement", "Guidance_Note", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
+    const headers = ["Doc_ID", "Stage", "Sr_No", "Hospital_Name", "Status", "Requirement", "Guidance_Note", "Upload_Remark", "Hospital_Response", "Submitted_At", "PDF_Link", "Remark"];
     const esc = v => `"${String(v || "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
-    const rows = [headers.join(",")].concat(ncs.map(n => [esc(n.ncId), esc(n.stage), esc(n.srNo), esc(n.hospitalName), esc(n.status), esc(n.correctiveAction), esc(n.adminNote), esc(n.hospitalResponse), esc(n.submittedAt), esc(n.proofUrl), esc(n.remark)].join(",")));
+    const rows = [headers.join(",")].concat(ncs.map(n => [esc(n.ncId), esc(n.stage), esc(n.srNo), esc(n.hospitalName), esc(n.status), esc(n.correctiveAction), esc(n.adminNote), esc(n.uploadRemark), esc(n.hospitalResponse), esc(n.submittedAt), esc(n.proofUrl), esc(n.remark)].join(",")));
     const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `${hospital.hospitalName.replace(/[^A-Za-z0-9]/g, "_")}_UDCP_Report.csv`;
     a.click();
   }
+
+  /* ================= LOGIN & ROLE ROUTING ================= */
 
   async function handleLoginSubmit(e) {
     if (e && e.preventDefault) e.preventDefault();
@@ -1367,7 +1424,7 @@
         session.adminCredentials = { userId: uid, password: pass };
         document.getElementById("navRoleBadge").innerText = `${session.fullName} (ASSOCIATE)`;
         document.getElementById("adminHeaderTitle").innerText = `UDCP — Associate Desk (${session.fullName})`;
-        document.getElementById("adminHeaderSub").innerText = "Showing ONLY your assigned hospitals, documents, upload portals & fee milestones";
+        document.getElementById("adminHeaderSub").innerText = "Showing ONLY your assigned hospitals, documents, upload portals & payment entry";
         document.getElementById("superAdminAssignBox").classList.add("hidden");
         session.adminData = scopeDataForAssociate(res.data, {
           sheetColumn: session.sheetColumn,
@@ -1397,10 +1454,6 @@
     }
   }
 
-  function normStr(v) {
-    return String(v || "").trim().toUpperCase();
-  }
-
   async function openHospitalPortalAsAdmin(hospUserId) {
     const hosp = session.adminData.hospitals.find(h => h.userId === hospUserId);
     if (!hosp) return alert("Hospital not found.");
@@ -1428,12 +1481,14 @@
   }
 
   function getRequiredMilestoneForStageOrder(ord) {
-    if (ord === 1 || ord === 2) return { index: 0, label: "1st Installment (25% — Kickoff)" };
-    if (ord === 3) return { index: 1, label: "2nd Installment (25% — Audit Prep)" };
-    if (ord === 4) return { index: 2, label: "3rd Installment (25% — Onsite NC)" };
-    if (ord === 5) return { index: 3, label: "4th Installment (25% — Final Clearance)" };
+    if (ord === 1 || ord === 2) return { index: 0, pct: 25, label: "1st Installment (25% — Kickoff)" };
+    if (ord === 3) return { index: 1, pct: 50, label: "2nd Installment (50% — DA NC Close)" };
+    if (ord === 4) return { index: 2, pct: 75, label: "3rd Installment (75% — OA NC)" };
+    if (ord === 5) return { index: 3, pct: 100, label: "4th Installment (100% — Final Clearance)" };
     return null;
   }
+
+  /* ================= HOSPITAL DASHBOARD ================= */
 
   function renderHospitalDashboard() {
     const h = session.hospital;
@@ -1444,7 +1499,7 @@
 
     const banner = document.getElementById("hospDeadlineBanner");
     const timerBox = document.getElementById("hospLiveTimerBox");
-    if (h.deadline) {
+    if (h.deadline && !isHospitalClosedStatus(h)) {
       const check = computeCountdownText(h.deadline);
       banner.classList.remove("hidden");
       banner.className = check.expired
@@ -1458,40 +1513,21 @@
       timerBox.removeAttribute("data-countdown");
     }
 
-    const payBar = document.getElementById("hospPaymentBar");
-    const mGrid = document.getElementById("hospMilestoneGrid");
-    const warnBanner = document.getElementById("hospPaymentWarningBanner");
-    const milestones = h.milestonesPaid || [0, 0, 0, 0];
-    const totalFee = Number(h.totalFee) || 0;
-    const hasPaySetup = totalFee > 0 || milestones.some(x => x === 1);
-
-    if (hasPaySetup) {
-      payBar.classList.remove("hidden");
-      const paidCount = milestones.filter(x => x === 1).length;
-      const eachAmt = totalFee ? Math.round(totalFee * 0.25) : 0;
-      document.getElementById("hospFeeSummaryText").innerText = totalFee
-        ? `Paid: ₹${(paidCount * eachAmt).toLocaleString("en-IN")} / ₹${totalFee.toLocaleString("en-IN")} (${paidCount * 25}%)`
-        : `${paidCount * 25}% Completed`;
-      const mLabels = [
-        { title: "P1 (25%)", sub: "Stage 1: Kickoff", paid: milestones[0] === 1 },
-        { title: "P2 (25%)", sub: "Stage 3: Audit Prep", paid: milestones[1] === 1 },
-        { title: "P3 (25%)", sub: "Stage 4: Onsite NC", paid: milestones[2] === 1 },
-        { title: "P4 (25%)", sub: "Stage 5: Certificate", paid: milestones[3] === 1 }
-      ];
-      mGrid.innerHTML = mLabels.map(m => `
-        <div class="p-2.5 rounded-xl border text-xs ${m.paid ? "bg-emerald-50 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"}">
-          <div class="font-extrabold flex items-center justify-between"><span>${m.title}</span><span>${m.paid ? "✓ PAID" : "⏳ DUE"}</span></div>
-          <div class="text-[10px] mt-0.5">${m.sub}${eachAmt ? " • ₹" + eachAmt.toLocaleString("en-IN") : ""}</div>
-        </div>
-      `).join("");
-    } else {
-      payBar.classList.add("hidden");
+    // Compact Dual Work vs Payment Meter on Hospital Dashboard
+    const dualBox = document.getElementById("hospDualMeterBox");
+    if (dualBox) {
+      dualBox.innerHTML = renderCompactDualMeterHtml(h, { showPay: true, compactCard: false });
     }
+
+    const payBar = document.getElementById("hospPaymentBar");
+    const warnBanner = document.getElementById("hospPaymentWarningBanner");
+    const payStats = computeHospitalPaymentStats(h);
+    const workInfo = getWorkStepInfo(h);
 
     const stageDropdown = document.getElementById("hospStageDropdown");
     if (stageDropdown) stageDropdown.value = hospStageFilter;
 
-    const stages = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance", "Certified"];
+    const stages = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance", "Certified", "Dropped project"];
     const cardsBox = document.getElementById("hospStageSummaryCards");
     const allTotal = session.ncs.length;
     const allSubmitted = session.ncs.filter(n => n.status === "Submitted").length;
@@ -1534,16 +1570,14 @@
     document.getElementById("hospProgressBar").style.width = pct + "%";
 
     let anyUnpaidWarning = "";
-    visibleList.forEach(nc => {
-      if (hasPaySetup && nc.status !== "Approved") {
-        const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
-        if (reqM && milestones[reqM.index] !== 1) {
-          anyUnpaidWarning = `⚠️ Payment Milestone Pending: ${reqM.label} is due for "${nc.stage}".`;
-        }
-      }
-    });
-    warnBanner.innerText = anyUnpaidWarning;
-    warnBanner.classList.toggle("hidden", !anyUnpaidWarning);
+    if (payStats.hasSetup && !workInfo.isDropped && workInfo.workPct > payStats.payPct) {
+      anyUnpaidWarning = `⚠️ Consultancy Fee Due: Work has reached ${workInfo.label} (${workInfo.workPct}%), while fee received is ${payStats.payPct}% (₹${payStats.paidAmount.toLocaleString("en-IN")}${payStats.totalFee ? " / ₹" + payStats.totalFee.toLocaleString("en-IN") : ""}). Balance Due: ₹${payStats.balanceDue.toLocaleString("en-IN")}.`;
+    }
+    if (payBar && warnBanner) {
+      payBar.classList.toggle("hidden", !anyUnpaidWarning);
+      warnBanner.innerText = anyUnpaidWarning;
+      warnBanner.classList.toggle("hidden", !anyUnpaidWarning);
+    }
 
     const container = document.getElementById("hospNcList");
     if (!total) {
@@ -1561,7 +1595,7 @@
 
     container.innerHTML = visibleList.map(nc => {
       const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
-      const isStagePaymentDue = hasPaySetup && reqM && milestones[reqM.index] !== 1;
+      const isStagePaymentDue = payStats.hasSetup && reqM && payStats.payPct < reqM.pct;
       const isStrictLocked = isStagePaymentDue && (h.paymentLockMode === "STRICT");
       const canRespond = nc.status !== "Approved" && !isStrictLocked;
       const safeJson = JSON.stringify(nc).replace(/'/g, "&#39;");
@@ -1580,6 +1614,7 @@
             ${formatNcRichText(nc.correctiveAction)}
             ${nc.adminNote ? `<div class="mt-3 bg-blue-50 border-l-4 border-blue-500 p-2.5 rounded-r-lg text-xs text-blue-900"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</div>` : ""}
           </div>
+          ${nc.uploadRemark ? `<div class="bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold p-2.5 rounded-lg">📝 Upload Remark: ${escapeHtml(nc.uploadRemark)}</div>` : ""}
           ${nc.remark ? `<div class="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold p-2.5 rounded-lg">⚠ Admin Remark: ${escapeHtml(nc.remark)}</div>` : ""}
           ${nc.status === "Unable to Provide" && nc.hospitalResponse ? `<div class="bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold p-2.5 rounded-lg">📝 Your Response: ${escapeHtml(nc.hospitalResponse)}</div>` : ""}
           <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
@@ -1596,10 +1631,14 @@
     }).join("");
   }
 
+  /* ================= EVIDENCE UPLOAD MODAL + SHORT REMARK ================= */
+
   function openEvidenceModal(nc, ctx = "HOSPITAL") {
     activeNc = nc;
     activeUploadContext = ctx;
     evidenceQueue = [];
+    const remarkEl = document.getElementById("uploadShortRemarkInput");
+    if (remarkEl) remarkEl.value = "";
     renderQueueUI();
     document.getElementById("modalNcTag").innerText = `${nc.stage} • Sr. ${nc.srNo || nc.ncId}`;
     document.getElementById("evidenceModal").classList.remove("hidden");
@@ -1784,6 +1823,7 @@
         }
       }
       const mergedBase64 = await mergedPdf.saveAsBase64({ dataUri: true });
+      const uploadRemark = (document.getElementById("uploadShortRemarkInput")?.value || "").trim();
 
       const isOpsCtx = activeUploadContext === "OPS_VIEW";
       const staff = opsUnlockedUser || (session.userId ? { loginId: session.userId, password: session.password } : null);
@@ -1801,6 +1841,7 @@
         ncId: activeNc.ncId,
         srNo: activeNc.srNo,
         gps: currentCoords,
+        uploadRemark,
         pageCount: mergedPdf.getPageCount(),
         fileBase64: mergedBase64
       }, "Uploading Merged PDF...");
@@ -1863,6 +1904,8 @@
       alert(res.message);
     }
   }
+
+  /* ================= ADMIN / ASSOCIATE DESK ================= */
 
   async function refreshAdminData() {
     const res = await callApi({ action: "getAdminData", adminUser: session.userId, adminPass: session.password, forceRefresh: true }, "Refreshing UDCP Data...");
@@ -1979,6 +2022,16 @@
     return st === "CERTIFIED" || st.indexOf("CERTIFIED") !== -1;
   }
 
+  function isHospitalDropped(h) {
+    if (!h) return false;
+    const st = String(h.currentStage || getHospitalResolvedStage(h) || "").trim().toUpperCase();
+    return st === "DROPPED PROJECT" || st.indexOf("DROPPED") !== -1;
+  }
+
+  function isHospitalClosedStatus(h) {
+    return isHospitalCertified(h) || isHospitalDropped(h);
+  }
+
   function getHospitalResolvedStage(h) {
     if (h.currentStage) return h.currentStage;
     if (h.stageMetrics && h.stageMetrics.latestStage && h.stageMetrics.latestStage !== "Not Started") return h.stageMetrics.latestStage;
@@ -2006,10 +2059,66 @@
     if (prevVal && Array.from(select.options).some(o => o.value === prevVal)) select.value = prevVal;
   }
 
+  function renderAdminPendingPaymentQueue() {
+    const box = document.getElementById("adminPendingPaymentsBox");
+    if (!box) return;
+    const isSuperAdmin = session.role === "admin";
+    const pendingList = (session.adminData && session.adminData.pendingPaymentRequests) || [];
+    if (!isSuperAdmin || !pendingList.length) {
+      box.classList.add("hidden");
+      return;
+    }
+    box.classList.remove("hidden");
+    box.innerHTML = `
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-black text-amber-950">💰 Pending Associate Payment Approvals (${pendingList.length})</h3>
+        <span class="text-[11px] font-bold text-amber-900">Approve to add into hospital's Paid Fee</span>
+      </div>
+      <div class="space-y-2">
+        ${pendingList.map(req => `
+          <div class="bg-white border border-amber-300 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="space-y-0.5">
+              <div class="font-black text-slate-900">${escapeHtml(req.hospitalName)} <span class="font-mono text-[11px] text-slate-500">(${escapeHtml(req.hospId)})</span></div>
+              <div class="text-slate-700">New Payment: <strong class="text-emerald-700 text-sm">₹${Number(req.amount).toLocaleString("en-IN")}</strong> • Submitted by <strong>${escapeHtml(req.submittedBy)}</strong> (${escapeHtml(req.submittedAt)})</div>
+              ${req.note ? `<div class="text-slate-600">Note: <em>${escapeHtml(req.note)}</em></div>` : ""}
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="reviewPaymentRequest('${req.reqId}', 'APPROVED')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3.5 py-2 rounded-lg shadow">✓ Approve & Add</button>
+              <button type="button" onclick="reviewPaymentRequest('${req.reqId}', 'REJECTED')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-lg">✕ Reject</button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  async function reviewPaymentRequest(reqId, decision) {
+    let remark = "";
+    if (decision === "REJECTED") {
+      remark = prompt("Reason for rejecting payment entry (optional):") || "";
+    }
+    const res = await callApi({
+      action: "reviewPaymentRequest",
+      adminUser: session.userId,
+      adminPass: session.password,
+      reqId,
+      decision,
+      remark
+    }, decision === "APPROVED" ? "Approving Payment..." : "Rejecting Payment...");
+    if (res && res.status === "ok") {
+      session.adminData = res.data;
+      renderAdminDashboard();
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
   function renderAdminDashboard() {
     const { hospitals, ncs, inputSheetUrl, associates } = session.adminData;
     const isAssociate = session.role === "associate";
     if (inputSheetUrl) document.getElementById("openInputSheetLink").href = inputSheetUrl;
+
+    renderAdminPendingPaymentQueue();
 
     const assocSel = document.getElementById("assignAssociateSelect");
     const prevAssoc = assocSel.value;
@@ -2188,7 +2297,7 @@
       if (fHosp !== "ALL" && n.userId !== fHosp) return false;
       if (fStage !== "ALL" && n.stage !== fStage) return false;
       if (fStat !== "ALL" && n.status !== fStat) return false;
-      if (q && !(`${n.hospitalName} ${n.correctiveAction} ${n.userId} ${n.stage}`).toLowerCase().includes(q)) return false;
+      if (q && !(`${n.hospitalName} ${n.correctiveAction} ${n.userId} ${n.stage} ${n.uploadRemark || ""}`).toLowerCase().includes(q)) return false;
       return true;
     });
 
@@ -2214,6 +2323,7 @@
             }">${nc.status}</span>
           </div>
           <div>${formatNcRichText(nc.correctiveAction)}</div>
+          ${nc.uploadRemark ? `<p class="text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded"><strong>📝 Upload Remark:</strong> ${escapeHtml(nc.uploadRemark)}</p>` : ""}
           ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ""}
         </div>
         <div class="flex flex-wrap items-center gap-2 shrink-0">
@@ -2253,6 +2363,8 @@
     }
   }
 
+  /* ================= HOSPITAL MASTER DIRECTORY & BULK GRID ================= */
+
   function switchDirectoryViewMode(mode) {
     dirViewMode = mode;
     const isGrid = mode === "grid";
@@ -2266,15 +2378,17 @@
   function getEffectiveHospitalState(h) {
     const key = h.hospitalName.toUpperCase();
     const staged = dirtyHospitals[key];
-    if (!staged) return { ...h, isTargetPending: !isHospitalCertified(h) && !toDateTimeLocalValue(h.deadline), isDirty: false };
+    if (!staged) return { ...h, isTargetPending: !isHospitalClosedStatus(h) && !toDateTimeLocalValue(h.deadline), isDirty: false };
     const resolvedDeadline = staged.deadline !== undefined ? staged.deadline : h.deadline;
+    const resolvedStage = staged.currentStage !== undefined ? staged.currentStage : h.currentStage;
     return {
       ...h,
       associate: staged.associate !== undefined ? staged.associate : h.associate,
-      currentStage: staged.currentStage !== undefined ? staged.currentStage : h.currentStage,
+      currentStage: resolvedStage,
       deadline: resolvedDeadline,
-      isTargetPending: !isHospitalCertified({ currentStage: resolvedDeadline ? h.currentStage : h.currentStage }) && !toDateTimeLocalValue(resolvedDeadline),
+      isTargetPending: !isHospitalClosedStatus({ currentStage: resolvedStage }) && !toDateTimeLocalValue(resolvedDeadline),
       totalFee: staged.totalFee !== undefined ? staged.totalFee : h.totalFee,
+      paidAmount: staged.paidAmount !== undefined ? staged.paidAmount : (Number(h.paidAmount) || 0),
       milestonesPaid: staged.milestonesPaid !== undefined ? staged.milestonesPaid : (h.milestonesPaid || [0, 0, 0, 0]),
       paymentLockMode: staged.paymentLockMode !== undefined ? staged.paymentLockMode : (h.paymentLockMode || "SOFT"),
       isDirty: true
@@ -2293,12 +2407,13 @@
         currentStage: base.currentStage || "1. Kickoff Docs",
         deadline: base.deadline || "",
         totalFee: Number(base.totalFee) || 0,
+        paidAmount: Number(base.paidAmount) || 0,
         milestonesPaid: [...(base.milestonesPaid || [0, 0, 0, 0])],
         paymentLockMode: base.paymentLockMode || "SOFT"
       };
     }
-    if (field === "milestone") dirtyHospitals[key].milestonesPaid[value.idx] = value.checked ? 1 : 0;
-    else if (field === "totalFee") dirtyHospitals[key].totalFee = Number(value) || 0;
+    if (field === "totalFee") dirtyHospitals[key].totalFee = Number(value) || 0;
+    else if (field === "paidAmount") dirtyHospitals[key].paidAmount = Math.max(0, Number(value) || 0);
     else dirtyHospitals[key][field] = value;
 
     updateStickySaveBar();
@@ -2371,6 +2486,7 @@
         currentStage: d.currentStage,
         deadline: d.deadline,
         totalFee: d.totalFee,
+        paidAmount: d.paidAmount,
         milestonesPaid: (d.milestonesPaid || [0, 0, 0, 0]).join(","),
         paymentLockMode: d.paymentLockMode
       };
@@ -2395,12 +2511,39 @@
     }
   }
 
+  async function submitAssociateAddPaymentCard(hospId, hospitalName, inputId, noteId) {
+    const amtEl = document.getElementById(inputId);
+    const noteEl = document.getElementById(noteId);
+    const amount = Number(amtEl ? amtEl.value : 0) || 0;
+    const note = (noteEl ? noteEl.value : "").trim();
+    if (amount <= 0) return alert("Please enter a valid received amount (₹).");
+
+    const res = await callApi({
+      action: "submitPaymentRequest",
+      userId: session.userId,
+      password: session.password,
+      hospId,
+      hospitalName,
+      amount,
+      note
+    }, "Sending Payment for Admin Approval...");
+
+    if (res && res.status === "ok") {
+      if (amtEl) amtEl.value = "";
+      if (noteEl) noteEl.value = "";
+      alert("✓ Payment entry submitted! It will reflect in the hospital's main Paid meter after Admin approves it.");
+      await refreshAdminData();
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
   function isHospitalPaymentDue(h) {
-    if (!h.hasPaymentSetup) return false;
-    const ord = (h.stageMetrics && h.stageMetrics.latestStageOrder) || 1;
-    const reqM = getRequiredMilestoneForStageOrder(ord);
-    if (!reqM) return false;
-    return (h.milestonesPaid || [0, 0, 0, 0])[reqM.index] !== 1;
+    if (isHospitalDropped(h)) return false;
+    const pay = computeHospitalPaymentStats(h);
+    if (!pay.hasSetup) return false;
+    const work = getWorkStepInfo(h);
+    return work.workPct > pay.payPct;
   }
 
   function renderActiveLoginsDirectory() {
@@ -2414,7 +2557,7 @@
 
     document.getElementById("dirSubHeaderText").innerHTML = isSuperAdmin
       ? "Edit hospitals inline and click <strong>Save & Sync All</strong>"
-      : (isAssociate ? "Your assigned hospitals, fee milestones & upload links" : "All hospitals (Fee details hidden for Ops team)");
+      : (isAssociate ? "Your assigned hospitals, Dual Work vs Payment Meter & Add Payment requests" : "All hospitals (Fee details hidden for Ops team)");
 
     const batchAssocSel = document.getElementById("batchAssocInput");
     if (batchAssocSel) {
@@ -2437,9 +2580,10 @@
       chips.push({ id: "PAYMENT_DUE", label: `⏳ Payment Due (${hospitals.filter(h => isHospitalPaymentDue(h)).length})` });
     }
     if (isSuperAdmin) {
-      const pendingTargetCnt = hospitals.filter(h => !isHospitalCertified(h) && !toDateTimeLocalValue(h.deadline)).length;
+      const pendingTargetCnt = hospitals.filter(h => !isHospitalClosedStatus(h) && !toDateTimeLocalValue(h.deadline)).length;
       chips.push({ id: "TARGET_PENDING", label: `⏳ Target Pending (${pendingTargetCnt})` });
     }
+    chips.push({ id: "DROPPED", label: `✕ Dropped project (${hospitals.filter(h => isHospitalDropped(h)).length})` });
     chips.push({ id: "NOT_STARTED", label: `📋 Not Started (${hospitals.filter(h => !h.userId).length})` });
     chips.push({ id: "ALL", label: `All (${hospitals.length})` });
 
@@ -2449,7 +2593,7 @@
       `<button type="button" onclick="activeSmartChip='${c.id}'; dirPage=1; renderActiveLoginsDirectory();" class="text-xs font-bold px-3 py-1.5 rounded-full transition ${activeSmartChip === c.id ? "bg-slate-900 text-amber-300 shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}">${c.label}</button>`
     ).join("");
 
-    const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance", "Certified"];
+    const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance", "Certified", "Dropped project"];
     const stageChips = ["ALL", ...stageList];
     const stageChipsBox = document.getElementById("stageFilterChipsBar");
     if (stageChipsBox) {
@@ -2464,7 +2608,8 @@
       if (activeSmartChip === "UNASSIGNED" && h.associate) return false;
       if (activeSmartChip === "NO_PAYMENT" && h.hasPaymentSetup) return false;
       if (activeSmartChip === "PAYMENT_DUE" && !isHospitalPaymentDue(h)) return false;
-      if (activeSmartChip === "TARGET_PENDING" && (isHospitalCertified(h) || Boolean(toDateTimeLocalValue(h.deadline)))) return false;
+      if (activeSmartChip === "TARGET_PENDING" && (isHospitalClosedStatus(h) || Boolean(toDateTimeLocalValue(h.deadline)))) return false;
+      if (activeSmartChip === "DROPPED" && !isHospitalDropped(h)) return false;
       if (activeSmartChip === "NOT_STARTED" && h.userId) return false;
       if (activeStageChip !== "ALL" && getHospitalResolvedStage(h) !== activeStageChip) return false;
       if (!isAssociate) {
@@ -2491,20 +2636,31 @@
     const gridBody = document.getElementById("excelBulkGridBody");
     gridBody.innerHTML = pageItems.length ? pageItems.map(rawH => {
       const h = getEffectiveHospitalState(rawH);
-      const m = h.milestonesPaid || [0, 0, 0, 0];
       const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
       const assocOpts = [`<option value="">-- Unassigned --</option>`].concat((associates || []).map(ag => `<option value="${escapeHtml(ag)}" ${h.associate === ag ? "selected" : ""}>${escapeHtml(ag)}</option>`)).join("");
       const stageOpts = stageList.map(st => `<option value="${st}" ${(h.currentStage || "1. Kickoff Docs") === st ? "selected" : ""}>${st}</option>`).join("");
+      const payStats = computeHospitalPaymentStats(h);
+
+      let statusChipHtml = "";
+      if (isSuperAdmin) {
+        if (isHospitalCertified(h)) {
+          statusChipHtml = `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-1.5 py-0.5 rounded-full">✓ Certified</span>`;
+        } else if (isHospitalDropped(h)) {
+          statusChipHtml = `<span class="text-[10px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300 px-1.5 py-0.5 rounded-full">✕ Dropped project</span>`;
+        } else if (!toDateTimeLocalValue(h.deadline)) {
+          statusChipHtml = `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded-full">⏳ Target Pending</span>`;
+        }
+      }
 
       return `
         <tr class="${h.isDirty ? "bg-amber-50" : "hover:bg-slate-50"}">
           <td class="p-2.5 text-center">${isSuperAdmin ? `<input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk w-4 h-4 rounded text-red-600" />` : "•"}</td>
-          <td class="p-2.5"><div class="flex flex-wrap items-center gap-1.5"><span class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</span>${isSuperAdmin && isHospitalCertified(h) ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-1.5 py-0.5 rounded-full">✓ Certified</span>` : (isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded-full">⏳ Target Pending</span>` : "")}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
+          <td class="p-2.5"><div class="flex flex-wrap items-center gap-1.5"><span class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</span>${statusChipHtml}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "associate", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${assocOpts}</select>` : `<span class="font-bold">${escapeHtml(h.associate || "Unassigned")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "currentStage", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${stageOpts}</select>` : `<span class="font-bold">${escapeHtml(h.currentStage || "1. Kickoff Docs")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<input type="datetime-local" value="${toDateTimeLocalValue(h.deadline)}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px]">${formatDeadlineDisplay(h.deadline) || "-"}</span>`}</td>
-          <td class="p-2">${canSeeFee ? `<input type="number" value="${h.totalFee || ""}" placeholder="₹ Fee" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
-          <td class="p-2">${canSeeFee ? `<div class="flex items-center gap-1 text-[11px] font-bold">${[0,1,2,3].map(idx => `<label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border"><input type="checkbox" ${m[idx] === 1 ? "checked" : ""} ${isSuperAdmin ? "" : "disabled"} onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })' class="w-3.5 h-3.5" /><span>P${idx+1}</span></label>`).join("")}</div>` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
+          <td class="p-2">${canSeeFee ? `<input type="number" value="${h.totalFee || ""}" placeholder="₹ Total" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
+          <td class="p-2">${canSeeFee ? `<div class="space-y-0.5"><input type="number" value="${payStats.paidAmount || ""}" placeholder="₹ Paid" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "paidAmount", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1" /><div class="text-[10px] font-bold text-slate-500">${payStats.payPct}% Paid</div></div>` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
           <td class="p-2">${canSeeFee ? `<select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)' ${isSuperAdmin ? "" : "disabled"} class="w-full text-[11px] font-bold border rounded-lg px-1.5 py-1.5"><option value="SOFT" ${h.paymentLockMode === "SOFT" ? "selected" : ""}>SOFT</option><option value="STRICT" ${h.paymentLockMode === "STRICT" ? "selected" : ""}>STRICT</option></select>` : `-`}</td>
           <td class="p-2 text-right whitespace-nowrap">${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="text-[11px] font-bold text-blue-600 hover:underline mr-2">📁 Drive</a>` : ""}${(isSuperAdmin || isAssociate || isOpsTeam) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="text-[11px] font-bold text-slate-800 underline">👁 Portal</button>` : ""}</td>
         </tr>`;
@@ -2512,14 +2668,31 @@
 
     const cardBox = document.getElementById("activeHospListContainer");
     if (cardBox) {
-      cardBox.innerHTML = pageItems.length ? pageItems.map(rawH => {
+      cardBox.innerHTML = pageItems.length ? pageItems.map((rawH, idxOnPage) => {
         const h = getEffectiveHospitalState(rawH);
-        const m = h.milestonesPaid || [0, 0, 0, 0];
-        const paidCnt = m.filter(x => x === 1).length;
         const escName = JSON.stringify(h.hospitalName).replace(/'/g, "&#39;");
         const assocOpts = [`<option value="">-- Unassigned --</option>`].concat((associates || []).map(ag => `<option value="${escapeHtml(ag)}" ${h.associate === ag ? "selected" : ""}>${escapeHtml(ag)}</option>`)).join("");
         const stageOpts = stageList.map(st => `<option value="${st}" ${(h.currentStage || "1. Kickoff Docs") === st ? "selected" : ""}>${st}</option>`).join("");
         const metrics = h.stageMetrics || { latestPercent: 0, latestApproved: 0, latestTotal: 0 };
+        const payStats = computeHospitalPaymentStats(h);
+
+        let statusChipHtml = "";
+        if (isSuperAdmin) {
+          if (isHospitalCertified(h)) {
+            statusChipHtml = `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-full">✓ Certified</span>`;
+          } else if (isHospitalDropped(h)) {
+            statusChipHtml = `<span class="text-[10px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300 px-2 py-0.5 rounded-full">✕ Dropped project</span>`;
+          } else if (!toDateTimeLocalValue(h.deadline)) {
+            statusChipHtml = `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">⏳ Target Pending</span>`;
+          }
+        } else if (isHospitalDropped(h)) {
+          statusChipHtml = `<span class="text-[10px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300 px-2 py-0.5 rounded-full">✕ Dropped project</span>`;
+        } else if (isHospitalCertified(h)) {
+          statusChipHtml = `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-full">✓ Certified</span>`;
+        }
+
+        const addAmtId = `assocPayAmt_${idxOnPage}`;
+        const addNoteId = `assocPayNote_${idxOnPage}`;
 
         return `
           <div class="border ${h.isDirty ? "border-amber-400 bg-amber-50/60" : "border-slate-200 bg-white"} rounded-2xl p-4 shadow-sm space-y-3">
@@ -2527,12 +2700,15 @@
               <div class="flex items-start gap-2.5">
                 ${isSuperAdmin ? `<input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk mt-1 w-4 h-4 rounded text-red-600" />` : ""}
                 <div>
-                  <div class="flex flex-wrap items-center gap-1.5"><h4 class="font-black text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>${isSuperAdmin && isHospitalCertified(h) ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-full">✓ Certified</span>` : (isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">⏳ Target Pending</span>` : "")}</div>
+                  <div class="flex flex-wrap items-center gap-1.5"><h4 class="font-black text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>${statusChipHtml}</div>
                   <p class="text-[11px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}${h.password && (isSuperAdmin || isAssociate) ? " • Pass: " + escapeHtml(h.password) : ""}${h.city ? " • " + escapeHtml(h.city) : ""}</p>
                 </div>
               </div>
               <span class="text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">${metrics.latestPercent}% (${metrics.latestApproved}/${metrics.latestTotal})</span>
             </div>
+
+            <!-- Compact Dual Work vs Payment Meter on Card -->
+            ${renderCompactDualMeterHtml(h, { showPay: canSeeFee, compactCard: true })}
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <div>
@@ -2540,33 +2716,39 @@
                 ${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "associate", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5 bg-white">${assocOpts}</select>` : `<div class="font-bold text-slate-800">${escapeHtml(h.associate || "Unassigned")}</div>`}
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Active Stage</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Active Stage / Status</label>
                 ${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "currentStage", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5 bg-white">${stageOpts}</select>` : `<div class="font-bold text-slate-800">${escapeHtml(h.currentStage || "1. Kickoff Docs")}</div>`}
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Target Deadline</label>
                 ${isSuperAdmin ? `<input type="datetime-local" value="${toDateTimeLocalValue(h.deadline)}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5 bg-white" />` : `<div class="text-[11px] font-semibold">${formatDeadlineDisplay(h.deadline) || "-"}</div>`}
               </div>
-              ${canSeeFee ? `
+              ${isSuperAdmin ? `
               <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Total Fee (₹) & Lock</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Total Fee (₹) & Gate</label>
                 <div class="flex gap-1.5">
-                  <input type="number" value="${h.totalFee || ""}" placeholder="₹ Fee" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5 bg-white" />
-                  <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)' ${isSuperAdmin ? "" : "disabled"} class="text-[11px] font-bold border rounded-lg px-1.5 py-1.5 bg-white"><option value="SOFT" ${h.paymentLockMode === "SOFT" ? "selected" : ""}>SOFT</option><option value="STRICT" ${h.paymentLockMode === "STRICT" ? "selected" : ""}>STRICT</option></select>
+                  <input type="number" value="${h.totalFee || ""}" placeholder="₹ Total" oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5 bg-white" />
+                  <select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)' class="text-[11px] font-bold border rounded-lg px-1.5 py-1.5 bg-white"><option value="SOFT" ${h.paymentLockMode === "SOFT" ? "selected" : ""}>SOFT</option><option value="STRICT" ${h.paymentLockMode === "STRICT" ? "selected" : ""}>STRICT</option></select>
                 </div>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Actual Received / Paid Amount (₹)</label>
+                <input type="number" value="${payStats.paidAmount || ""}" placeholder="₹ Actual Paid Amount (e.g. 10000)" oninput='stageHospitalChange(${escName}, "paidAmount", this.value)' class="w-full text-xs font-bold border rounded-lg px-2.5 py-1.5 bg-white" />
               </div>` : ""}
             </div>
 
-            ${canSeeFee ? `
-            <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 text-xs">
-              <span class="font-bold text-slate-700">Milestones (${paidCnt * 25}% Paid):</span>
-              <div class="flex items-center gap-1.5 font-bold">
-                ${[0,1,2,3].map(idx => `<label class="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded border"><input type="checkbox" ${m[idx] === 1 ? "checked" : ""} ${isSuperAdmin ? "" : "disabled"} onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })' class="w-3.5 h-3.5" /><span>P${idx+1}</span></label>`).join("")}
+            ${isAssociate ? `
+            <div class="bg-amber-50/80 border border-amber-300 rounded-xl p-2.5 space-y-1.5 text-xs">
+              <div class="font-extrabold text-amber-950 text-[11px]">💰 Add New Payment Received (Admin Approval Required)</div>
+              <div class="flex flex-wrap gap-1.5">
+                <input id="${addAmtId}" type="number" min="1" placeholder="New Amount ₹" class="w-28 px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs font-bold" />
+                <input id="${addNoteId}" type="text" placeholder="Note (UPI/Cash)" class="flex-1 min-w-[100px] px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs" />
+                <button type="button" onclick='submitAssociateAddPaymentCard(${JSON.stringify(h.userId || "")}, ${escName}, "${addAmtId}", "${addNoteId}")' class="bg-slate-900 text-amber-300 font-extrabold px-3 py-1 rounded-lg text-[11px]">+ Submit</button>
               </div>
             </div>` : ""}
 
             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
-              <span class="text-[11px] font-semibold text-slate-500">${canSeeFee ? (isHospitalPaymentDue(h) ? "⏳ Payment Milestone Hold" : "✓ Payment Clear / Active") : "✓ Umbrella Ops Access"}</span>
+              <span class="text-[11px] font-semibold text-slate-500">${canSeeFee ? (isHospitalPaymentDue(h) ? "⏳ Payment Behind Work Stage" : "✓ Payment Clear / Active") : "✓ Umbrella Ops Access"}</span>
               <div class="flex items-center gap-2">
                 ${h.driveUrl ? `<a href="${h.driveUrl}" target="_blank" class="font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg">📁 Drive</a>` : ""}
                 ${(isSuperAdmin || isAssociate || isOpsTeam) && h.userId ? `<button type="button" onclick="openHospitalPortalAsAdmin('${h.userId}')" class="font-bold bg-slate-900 text-white px-2.5 py-1 rounded-lg">👁 Portal</button>` : ""}
