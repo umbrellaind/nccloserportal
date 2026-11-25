@@ -675,6 +675,112 @@
     return String(str || "").trim().toUpperCase();
   }
 
+  const WORKING_TARGETS_SPREADSHEET_ID = "1iz2lbBlhmuIFlfV1NIwNFtZcZ0vaU6RNpR2ZpU7Gq-g";
+
+  function extractHospCodeFromText(raw) {
+    const m = String(raw || "").toUpperCase().match(/\bHOSP[-_]?\d+\b/);
+    return m ? m[0].replace("_", "-") : "";
+  }
+
+  function cleanHospitalNameForMatch(raw) {
+    return String(raw || "")
+      .replace(/⏳/g, " ")
+      .replace(/\bHOSP[-_]?\d+\b/gi, " ")
+      .replace(/\?hosp=[A-Za-z0-9_-]+/gi, " ")
+      .replace(/https?:\/\/\S+/gi, " ")
+      .replace(/[-–—]?\s*UDCP Target\b[^\n]*/gi, " ")
+      .replace(/[-–—]?\s*NC Closure Target\b[^\n]*/gi, " ")
+      .replace(/\(\d{1,2}:\d{2}\s*(AM|PM)\)/gi, " ")
+      .replace(/\([^)]*\)/g, " ")
+      .replace(/[^A-Za-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function extractCoreHospitalTokens(cleanName) {
+    const stopWords = new Set([
+      "hospital", "hosp", "nursing", "home", "medical", "centre", "center",
+      "clinic", "poly", "polyclinic", "super", "speciality", "specialty",
+      "multi", "multispeciality", "multispecialty", "health", "healthcare",
+      "care", "institute", "trust", "foundation", "pvt", "ltd", "limited",
+      "and", "the", "of", "for", "in", "at", "gkp", "knp", "cnb", "lko",
+      "kanpur", "gorakhpur", "lucknow", "varanasi", "agra", "delhi", "ncr"
+    ]);
+    return cleanName
+      .split(/\s+/)
+      .map(t => t.trim())
+      .filter(t => t.length >= 3 && !stopWords.has(t));
+  }
+
+  function parseCalendarDateToIso2300(rawDate) {
+    if (!rawDate) return "";
+    if (rawDate instanceof Date && !isNaN(rawDate.getTime())) {
+      const pad = n => String(n).padStart(2, "0");
+      return `${rawDate.getFullYear()}-${pad(rawDate.getMonth() + 1)}-${pad(rawDate.getDate())}T23:00`;
+    }
+    const s = String(rawDate).trim();
+    if (!s) return "";
+    const ymd = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (ymd) return `${ymd[1]}-${ymd[2]}-${ymd[3]}T23:00`;
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T23:00`;
+    }
+    return "";
+  }
+
+  function pickFurthestDeadline2300(a, b) {
+    const da = parseCalendarDateToIso2300(a);
+    const db = parseCalendarDateToIso2300(b);
+    if (!da) return db;
+    if (!db) return da;
+    return da >= db ? da : db;
+  }
+
+  function matchHospitalToWorkingTarget(hosp, targetEntries) {
+    if (!hosp || !Array.isArray(targetEntries) || !targetEntries.length) return "";
+    const hCode = normKey(hosp.userId);
+    const hClean = cleanHospitalNameForMatch(hosp.hospitalName);
+    const hCompact = hClean.replace(/\s+/g, "");
+    const hTokens = extractCoreHospitalTokens(hClean);
+
+    let bestIso = "";
+    let bestScore = 0;
+
+    for (const entry of targetEntries) {
+      if (!entry.iso2300) continue;
+      let score = 0;
+
+      if (hCode && entry.hospCode && hCode === entry.hospCode) {
+        score = 100;
+      } else if (hClean && entry.cleanName && (hClean === entry.cleanName || hCompact === entry.compactName)) {
+        score = 90;
+      } else if (hClean && entry.cleanName && hClean.length >= 5 && entry.cleanName.length >= 5 &&
+                 (entry.cleanName.includes(hClean) || hClean.includes(entry.cleanName))) {
+        score = 75;
+      } else if (hTokens.length && entry.tokens && entry.tokens.length) {
+        const overlap = hTokens.filter(t => entry.tokens.includes(t));
+        const hasSpecificToken = overlap.some(t => t.length >= 4);
+        if (hasSpecificToken) {
+          score = 50 + overlap.length * 10;
+        }
+      }
+
+      if (score >= 50) {
+        if (score > bestScore) {
+          bestScore = score;
+          bestIso = entry.iso2300;
+        } else if (score === bestScore) {
+          bestIso = pickFurthestDeadline2300(bestIso, entry.iso2300);
+        }
+      }
+    }
+
+    return bestIso;
+  }
+
   function toDateTimeLocalValue(raw) {
     if (!raw) return "";
     const s = String(raw).trim();
@@ -2150,12 +2256,14 @@
   function getEffectiveHospitalState(h) {
     const key = h.hospitalName.toUpperCase();
     const staged = dirtyHospitals[key];
-    if (!staged) return { ...h, isDirty: false };
+    if (!staged) return { ...h, isTargetPending: !toDateTimeLocalValue(h.deadline), isDirty: false };
+    const resolvedDeadline = staged.deadline !== undefined ? staged.deadline : h.deadline;
     return {
       ...h,
       associate: staged.associate !== undefined ? staged.associate : h.associate,
       currentStage: staged.currentStage !== undefined ? staged.currentStage : h.currentStage,
-      deadline: staged.deadline !== undefined ? staged.deadline : h.deadline,
+      deadline: resolvedDeadline,
+      isTargetPending: !toDateTimeLocalValue(resolvedDeadline),
       totalFee: staged.totalFee !== undefined ? staged.totalFee : h.totalFee,
       milestonesPaid: staged.milestonesPaid !== undefined ? staged.milestonesPaid : (h.milestonesPaid || [0, 0, 0, 0]),
       paymentLockMode: staged.paymentLockMode !== undefined ? staged.paymentLockMode : (h.paymentLockMode || "SOFT"),
@@ -2318,6 +2426,10 @@
     if (canSeeFee) {
       chips.push({ id: "PAYMENT_DUE", label: `⏳ Payment Due (${hospitals.filter(h => isHospitalPaymentDue(h)).length})` });
     }
+    if (isSuperAdmin) {
+      const pendingTargetCnt = hospitals.filter(h => !toDateTimeLocalValue(h.deadline)).length;
+      chips.push({ id: "TARGET_PENDING", label: `⏳ Target Pending (${pendingTargetCnt})` });
+    }
     chips.push({ id: "NOT_STARTED", label: `📋 Not Started (${hospitals.filter(h => !h.userId).length})` });
     chips.push({ id: "ALL", label: `All (${hospitals.length})` });
 
@@ -2342,6 +2454,7 @@
       if (activeSmartChip === "UNASSIGNED" && h.associate) return false;
       if (activeSmartChip === "NO_PAYMENT" && h.hasPaymentSetup) return false;
       if (activeSmartChip === "PAYMENT_DUE" && !isHospitalPaymentDue(h)) return false;
+      if (activeSmartChip === "TARGET_PENDING" && Boolean(toDateTimeLocalValue(h.deadline))) return false;
       if (activeSmartChip === "NOT_STARTED" && h.userId) return false;
       if (activeStageChip !== "ALL" && getHospitalResolvedStage(h) !== activeStageChip) return false;
       if (!isAssociate) {
@@ -2376,7 +2489,7 @@
       return `
         <tr class="${h.isDirty ? "bg-amber-50" : "hover:bg-slate-50"}">
           <td class="p-2.5 text-center">${isSuperAdmin ? `<input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk w-4 h-4 rounded text-red-600" />` : "•"}</td>
-          <td class="p-2.5"><div class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
+          <td class="p-2.5"><div class="flex flex-wrap items-center gap-1.5"><span class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</span>${isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded-full">⏳ Target Pending</span>` : ""}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "associate", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${assocOpts}</select>` : `<span class="font-bold">${escapeHtml(h.associate || "Unassigned")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "currentStage", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${stageOpts}</select>` : `<span class="font-bold">${escapeHtml(h.currentStage || "1. Kickoff Docs")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<input type="datetime-local" value="${toDateTimeLocalValue(h.deadline)}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px]">${formatDeadlineDisplay(h.deadline) || "-"}</span>`}</td>
@@ -2404,7 +2517,7 @@
               <div class="flex items-start gap-2.5">
                 ${isSuperAdmin ? `<input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk mt-1 w-4 h-4 rounded text-red-600" />` : ""}
                 <div>
-                  <h4 class="font-black text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>
+                  <div class="flex flex-wrap items-center gap-1.5"><h4 class="font-black text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>${isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">⏳ Target Pending</span>` : ""}</div>
                   <p class="text-[11px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}${h.password && (isSuperAdmin || isAssociate) ? " • Pass: " + escapeHtml(h.password) : ""}${h.city ? " • " + escapeHtml(h.city) : ""}</p>
                 </div>
               </div>
