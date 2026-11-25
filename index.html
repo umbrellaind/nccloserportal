@@ -162,6 +162,7 @@
             <option value="3. Audit Prep">3. Audit Prep</option>
             <option value="4. Onsite NC">4. Onsite NC</option>
             <option value="5. Final Clearance">5. Final Clearance</option>
+            <option value="Certified">✓ Certified</option>
           </select>
         </div>
         <div id="hospStageSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
@@ -331,6 +332,7 @@
               <option value="3. Audit Prep">3. Audit Prep</option>
               <option value="4. Onsite NC">4. Onsite NC</option>
               <option value="5. Final Clearance">5. Final Clearance</option>
+            <option value="Certified">✓ Certified</option>
             </select>
           </div>
 
@@ -438,6 +440,7 @@
               <option value="3. Audit Prep">3. Audit Prep</option>
               <option value="4. Onsite NC">4. Onsite NC</option>
               <option value="5. Final Clearance">5. Final Clearance</option>
+            <option value="Certified">✓ Certified</option>
             </select>
             <a id="filterDriveLinkBtn" href="#" target="_blank" class="hidden text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg">📁 Drive Folder ↗</a>
             <button id="filterOpenPortalBtn" type="button" onclick="openSelectedFilterHospitalPortal()" class="hidden text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg">👁 Open Hospital Portal</button>
@@ -495,6 +498,7 @@
             <option value="3. Audit Prep">3. Audit Prep</option>
             <option value="4. Onsite NC">4. Onsite NC</option>
             <option value="5. Final Clearance">5. Final Clearance</option>
+            <option value="Certified">✓ Certified</option>
           </select>
           <input id="batchFeeInput" type="number" placeholder="Total Fee ₹" class="w-32 text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white" />
           <select id="batchLockInput" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white">
@@ -1487,7 +1491,7 @@
     const stageDropdown = document.getElementById("hospStageDropdown");
     if (stageDropdown) stageDropdown.value = hospStageFilter;
 
-    const stages = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+    const stages = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance", "Certified"];
     const cardsBox = document.getElementById("hospStageSummaryCards");
     const allTotal = session.ncs.length;
     const allSubmitted = session.ncs.filter(n => n.status === "Submitted").length;
@@ -1969,6 +1973,12 @@
     alert(`✓ Assigned ${res.addedCount} items (${res.skippedCount} skipped).`);
   }
 
+  function isHospitalCertified(h) {
+    if (!h) return false;
+    const st = String(h.currentStage || getHospitalResolvedStage(h) || "").trim().toUpperCase();
+    return st === "CERTIFIED" || st.indexOf("CERTIFIED") !== -1;
+  }
+
   function getHospitalResolvedStage(h) {
     if (h.currentStage) return h.currentStage;
     if (h.stageMetrics && h.stageMetrics.latestStage && h.stageMetrics.latestStage !== "Not Started") return h.stageMetrics.latestStage;
@@ -2256,14 +2266,14 @@
   function getEffectiveHospitalState(h) {
     const key = h.hospitalName.toUpperCase();
     const staged = dirtyHospitals[key];
-    if (!staged) return { ...h, isTargetPending: !toDateTimeLocalValue(h.deadline), isDirty: false };
+    if (!staged) return { ...h, isTargetPending: !isHospitalCertified(h) && !toDateTimeLocalValue(h.deadline), isDirty: false };
     const resolvedDeadline = staged.deadline !== undefined ? staged.deadline : h.deadline;
     return {
       ...h,
       associate: staged.associate !== undefined ? staged.associate : h.associate,
       currentStage: staged.currentStage !== undefined ? staged.currentStage : h.currentStage,
       deadline: resolvedDeadline,
-      isTargetPending: !toDateTimeLocalValue(resolvedDeadline),
+      isTargetPending: !isHospitalCertified({ currentStage: resolvedDeadline ? h.currentStage : h.currentStage }) && !toDateTimeLocalValue(resolvedDeadline),
       totalFee: staged.totalFee !== undefined ? staged.totalFee : h.totalFee,
       milestonesPaid: staged.milestonesPaid !== undefined ? staged.milestonesPaid : (h.milestonesPaid || [0, 0, 0, 0]),
       paymentLockMode: staged.paymentLockMode !== undefined ? staged.paymentLockMode : (h.paymentLockMode || "SOFT"),
@@ -2427,7 +2437,7 @@
       chips.push({ id: "PAYMENT_DUE", label: `⏳ Payment Due (${hospitals.filter(h => isHospitalPaymentDue(h)).length})` });
     }
     if (isSuperAdmin) {
-      const pendingTargetCnt = hospitals.filter(h => !toDateTimeLocalValue(h.deadline)).length;
+      const pendingTargetCnt = hospitals.filter(h => !isHospitalCertified(h) && !toDateTimeLocalValue(h.deadline)).length;
       chips.push({ id: "TARGET_PENDING", label: `⏳ Target Pending (${pendingTargetCnt})` });
     }
     chips.push({ id: "NOT_STARTED", label: `📋 Not Started (${hospitals.filter(h => !h.userId).length})` });
@@ -2439,7 +2449,7 @@
       `<button type="button" onclick="activeSmartChip='${c.id}'; dirPage=1; renderActiveLoginsDirectory();" class="text-xs font-bold px-3 py-1.5 rounded-full transition ${activeSmartChip === c.id ? "bg-slate-900 text-amber-300 shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}">${c.label}</button>`
     ).join("");
 
-    const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance"];
+    const stageList = ["1. Kickoff Docs", "2. Desktop NC", "3. Audit Prep", "4. Onsite NC", "5. Final Clearance", "Certified"];
     const stageChips = ["ALL", ...stageList];
     const stageChipsBox = document.getElementById("stageFilterChipsBar");
     if (stageChipsBox) {
@@ -2454,7 +2464,7 @@
       if (activeSmartChip === "UNASSIGNED" && h.associate) return false;
       if (activeSmartChip === "NO_PAYMENT" && h.hasPaymentSetup) return false;
       if (activeSmartChip === "PAYMENT_DUE" && !isHospitalPaymentDue(h)) return false;
-      if (activeSmartChip === "TARGET_PENDING" && Boolean(toDateTimeLocalValue(h.deadline))) return false;
+      if (activeSmartChip === "TARGET_PENDING" && (isHospitalCertified(h) || Boolean(toDateTimeLocalValue(h.deadline)))) return false;
       if (activeSmartChip === "NOT_STARTED" && h.userId) return false;
       if (activeStageChip !== "ALL" && getHospitalResolvedStage(h) !== activeStageChip) return false;
       if (!isAssociate) {
@@ -2489,7 +2499,7 @@
       return `
         <tr class="${h.isDirty ? "bg-amber-50" : "hover:bg-slate-50"}">
           <td class="p-2.5 text-center">${isSuperAdmin ? `<input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk w-4 h-4 rounded text-red-600" />` : "•"}</td>
-          <td class="p-2.5"><div class="flex flex-wrap items-center gap-1.5"><span class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</span>${isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded-full">⏳ Target Pending</span>` : ""}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
+          <td class="p-2.5"><div class="flex flex-wrap items-center gap-1.5"><span class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</span>${isSuperAdmin && isHospitalCertified(h) ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-1.5 py-0.5 rounded-full">✓ Certified</span>` : (isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded-full">⏳ Target Pending</span>` : "")}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "associate", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${assocOpts}</select>` : `<span class="font-bold">${escapeHtml(h.associate || "Unassigned")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "currentStage", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${stageOpts}</select>` : `<span class="font-bold">${escapeHtml(h.currentStage || "1. Kickoff Docs")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<input type="datetime-local" value="${toDateTimeLocalValue(h.deadline)}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px]">${formatDeadlineDisplay(h.deadline) || "-"}</span>`}</td>
@@ -2517,7 +2527,7 @@
               <div class="flex items-start gap-2.5">
                 ${isSuperAdmin ? `<input type="checkbox" data-hosp=${escName} ${selectedHospKeys[h.hospitalName.toUpperCase()] ? "checked" : ""} onchange='toggleHospitalRowSelect(${escName}, this.checked)' class="hosp-batch-chk mt-1 w-4 h-4 rounded text-red-600" />` : ""}
                 <div>
-                  <div class="flex flex-wrap items-center gap-1.5"><h4 class="font-black text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>${isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">⏳ Target Pending</span>` : ""}</div>
+                  <div class="flex flex-wrap items-center gap-1.5"><h4 class="font-black text-sm text-slate-900">${escapeHtml(h.hospitalName)}</h4>${isSuperAdmin && isHospitalCertified(h) ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-full">✓ Certified</span>` : (isSuperAdmin && !toDateTimeLocalValue(h.deadline) ? `<span class="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">⏳ Target Pending</span>` : "")}</div>
                   <p class="text-[11px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}${h.password && (isSuperAdmin || isAssociate) ? " • Pass: " + escapeHtml(h.password) : ""}${h.city ? " • " + escapeHtml(h.city) : ""}</p>
                 </div>
               </div>
