@@ -675,6 +675,20 @@
     return String(str || "").trim().toUpperCase();
   }
 
+  function toDateTimeLocalValue(raw) {
+    if (!raw) return "";
+    const s = String(raw).trim();
+    if (!s) return "";
+    const isoMatch = s.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+    if (isoMatch) return `${isoMatch[1]}T${isoMatch[2]}`;
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    return "";
+  }
+
   function formatDeadlineDisplay(isoStr) {
     if (!isoStr) return "";
     const d = new Date(isoStr);
@@ -1811,10 +1825,17 @@
   function renderTemplateChecklistItems() {
     const q = (document.getElementById("tmplSearchInput")?.value || "").trim().toLowerCase();
     const box = document.getElementById("tmplChecklistContainer");
+    const dupSummary = document.getElementById("tmplDuplicateSummary");
+    const existingCnt = loadedTemplateItems.filter(it => it.alreadyExists).length;
+    if (dupSummary) {
+      dupSummary.innerText = existingCnt
+        ? `${existingCnt} item(s) already assigned to selected hospital (auto-skipped on push).`
+        : `${loadedTemplateItems.length} ready-made item(s) loaded.`;
+    }
     document.getElementById("tmplTickedCount").innerText = Object.keys(tickedTemplateCodes).length;
     const filtered = loadedTemplateItems.filter(it => !q || `${it.code} ${it.srNo} ${it.description}`.toLowerCase().includes(q));
     box.innerHTML = filtered.length
-      ? filtered.map(it => `<label class="flex items-start gap-3 p-3 hover:bg-slate-50 cursor-pointer ${it.alreadyExists ? "opacity-60" : ""}"><input type="checkbox" ${it.alreadyExists ? "checked disabled" : (tickedTemplateCodes[it.code] ? "checked" : "")} onchange="toggleSingleTemplateItem('${it.code}', this.checked)" class="mt-1 w-4 h-4 rounded text-emerald-600 shrink-0" /><div class="flex-1 text-xs"><span class="font-mono font-extrabold bg-slate-900 text-white px-2 py-0.5 rounded text-[10px]">${it.code}</span> <span class="font-bold text-slate-700">Sr. ${escapeHtml(it.srNo)}</span><p class="text-slate-800 font-semibold mt-1">${escapeHtml(it.description)}</p></div></label>`).join("")
+      ? filtered.map(it => `<label class="flex items-start gap-3 p-3 hover:bg-slate-50 cursor-pointer ${it.alreadyExists ? "opacity-60" : ""}"><input type="checkbox" ${it.alreadyExists ? "checked disabled" : (tickedTemplateCodes[it.code] ? "checked" : "")} onchange="toggleSingleTemplateItem('${it.code}', this.checked)" class="mt-1 w-4 h-4 rounded text-emerald-600 shrink-0" /><div class="flex-1 text-xs"><span class="font-mono font-extrabold bg-slate-900 text-white px-2 py-0.5 rounded text-[10px]">${it.code}</span> <span class="font-bold text-slate-700">Sr. ${escapeHtml(it.srNo)}</span>${it.alreadyExists ? ` <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full ml-1">Already Assigned</span>` : ``}<p class="text-slate-800 font-semibold mt-1">${escapeHtml(it.description)}</p></div></label>`).join("")
       : `<div class="p-6 text-center text-xs text-slate-400">No matching checklist items found.</div>`;
   }
 
@@ -1944,7 +1965,7 @@
       box.classList.add("hidden");
       const existing = session.adminData.hospitals.find(h => h.hospitalName === val);
       if (existing) {
-        if (existing.deadline) document.getElementById("assignDeadlineInput").value = existing.deadline;
+        if (existing.deadline) document.getElementById("assignDeadlineInput").value = toDateTimeLocalValue(existing.deadline);
         if (existing.currentStage) stageSel.value = existing.currentStage;
         assocSel.value = existing.associate || "";
         hint.innerText = existing.associate ? "✓ Associate: " + existing.associate : "⚠ Unassigned Associate";
@@ -2358,7 +2379,7 @@
           <td class="p-2.5"><div class="font-extrabold text-slate-900">${escapeHtml(h.hospitalName)}</div><div class="text-[10px] text-slate-500 font-mono">${h.userId || "Not Active Yet"}</div></td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "associate", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${assocOpts}</select>` : `<span class="font-bold">${escapeHtml(h.associate || "Unassigned")}</span>`}</td>
           <td class="p-2">${isSuperAdmin ? `<select onchange='stageHospitalChange(${escName}, "currentStage", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5">${stageOpts}</select>` : `<span class="font-bold">${escapeHtml(h.currentStage || "1. Kickoff Docs")}</span>`}</td>
-          <td class="p-2">${isSuperAdmin ? `<input type="datetime-local" value="${h.deadline || ""}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px]">${formatDeadlineDisplay(h.deadline) || "-"}</span>`}</td>
+          <td class="p-2">${isSuperAdmin ? `<input type="datetime-local" value="${toDateTimeLocalValue(h.deadline)}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px]">${formatDeadlineDisplay(h.deadline) || "-"}</span>`}</td>
           <td class="p-2">${canSeeFee ? `<input type="number" value="${h.totalFee || ""}" placeholder="₹ Fee" ${isSuperAdmin ? "" : "disabled"} oninput='stageHospitalChange(${escName}, "totalFee", this.value)' class="w-full text-xs font-bold border rounded-lg px-2 py-1.5" />` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
           <td class="p-2">${canSeeFee ? `<div class="flex items-center gap-1 text-[11px] font-bold">${[0,1,2,3].map(idx => `<label class="inline-flex items-center gap-0.5 bg-slate-100 px-1.5 py-1 rounded border"><input type="checkbox" ${m[idx] === 1 ? "checked" : ""} ${isSuperAdmin ? "" : "disabled"} onchange='stageHospitalChange(${escName}, "milestone", { idx: ${idx}, checked: this.checked })' class="w-3.5 h-3.5" /><span>P${idx+1}</span></label>`).join("")}</div>` : `<span class="text-[11px] text-slate-400">Hidden</span>`}</td>
           <td class="p-2">${canSeeFee ? `<select onchange='stageHospitalChange(${escName}, "paymentLockMode", this.value)' ${isSuperAdmin ? "" : "disabled"} class="w-full text-[11px] font-bold border rounded-lg px-1.5 py-1.5"><option value="SOFT" ${h.paymentLockMode === "SOFT" ? "selected" : ""}>SOFT</option><option value="STRICT" ${h.paymentLockMode === "STRICT" ? "selected" : ""}>STRICT</option></select>` : `-`}</td>
@@ -2401,7 +2422,7 @@
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Target Deadline</label>
-                ${isSuperAdmin ? `<input type="datetime-local" value="${h.deadline || ""}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5 bg-white" />` : `<div class="text-[11px] font-semibold">${formatDeadlineDisplay(h.deadline) || "-"}</div>`}
+                ${isSuperAdmin ? `<input type="datetime-local" value="${toDateTimeLocalValue(h.deadline)}" onchange='stageHospitalChange(${escName}, "deadline", this.value)' class="w-full text-[11px] border rounded-lg px-2 py-1.5 bg-white" />` : `<div class="text-[11px] font-semibold">${formatDeadlineDisplay(h.deadline) || "-"}</div>`}
               </div>
               ${canSeeFee ? `
               <div>
