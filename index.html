@@ -6,6 +6,7 @@
   <title>UDCP — Umbrella Docs & Compliance Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -92,7 +93,7 @@
     </div>
   </main>
 
-  <!-- 1B. ACCESS DENIED SCREEN (Unauthorized Associate ?hosp= Link) -->
+  <!-- 1B. ACCESS DENIED SCREEN -->
   <section id="accessDeniedSection" class="hidden flex-1 flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border-2 border-red-300 p-6 sm:p-8 text-center space-y-4">
       <div class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl font-black">🔒</div>
@@ -142,8 +143,8 @@
         <div id="hospProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
       </div>
 
-      <!-- COMPACT DUAL WORK vs PAYMENT METER (Hospital Dashboard) -->
-      <div id="hospDualMeterBox" class="pt-2 border-t border-slate-100"></div>
+      <!-- COMPACT DUAL WORK vs PAYMENT METER + OTHER WORK LOG -->
+      <div id="hospDualMeterBox" class="pt-2 border-t border-slate-100 space-y-2"></div>
 
       <div id="hospPaymentBar" class="hidden pt-2 space-y-2">
         <div id="hospPaymentWarningBanner" class="hidden bg-red-50 border border-red-300 text-red-800 text-xs font-bold p-3 rounded-xl"></div>
@@ -197,10 +198,13 @@
         </div>
       </div>
 
-      <!-- COMPACT DUAL WORK vs PAYMENT METER (Direct ?hosp= View) -->
-      <div id="opsViewDualMeterBox" class="pt-2 border-t border-slate-100"></div>
+      <!-- COMPACT DUAL WORK vs PAYMENT METER + OTHER WORK LOG -->
+      <div id="opsViewDualMeterBox" class="pt-2 border-t border-slate-100 space-y-2"></div>
 
-      <!-- Associate Add Payment Request Box (Direct ?hosp= View) -->
+      <!-- HOSPITAL AGREEMENT SECTION (ADMIN & ASSIGNED ASSOCIATE ONLY) -->
+      <div id="opsViewAgreementBox" class="hidden bg-indigo-50/70 border border-indigo-300 rounded-xl p-3.5 space-y-2.5"></div>
+
+      <!-- Associate Add Payment Request Box (Consultancy vs Other Work) -->
       <div id="opsViewAssocPaymentBox" class="hidden bg-amber-50/70 border border-amber-300 rounded-xl p-3 space-y-2"></div>
 
       <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
@@ -285,9 +289,15 @@
       <button type="button" id="mainTabLogins" onclick="switchAdminMainTab('logins')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
         2. Hospital Master Cards, Filters & Milestones
       </button>
+      <button type="button" id="mainTabExpenses" onclick="switchAdminMainTab('expenses')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+        3. 💸 Expenses & Monthly Ledger
+      </button>
+      <button type="button" id="mainTabAnalytics" onclick="switchAdminMainTab('analytics')" class="hidden px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-amber-300 shadow-sm">
+        4. 📊 Business Analytics, ROI & Commission
+      </button>
     </div>
 
-    <!-- TAB 1 -->
+    <!-- TAB 1: ASSIGN & VERIFY -->
     <div id="adminAssignView" class="space-y-6">
       <div id="superAdminAssignBox" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
@@ -461,7 +471,7 @@
       </div>
     </div>
 
-    <!-- TAB 2 -->
+    <!-- TAB 2: HOSPITAL MASTER DIRECTORY -->
     <div id="adminLoginsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4 pb-20">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
@@ -538,6 +548,213 @@
       <div id="dirPaginationBar" class="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-slate-600"></div>
     </div>
 
+    <!-- TAB 3: EXPENSES & PERSONAL MONTHLY LEDGER -->
+    <div id="adminExpensesView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div>
+          <h3 id="expenseTabTitle" class="font-bold text-slate-900 text-base">💸 Expense Entry & Monthly Ledger</h3>
+          <p id="expenseTabSub" class="text-xs text-slate-500">Strict Personal Privacy: Team members see ONLY their own expenses. Super Admin sees all.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="expFilterPerson" onchange="renderExpensesTab()" class="hidden text-xs font-bold border border-slate-300 rounded-xl px-3 py-1.5 bg-white">
+            <option value="ALL">All Team Members</option>
+          </select>
+          <select id="expFilterMonth" onchange="renderExpensesTab()" class="text-xs font-bold border border-slate-300 rounded-xl px-3 py-1.5 bg-white">
+            <option value="ALL">All Months</option>
+          </select>
+          <select id="expFilterCategory" onchange="renderExpensesTab()" class="text-xs font-bold border border-slate-300 rounded-xl px-3 py-1.5 bg-white">
+            <option value="ALL">All Categories</option>
+            <option value="Travelling">Travelling</option>
+            <option value="Fooding">Fooding</option>
+            <option value="Accommodation">Accommodation</option>
+            <option value="Salary">Salary</option>
+            <option value="Associate Commission">Associate Commission</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Add New Expense Form -->
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+        <div class="text-xs font-black text-slate-900 uppercase tracking-wide">+ Add New Expense Entry (Backed up to Google Sheet)</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
+          <div class="md:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Date *</label>
+            <input id="expDateInput" type="date" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Category *</label>
+            <select id="expCategorySelect" onchange="onExpenseCategoryChange()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold">
+              <option value="Travelling">Travelling (Ticket / Conveyance)</option>
+              <option value="Fooding">Fooding (Meals)</option>
+              <option value="Accommodation">Accommodation (Hotel / Stay)</option>
+              <option value="Other">Other (Specify)</option>
+            </select>
+          </div>
+          <div id="expOtherDetailBox" class="hidden md:col-span-3">
+            <label class="block text-[11px] font-bold text-red-700 mb-1">Specify Other Expense *</label>
+            <input id="expOtherDetailInput" type="text" placeholder="e.g. Toll, Printing, Courier..." class="w-full px-3 py-2 rounded-xl border border-red-300 bg-white text-xs font-semibold" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₹) *</label>
+            <input id="expAmountInput" type="number" min="1" placeholder="₹ Amount" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Hospital (Optional)</label>
+            <select id="expHospitalSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold">
+              <option value="">-- General / Office --</option>
+            </select>
+          </div>
+          <div id="expAdminStaffCol" class="hidden md:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Staff / Associate (Optional)</label>
+            <input id="expAssocNameInput" type="text" placeholder="e.g. Kunal / Himanshu" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold" />
+          </div>
+          <div class="md:col-span-6">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Note / Description</label>
+            <input id="expNoteInput" type="text" placeholder="e.g. Kanpur to Karnal train ticket..." class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs" />
+          </div>
+          <div class="md:col-span-3 flex justify-end">
+            <button type="button" onclick="submitNewExpense()" class="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs py-2.5 px-4 rounded-xl shadow">
+              ✓ Save Expense
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Summary Cards -->
+      <div id="expenseSummaryCards" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5"></div>
+
+      <!-- Expense Ledger Table -->
+      <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead class="bg-slate-900 text-white uppercase text-[10px] tracking-wider">
+            <tr>
+              <th class="p-2.5">Date</th>
+              <th class="p-2.5">Person</th>
+              <th class="p-2.5">Category</th>
+              <th class="p-2.5">Hospital / Linked</th>
+              <th class="p-2.5">Note</th>
+              <th class="p-2.5 text-right">Amount (₹)</th>
+              <th class="p-2.5 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="expenseLedgerBody" class="divide-y divide-slate-200 bg-white"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: SUPER ADMIN BUSINESS ANALYTICS, ROI, BREAK-EVEN, AGEING & GRAPHS -->
+    <div id="adminAnalyticsView" class="hidden space-y-6">
+      <!-- Dynamic Analytics Filters -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="font-black text-slate-900 text-base">📊 Business Intelligence, Accountancy & ROI Suite (Admin Only)</h3>
+            <p class="text-xs text-slate-500">Filter by Month, Date Range, Hospital, Associate, Stage, or Payment Status</p>
+          </div>
+          <button type="button" onclick="resetAnalyticsFilters()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl">Reset Filters</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">From Date</label>
+            <input id="anaFromDate" type="date" onchange="renderAdminAnalytics()" class="w-full text-xs font-semibold border border-slate-300 rounded-xl px-2.5 py-2 bg-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">To Date</label>
+            <input id="anaToDate" type="date" onchange="renderAdminAnalytics()" class="w-full text-xs font-semibold border border-slate-300 rounded-xl px-2.5 py-2 bg-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Hospital</label>
+            <select id="anaHospFilter" onchange="renderAdminAnalytics()" class="w-full text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-2 bg-white">
+              <option value="ALL">All Hospitals</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Associate</label>
+            <select id="anaAssocFilter" onchange="renderAdminAnalytics()" class="w-full text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-2 bg-white">
+              <option value="ALL">All Associates</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Stage / Status</label>
+            <select id="anaStageFilter" onchange="renderAdminAnalytics()" class="w-full text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-2 bg-white">
+              <option value="ALL">All Stages</option>
+              <option value="1. Kickoff Docs">1. Kickoff Docs</option>
+              <option value="2. Desktop NC">2. Desktop NC</option>
+              <option value="3. Audit Prep">3. Audit Prep</option>
+              <option value="4. Onsite NC">4. Onsite NC</option>
+              <option value="5. Final Clearance">5. Final Clearance</option>
+              <option value="Certified">✓ Certified</option>
+              <option value="Dropped project">✕ Dropped project</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Payment Status</label>
+            <select id="anaPayStatusFilter" onchange="renderAdminAnalytics()" class="w-full text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-2 bg-white">
+              <option value="ALL">All Payments</option>
+              <option value="BEHIND">Payment Behind Work</option>
+              <option value="DUE">Has Balance Due</option>
+              <option value="FULL">100% Paid</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Financial KPIs -->
+      <div id="analyticsPrimaryKpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- Advanced Accountancy Tools: Break-Even, Collection Efficiency, Gross vs Net Margin, Receivable Ageing, Burn Rate -->
+      <div id="analyticsAdvancedKpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- Visual Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <h4 class="text-xs font-black text-slate-800 uppercase mb-3">1. Cash Flow: Revenue vs. Expenses vs. Net Profit</h4>
+          <div class="h-60"><canvas id="chartRevExpProfit"></canvas></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <h4 class="text-xs font-black text-slate-800 uppercase mb-3">2. Revenue Mix: Consultancy Fee vs. Other Work</h4>
+          <div class="h-60"><canvas id="chartRevenueMix"></canvas></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <h4 class="text-xs font-black text-slate-800 uppercase mb-3">3. Expense Breakdown by Category</h4>
+          <div class="h-60"><canvas id="chartExpenseCat"></canvas></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <h4 class="text-xs font-black text-slate-800 uppercase mb-3">4. Month-on-Month (MoM) Collection & Profit Trend</h4>
+          <div class="h-60"><canvas id="chartMomTrend"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Associate Commission (0% - 50% on Consultancy Fee Only) & Performance Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h4 class="font-black text-slate-900 text-sm">🤝 Associate Commission Manager (0% – 50% on Consultancy Fee Only) & ROI</h4>
+            <p class="text-xs text-slate-500">Commission is calculated strictly on Approved Consultancy Fee (Other Work excluded) and flows into Expenses.</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-slate-900 text-white uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="p-2.5">Associate</th>
+                <th class="p-2.5 text-center">Hospitals</th>
+                <th class="p-2.5 text-right">Consultancy Paid (₹)</th>
+                <th class="p-2.5 text-right">Consultancy Due (₹)</th>
+                <th class="p-2.5 text-center">Commission % (0–50)</th>
+                <th class="p-2.5 text-right">Earned Commission (₹)</th>
+                <th class="p-2.5 text-right">Field Expenses (₹)</th>
+                <th class="p-2.5 text-right">Net Contribution (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="associateAnalyticsTableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <div id="stickyBulkSaveBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-3xl bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-amber-400 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2.5">
         <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
@@ -556,7 +773,7 @@
       <div class="px-5 py-3.5 umbrella-gradient text-white flex items-center justify-between border-b-2 border-amber-400">
         <div>
           <span id="modalNcTag" class="text-[11px] font-bold text-amber-300 uppercase"></span>
-          <h3 class="font-bold text-sm sm:text-base">Add Photos / Scans / PDFs (Auto-Merges into 1 PDF)</h3>
+          <h3 class="font-bold text-sm sm:text-base">Add Photos / Scans / PDFs or Written Response</h3>
         </div>
         <button type="button" onclick="closeEvidenceModal()" class="text-white/80 hover:text-white text-xl font-bold px-2">&times;</button>
       </div>
@@ -591,18 +808,32 @@
         <div class="border-t border-slate-200 pt-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-extrabold text-slate-800">Attached Items (<span id="queueCount">0</span>)</span>
-            <span class="text-[11px] text-slate-500">Merges into 1 PDF</span>
+            <span class="text-[11px] text-slate-500">Previous uploads stay safe in history</span>
           </div>
           <div id="evidenceQueueList" class="max-h-36 overflow-y-auto space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs"></div>
         </div>
-        <!-- OPTIONAL SHORT REMARK INPUT -->
+        <!-- SHORT REMARK / WRITTEN RESPONSE INPUT -->
         <div class="space-y-1">
-          <label class="block text-xs font-extrabold text-slate-700">📝 Short Document Remark <span class="text-slate-400 font-semibold">(Optional — e.g. Signed copy, Valid till 2027)</span></label>
-          <input id="uploadShortRemarkInput" type="text" maxlength="140" placeholder="Write a short note about this document (optional)..."
+          <label class="block text-xs font-extrabold text-slate-700">📝 Written Response / Short Remark <span class="text-slate-400 font-semibold">(Can also submit without attaching a file)</span></label>
+          <input id="uploadShortRemarkInput" type="text" maxlength="240" oninput="renderQueueUI()" placeholder="Write remark or response here..."
             class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium bg-slate-50 focus:bg-white focus:border-red-500 outline-none" />
         </div>
-        <button id="submitMergedBtn" type="button" onclick="mergeAndUploadFinalPDF()" disabled class="w-full bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow text-sm">✓ Merge All & Submit Final PDF</button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button id="submitTextOnlyBtn" type="button" onclick="submitRemarkOnlyWithoutFile()" disabled class="bg-slate-900 disabled:bg-slate-200 disabled:text-slate-400 hover:bg-slate-800 text-amber-300 font-bold py-3 rounded-xl shadow text-xs">✍️ Submit Remark Only (No File)</button>
+          <button id="submitMergedBtn" type="button" onclick="mergeAndUploadFinalPDF()" disabled class="bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow text-xs">✓ Merge All & Submit Final PDF</button>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- OTHER WORK PAYMENTS LOG MODAL -->
+  <div id="otherWorkModal" class="hidden fixed inset-0 bg-slate-900/75 z-40 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl p-5 space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 id="otherWorkModalTitle" class="font-black text-slate-900 text-base">🧾 Other Work Payments Log</h3>
+        <button type="button" onclick="document.getElementById('otherWorkModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+      <div id="otherWorkModalBody" class="max-h-80 overflow-y-auto space-y-2 text-xs"></div>
     </div>
   </div>
 
@@ -626,7 +857,7 @@
         <h3 class="font-bold text-slate-900 text-base">🔐 Staff / Associate Verification</h3>
         <button type="button" onclick="document.getElementById('opsAuthModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
-      <p class="text-[11px] text-slate-500">Login with your registered Mobile Number & Password (USERS_AUTH) to unlock Upload, Payment Entry, or Approve/Reject controls.</p>
+      <p class="text-[11px] text-slate-500">Login with your registered Mobile Number & Password to unlock Upload, Payment Entry, Agreement Upload, or Approve/Reject controls.</p>
       <div class="space-y-3">
         <input id="opsModalMobile" type="text" placeholder="Registered Mobile Number" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
         <input id="opsModalPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter') submitOpsModalLogin()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-red-500" />
@@ -641,8 +872,8 @@
   <canvas id="workCanvas" class="hidden"></canvas>
 
 <script>
-  const STORAGE_KEY = "udcp_session_v1";
-  const OPS_AUTH_KEY = "udcp_ops_auth_v1";
+  const STORAGE_KEY = "udcp_session_v2";
+  const OPS_AUTH_KEY = "udcp_ops_auth_v2";
 
   let session = {
     role: null,
@@ -651,18 +882,41 @@
     fullName: "",
     userId: "",
     password: "",
+    mpUid: "",
+    mpMob: "",
     isAdminImpersonating: false,
     adminCredentials: null,
     hospital: null,
     ncs: [],
-    adminData: { hospitals: [], ncs: [], inputSheetUrl: "", associates: [], pendingPaymentRequests: [] }
+    otherPayments: [],
+    adminData: {
+      hospitals: [],
+      ncs: [],
+      inputSheetUrl: "",
+      associates: [],
+      paymentRequests: [],
+      otherPayments: [],
+      expenses: [],
+      agreements: [],
+      commissions: {}
+    }
   };
 
   let pendingDirectHospId = "";
   let hospStageFilter = "ALL";
   let activeSmartChip = "ACTIVE_UDCP";
   let activeStageChip = "ALL";
-  let opsPublicViewData = { hospital: null, ncs: [], viewerRole: "", canSeeFee: false, canUpload: false, pendingPayments: [] };
+  let opsPublicViewData = {
+    hospital: null,
+    ncs: [],
+    viewerRole: "",
+    canSeeFee: false,
+    canUpload: false,
+    canSeeAgreement: false,
+    paymentRequests: [],
+    otherPayments: [],
+    agreements: []
+  };
   let opsUnlockedUser = null;
 
   let activeNc = null;
@@ -682,6 +936,7 @@
   const DIR_PAGE_SIZE = 30;
   let dirtyHospitals = {};
   let selectedHospKeys = {};
+  let analyticsCharts = {};
 
   setInterval(updateAllCountdowns, 1000);
 
@@ -693,7 +948,7 @@
     return String(v || "").trim().toUpperCase();
   }
 
-  /* ================= COMPACT DUAL WORK vs PAYMENT METER ================= */
+  /* ================= COMPACT DUAL WORK vs PAYMENT METER + OTHER WORK ================= */
 
   function getWorkStepInfo(h) {
     const st = String((h && h.currentStage) || "").trim();
@@ -731,8 +986,47 @@
       payPct = paidSteps * 25;
     }
     const balanceDue = totalFee > 0 ? Math.max(0, totalFee - paidAmount) : 0;
-    const hasSetup = totalFee > 0 || paidAmount > 0 || paidSteps > 0;
-    return { totalFee, paidAmount, payPct, balanceDue, hasSetup };
+    const otherWorkTotal = Number(h && h.otherWorkTotal) || 0;
+    const hasSetup = totalFee > 0 || paidAmount > 0 || paidSteps > 0 || otherWorkTotal > 0;
+    return { totalFee, paidAmount, payPct, balanceDue, otherWorkTotal, hasSetup };
+  }
+
+  function openOtherWorkLogModal(hospId, hospName) {
+    let logs = [];
+    if (session.role === "hospital") {
+      logs = session.otherPayments || [];
+    } else if (opsPublicViewData.hospital && normKey(opsPublicViewData.hospital.userId) === normKey(hospId)) {
+      logs = opsPublicViewData.otherPayments || [];
+    } else {
+      logs = (session.adminData.otherPayments || []).filter(op =>
+        (hospId && normKey(op.userId) === normKey(hospId)) ||
+        (hospName && normKey(op.hospitalName) === normKey(hospName))
+      );
+    }
+
+    document.getElementById("otherWorkModalTitle").innerText = `🧾 Other Work Payments — ${hospName || hospId}`;
+    const body = document.getElementById("otherWorkModalBody");
+    if (!logs.length) {
+      body.innerHTML = `<p class="text-slate-400 text-center py-6">No approved Other Work payments recorded yet.</p>`;
+    } else {
+      const total = logs.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+      body.innerHTML = `
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center justify-between font-black text-blue-950">
+          <span>Total Other Work Payments (${logs.length})</span>
+          <span>₹${total.toLocaleString("en-IN")}</span>
+        </div>
+        ${logs.map(op => `
+          <div class="border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-2">
+            <div>
+              <div class="font-bold text-slate-900">${escapeHtml(op.note || "Other Work Payment")}</div>
+              <div class="text-[11px] text-slate-500">${escapeHtml(op.recordedAt)} • By ${escapeHtml(op.associateName || "Team")}</div>
+            </div>
+            <div class="font-black text-emerald-700 text-sm">₹${Number(op.amount).toLocaleString("en-IN")}</div>
+          </div>
+        `).join("")}
+      `;
+    }
+    document.getElementById("otherWorkModal").classList.remove("hidden");
   }
 
   function renderCompactDualMeterHtml(h, options = {}) {
@@ -740,7 +1034,7 @@
     const compactCard = Boolean(options.compactCard);
     const work = getWorkStepInfo(h);
     const pay = computeHospitalPaymentStats(h);
-    const isBehind = showPay && pay.hasSetup && !work.isDropped && (work.workPct > pay.payPct);
+    const isBehind = showPay && (pay.totalFee > 0 || pay.paidAmount > 0) && !work.isDropped && (work.workPct > pay.payPct);
 
     const stepNames = [
       { n: 1, short: "Kickoff", pct: 25 },
@@ -774,6 +1068,8 @@
 
     const fmt = n => "₹" + Number(n || 0).toLocaleString("en-IN");
     const payBarColor = isBehind ? "bg-red-600" : "bg-emerald-600";
+    const escId = JSON.stringify(h.userId || "").replace(/'/g, "&#39;");
+    const escName = JSON.stringify(h.hospitalName || "").replace(/'/g, "&#39;");
 
     return `
       <div class="rounded-xl border ${isBehind ? "border-red-300 bg-red-50/50" : "border-slate-200 bg-slate-50/90"} p-2.5 sm:p-3 space-y-2">
@@ -788,7 +1084,7 @@
 
         <div class="pt-1 space-y-1">
           <div class="flex flex-wrap items-center justify-between gap-1 text-[11px]">
-            <span class="font-extrabold text-slate-700">💳 Fee Paid: <span class="${isBehind ? "text-red-700" : "text-emerald-700"}">${fmt(pay.paidAmount)}</span>${pay.totalFee ? " / " + fmt(pay.totalFee) : ""} <span class="font-black">(${pay.payPct}%)</span></span>
+            <span class="font-extrabold text-slate-700">💳 Consultancy Paid: <span class="${isBehind ? "text-red-700" : "text-emerald-700"}">${fmt(pay.paidAmount)}</span>${pay.totalFee ? " / " + fmt(pay.totalFee) : ""} <span class="font-black">(${pay.payPct}%)</span></span>
             ${pay.totalFee > 0 ? `<span class="font-extrabold ${pay.balanceDue > 0 ? "text-red-700" : "text-emerald-700"}">${pay.balanceDue > 0 ? "Balance Due: " + fmt(pay.balanceDue) : "✓ Full Paid"}</span>` : ""}
           </div>
 
@@ -806,6 +1102,11 @@
             <span class="text-right pr-1">75% OA NC</span>
             <span class="text-right">100% Cert.</span>
           </div>` : ""}
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-slate-200/80 text-[11px]">
+            <span class="font-bold text-blue-900">🧾 Other Work Payments: <strong>${fmt(pay.otherWorkTotal)}</strong></span>
+            <button type="button" onclick='openOtherWorkLogModal(${escId}, ${escName})' class="text-[11px] font-extrabold text-blue-700 underline hover:text-blue-900">View Other Work Log ↗</button>
+          </div>
         </div>
       </div>
     `;
@@ -921,6 +1222,8 @@
     );
   }
 
+  /* ================= STARTUP & MASTER PORTAL HANDSHAKE ================= */
+
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const savedOps = localStorage.getItem(OPS_AUTH_KEY);
@@ -931,9 +1234,11 @@
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.userId) {
-          session.userId = parsed.userId;
+        if (parsed && (parsed.userId || parsed.mpUid || parsed.mpMob)) {
+          session.userId = parsed.userId || "";
           session.password = parsed.password || "";
+          session.mpUid = parsed.mpUid || "";
+          session.mpMob = parsed.mpMob || "";
           session.role = parsed.role || null;
           session.subRole = parsed.subRole || "";
           session.sheetColumn = parsed.sheetColumn || "";
@@ -944,18 +1249,44 @@
 
     const params = new URLSearchParams(window.location.search);
     const directHospId = params.get("hosp");
+    const mpUid = (params.get("mp_uid") || params.get("uid") || "").trim();
+    const mpMob = (params.get("mp_mob") || params.get("mobile") || "").trim();
+
+    if (mpUid || mpMob) {
+      session.mpUid = mpUid;
+      session.mpMob = mpMob;
+      if (directHospId) {
+        pendingDirectHospId = directHospId.trim().toUpperCase();
+        await loadDirectHospitalOpsView(pendingDirectHospId);
+        return;
+      }
+      await performMasterHandshake(mpUid, mpMob);
+      return;
+    }
+
     if (directHospId) {
       pendingDirectHospId = directHospId.trim().toUpperCase();
       await loadDirectHospitalOpsView(pendingDirectHospId);
       return;
     }
 
-    if (session.userId && session.password) {
+    if (session.mpUid || session.mpMob) {
+      await performMasterHandshake(session.mpUid, session.mpMob);
+    } else if (session.userId && session.password) {
       document.getElementById("loginUserId").value = session.userId;
       document.getElementById("loginPassword").value = session.password;
       await performLogin(session.userId, session.password, true);
     }
   });
+
+  async function performMasterHandshake(mpUid, mpMob) {
+    const res = await callApi({ action: "masterHandshake", mpUid, mpMob }, "Connecting via Master Portal...");
+    if (!res || res.status !== "ok") {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    applyAuthenticatedResponse(res, res.user.loginId || mpUid || mpMob, res.user.password || "", false, true);
+  }
 
   function callApi(payload, msg = "Syncing with UDCP...") {
     if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
@@ -975,14 +1306,18 @@
                 action: "getPublicHospitalView",
                 hospId: payload.targetHospId,
                 userId: payload.userId,
-                password: payload.password
+                password: payload.password,
+                mpUid: session.mpUid,
+                mpMob: session.mpMob
               }, `Confirming PDF Upload (${i}/3)...`);
               if (v && v.status === "ok" && Array.isArray(v.ncs) && v.ncs.some(x => x.ncId === payload.ncId && x.status === "Submitted")) {
                 return v;
               }
               if (i === 3) return v;
             } else {
-              const v = await callApi({ action: "login", userId: session.userId, password: session.password }, `Confirming PDF Upload (${i}/3)...`);
+              const v = session.mpUid || session.mpMob
+                ? await callApi({ action: "masterHandshake", mpUid: session.mpUid, mpMob: session.mpMob }, `Confirming PDF Upload (${i}/3)...`)
+                : await callApi({ action: "login", userId: session.userId, password: session.password }, `Confirming PDF Upload (${i}/3)...`);
               if (v && v.status === "ok" && Array.isArray(v.ncs) && v.ncs.some(x => x.ncId === payload.ncId && x.status === "Submitted")) {
                 return v;
               }
@@ -1031,6 +1366,10 @@
 
   async function loadDirectHospitalOpsView(hospId) {
     const payload = { action: "getPublicHospitalView", hospId };
+    if (session.mpUid || session.mpMob) {
+      payload.mpUid = session.mpUid;
+      payload.mpMob = session.mpMob;
+    }
     const activeAuth = opsUnlockedUser || (session.userId ? {
       loginId: session.userId,
       password: session.password,
@@ -1063,7 +1402,10 @@
       viewerRole: res.viewerRole || "",
       canSeeFee: Boolean(res.canSeeFee),
       canUpload: Boolean(res.canUpload),
-      pendingPayments: res.pendingPayments || []
+      canSeeAgreement: Boolean(res.canSeeAgreement),
+      paymentRequests: res.paymentRequests || [],
+      otherPayments: res.otherPayments || [],
+      agreements: res.agreements || []
     };
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("accessDeniedSection").classList.add("hidden");
@@ -1072,7 +1414,7 @@
   }
 
   function renderDirectHospitalOpsView() {
-    const { hospital, ncs, viewerRole, canSeeFee, canUpload, pendingPayments } = opsPublicViewData;
+    const { hospital, ncs, viewerRole, canSeeFee, canUpload, canSeeAgreement, paymentRequests, agreements } = opsPublicViewData;
     if (!hospital) return;
 
     document.getElementById("opsViewHospId").innerText = hospital.userId;
@@ -1088,7 +1430,7 @@
 
     document.getElementById("opsViewStageBadge").innerText = hospital.currentStage || "1. Kickoff Docs";
 
-    const effectiveStaff = opsUnlockedUser || (session.userId && (normKey(session.role) === "ADMIN" || normKey(session.role) === "ASSOCIATE" || normKey(session.role) === "OPS_TEAM" || normKey(session.subRole) === "ASSOCIATE" || normKey(session.subRole) === "OPERATOR" || normKey(session.subRole) === "FIELD")
+    const effectiveStaff = opsUnlockedUser || ((session.userId || session.mpUid || session.mpMob) && (normKey(session.role) === "ADMIN" || normKey(session.role) === "ASSOCIATE" || normKey(session.role) === "OPS_TEAM" || normKey(session.subRole) === "ASSOCIATE" || normKey(session.subRole) === "OPERATOR" || normKey(session.subRole) === "FIELD")
       ? {
           loginId: session.userId,
           password: session.password,
@@ -1101,6 +1443,7 @@
     const effRole = normKey(viewerRole || (effectiveStaff && effectiveStaff.role));
     const isAssocAllowed = effRole === "ASSOCIATE" && effectiveStaff && isAssociateAllowedForHospital(hospital, effectiveStaff);
     const canViewFees = Boolean(canSeeFee) || effRole === "ADMIN" || isAssocAllowed;
+    const canManageAgreement = Boolean(canSeeAgreement) || effRole === "ADMIN" || isAssocAllowed;
 
     const payBadge = document.getElementById("opsViewPayBadge");
     if (payBadge) {
@@ -1123,20 +1466,61 @@
       dualMeterBox.innerHTML = renderCompactDualMeterHtml(hospital, { showPay: canViewFees, compactCard: false });
     }
 
-    // Associate Add Payment Box in ?hosp= View
+    // Hospital Agreement Section (Admin & Assigned Associate ONLY)
+    const agBox = document.getElementById("opsViewAgreementBox");
+    if (agBox) {
+      if (canManageAgreement) {
+        const agListHtml = (agreements && agreements.length)
+          ? agreements.map((a, idx) => `
+              <div class="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 rounded-lg border border-indigo-200 text-xs">
+                <div>
+                  <span class="font-extrabold text-indigo-950">Agreement #${agreements.length - idx}: ${escapeHtml(a.note || a.fileName)}</span>
+                  <span class="text-[11px] text-slate-500 block">Uploaded by ${escapeHtml(a.uploadedBy)} • ${escapeHtml(a.uploadedAt)}</span>
+                </div>
+                <a href="${a.fileUrl}" target="_blank" class="font-bold bg-indigo-600 text-white px-3 py-1 rounded-lg">📄 View Agreement ↗</a>
+              </div>
+            `).join("")
+          : `<p class="text-[11px] text-slate-500">No Hospital Agreement uploaded yet.</p>`;
+
+        agBox.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-black text-indigo-950">📑 Hospital Agreement (Admin & Associate Only)</span>
+            <span class="text-[10px] font-bold text-indigo-700">Previous versions preserved automatically</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="opsAgNoteInput" type="text" placeholder="Agreement Title / Note (e.g. Signed MOU 2026)" class="flex-1 min-w-[160px] px-3 py-1.5 rounded-lg border border-indigo-300 bg-white text-xs" />
+            <label class="cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-lg shadow">
+              📤 Upload Agreement (PDF/Image)
+              <input type="file" accept="application/pdf,image/*" onchange="uploadAgreementFromOpsView(event)" class="hidden" />
+            </label>
+          </div>
+          <div class="space-y-1.5">${agListHtml}</div>
+        `;
+        agBox.classList.remove("hidden");
+      } else {
+        agBox.classList.add("hidden");
+      }
+    }
+
+    // Associate / Admin Add Payment Box (Consultancy Fee vs Other Work)
     const assocPayBox = document.getElementById("opsViewAssocPaymentBox");
     if (assocPayBox) {
-      if (isAssocAllowed) {
-        const pendingHtml = (pendingPayments && pendingPayments.length)
-          ? `<div class="text-[11px] font-bold text-amber-900 bg-white/80 px-2.5 py-1.5 rounded-lg border border-amber-300">⏳ Pending Admin Approval: ${pendingPayments.map(p => `₹${Number(p.amount).toLocaleString("en-IN")}${p.note ? " (" + escapeHtml(p.note) + ")" : ""}`).join(", ")}</div>`
+      if (isAssocAllowed || effRole === "ADMIN") {
+        const pendingList = (paymentRequests || []).filter(p => p.status === "Pending");
+        const pendingHtml = pendingList.length
+          ? `<div class="text-[11px] font-bold text-amber-900 bg-white/80 px-2.5 py-1.5 rounded-lg border border-amber-300">⏳ Pending Admin Approval: ${pendingList.map(p => `[${p.paymentType === "OTHER_WORK" ? "Other Work" : "Consultancy"}] ₹${Number(p.amount).toLocaleString("en-IN")}${p.note ? " (" + escapeHtml(p.note) + ")" : ""}`).join(", ")}</div>`
           : "";
         assocPayBox.innerHTML = `
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <span class="text-xs font-extrabold text-amber-950">💰 Submit New Received Payment (Requires Admin Approval)</span>
+            <span class="text-xs font-extrabold text-amber-950">💰 Submit New Received Payment (Admin Approval Required)</span>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <input id="opsAssocAddPayAmt" type="number" min="1" placeholder="New Amount Received ₹" class="w-44 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-bold outline-none" />
-            <input id="opsAssocAddPayNote" type="text" placeholder="Note (e.g. UPI / Cash / Cheque)" class="flex-1 min-w-[160px] px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs outline-none" />
+            <select id="opsAssocPayType" class="px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-extrabold text-slate-900 outline-none">
+              <option value="CONSULTANCY">Consultancy Fee</option>
+              <option value="OTHER_WORK">Other Work Payment</option>
+            </select>
+            <input id="opsAssocAddPayAmt" type="number" min="1" placeholder="New Amount Received ₹" class="w-40 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-bold outline-none" />
+            <input id="opsAssocAddPayNote" type="text" placeholder="Note (e.g. UPI / Cash / Visit / Training)" class="flex-1 min-w-[160px] px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs outline-none" />
             <button type="button" onclick="submitAssociatePaymentFromOpsView()" class="bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-extrabold px-4 py-1.5 rounded-lg shadow">+ Send for Approval</button>
           </div>
           ${pendingHtml}
@@ -1193,6 +1577,10 @@
     listContainer.innerHTML = ncs.map(nc => {
       const safeJson = JSON.stringify(nc).replace(/'/g, "&#39;");
       const allowUploadHere = canUploadOrUnable && nc.status !== "Approved";
+      const histLinks = (nc.proofHistory && nc.proofHistory.length)
+        ? nc.proofHistory.map((item, i) => `<a href="${item.url}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-xl">📑 PDF ${i + 1}</a>`).join("")
+        : (nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-xl">📑 View PDF</a>` : `<span class="text-xs text-slate-400">Pending Upload</span>`);
+
       return `
       <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div class="space-y-2 flex-1">
@@ -1209,15 +1597,14 @@
           </div>
           <div>${formatNcRichText(nc.correctiveAction)}</div>
           ${nc.adminNote ? `<p class="text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</p>` : ""}
-          ${nc.uploadRemark ? `<p class="text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded"><strong>📝 Upload Remark:</strong> ${escapeHtml(nc.uploadRemark)}</p>` : ""}
-          ${nc.status === "Unable to Provide" ? `<p class="text-xs text-purple-800 bg-purple-50 px-2.5 py-1 rounded"><strong>Hospital / Staff Reason:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ""}
+          ${nc.hospitalResponse ? `<p class="text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded"><strong>📝 Response / Log:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ""}
           ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Verification Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ""}
         </div>
         <div class="flex flex-wrap items-center gap-2 shrink-0">
-          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-xl">📑 View PDF</a>` : `<span class="text-xs text-slate-400">Pending Upload</span>`}
+          ${histLinks}
           ${allowUploadHere ? `
             <button type="button" onclick='openUnableModal(${safeJson}, "OPS_VIEW")' class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl">Unable to Provide</button>
-            <button type="button" onclick='openEvidenceModal(${safeJson}, "OPS_VIEW")' class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl shadow">📸 Capture / Upload</button>
+            <button type="button" onclick='openEvidenceModal(${safeJson}, "OPS_VIEW")' class="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl shadow">📸 Upload / Remark</button>
           ` : ""}
           ${canVerify && (nc.status === "Submitted" || nc.status === "Unable to Provide") ? `
             <button type="button" onclick="verifyNCFromOpsView('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl">✓ Approve</button>
@@ -1228,23 +1615,57 @@
     `}).join("");
   }
 
+  async function uploadAgreementFromOpsView(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !opsPublicViewData.hospital) return;
+    const staff = opsUnlockedUser || (session.userId ? { loginId: session.userId, password: session.password } : null);
+    const note = (document.getElementById("opsAgNoteInput")?.value || "").trim() || file.name;
+    const ext = (file.name.split(".").pop() || "pdf").toLowerCase();
+    const b64 = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+    e.target.value = "";
+
+    const res = await callApi({
+      action: "uploadHospitalAgreement",
+      hospId: opsPublicViewData.hospital.userId,
+      hospitalName: opsPublicViewData.hospital.hospitalName,
+      userId: staff ? staff.loginId : session.userId,
+      password: staff ? staff.password : session.password,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
+      note,
+      fileExt: ext,
+      fileBase64: b64
+    }, "Uploading Hospital Agreement...");
+
+    if (res && res.status === "ok") {
+      alert("✓ Hospital Agreement uploaded safely!");
+      await loadDirectHospitalOpsView(opsPublicViewData.hospital.userId);
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
   async function submitAssociatePaymentFromOpsView() {
     const staff = opsUnlockedUser || (session.userId ? { loginId: session.userId, password: session.password } : null);
-    if (!staff || !opsPublicViewData.hospital) return openOpsAuthModal();
+    if (!staff && !session.mpUid && !session.mpMob) return openOpsAuthModal();
+    const paymentType = document.getElementById("opsAssocPayType")?.value || "CONSULTANCY";
     const amt = Number(document.getElementById("opsAssocAddPayAmt").value) || 0;
     const note = (document.getElementById("opsAssocAddPayNote").value || "").trim();
     if (amt <= 0) return alert("Please enter a valid payment amount greater than ₹0.");
     const res = await callApi({
       action: "submitPaymentRequest",
-      userId: staff.loginId,
-      password: staff.password,
+      userId: staff ? staff.loginId : session.userId,
+      password: staff ? staff.password : session.password,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
       hospId: opsPublicViewData.hospital.userId,
       hospitalName: opsPublicViewData.hospital.hospitalName,
+      paymentType,
       amount: amt,
       note
     }, "Submitting Payment Request...");
     if (res && res.status === "ok") {
-      alert("✓ Payment request submitted! It will reflect in the main balance once Admin approves it.");
+      alert("✓ " + (res.message || "Payment request submitted for Admin approval!"));
       await loadDirectHospitalOpsView(opsPublicViewData.hospital.userId);
     } else if (res && res.message) {
       alert(res.message);
@@ -1378,6 +1799,10 @@
       return;
     }
 
+    applyAuthenticatedResponse(res, uid, pass, isImpersonate, false);
+  }
+
+  function applyAuthenticatedResponse(res, uid, pass, isImpersonate, viaMasterPortal) {
     const subRoleUpper = normStr(res.user ? res.user.role : "");
     const isAssocRole = (res.role === "associate" || subRoleUpper === "ASSOCIATE");
     const resolvedRole = isAssocRole ? "associate" : res.role;
@@ -1394,6 +1819,8 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         userId: uid,
         password: pass,
+        mpUid: session.mpUid,
+        mpMob: session.mpMob,
         role: session.role,
         subRole: session.subRole,
         sheetColumn: session.sheetColumn,
@@ -1401,31 +1828,28 @@
       }));
     }
 
-    if (pendingDirectHospId && !isImpersonate) {
-      const target = pendingDirectHospId;
-      pendingDirectHospId = "";
-      await loadDirectHospitalOpsView(target);
-      return;
-    }
-
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("accessDeniedSection").classList.add("hidden");
     document.getElementById("navUserBox").classList.remove("hidden");
 
+    const analyticsTabBtn = document.getElementById("mainTabAnalytics");
+
     if (resolvedRole === "admin" || resolvedRole === "ops_team" || resolvedRole === "associate") {
       if (resolvedRole === "admin") {
         session.adminCredentials = { userId: uid, password: pass };
-        document.getElementById("navRoleBadge").innerText = "SUPER ADMIN";
+        document.getElementById("navRoleBadge").innerText = viaMasterPortal ? "SUPER ADMIN (SSO)" : "SUPER ADMIN";
         document.getElementById("adminHeaderTitle").innerText = "UDCP — Super Admin Control Center";
-        document.getElementById("adminHeaderSub").innerHTML = "Stage-wise Compliance, 25%×4 Payment Gates & <strong>WORKING TARGETS</strong> Calendar Sync";
+        document.getElementById("adminHeaderSub").innerHTML = "Stage-wise Compliance, Consultancy vs Other Work, Expenses & <strong>Business Analytics</strong>";
         document.getElementById("superAdminAssignBox").classList.remove("hidden");
+        if (analyticsTabBtn) analyticsTabBtn.classList.remove("hidden");
         session.adminData = res.data;
       } else if (resolvedRole === "associate") {
         session.adminCredentials = { userId: uid, password: pass };
         document.getElementById("navRoleBadge").innerText = `${session.fullName} (ASSOCIATE)`;
         document.getElementById("adminHeaderTitle").innerText = `UDCP — Associate Desk (${session.fullName})`;
-        document.getElementById("adminHeaderSub").innerText = "Showing ONLY your assigned hospitals, documents, upload portals & payment entry";
+        document.getElementById("adminHeaderSub").innerText = "Your assigned hospitals, Agreements, Consultancy/Other Work payments & Personal Expense Ledger";
         document.getElementById("superAdminAssignBox").classList.add("hidden");
+        if (analyticsTabBtn) analyticsTabBtn.classList.add("hidden");
         session.adminData = scopeDataForAssociate(res.data, {
           sheetColumn: session.sheetColumn,
           fullName: session.fullName,
@@ -1434,8 +1858,9 @@
       } else {
         document.getElementById("navRoleBadge").innerText = `${session.fullName} (${session.subRole})`;
         document.getElementById("adminHeaderTitle").innerText = `UDCP — Umbrella Ops Desk (${session.subRole})`;
-        document.getElementById("adminHeaderSub").innerText = "All hospitals visible for document upload & verification (Fee details hidden)";
+        document.getElementById("adminHeaderSub").innerText = "Document upload/verification & Personal Expense Ledger (Fees hidden)";
         document.getElementById("superAdminAssignBox").classList.add("hidden");
+        if (analyticsTabBtn) analyticsTabBtn.classList.add("hidden");
         session.adminData = res.data;
       }
       document.getElementById("backToAdminBtn").classList.add("hidden");
@@ -1447,6 +1872,7 @@
       document.getElementById("backToAdminBtn").classList.toggle("hidden", !isImpersonate);
       session.hospital = res.hospital;
       session.ncs = res.ncs || [];
+      session.otherPayments = res.otherPayments || [];
       hospStageFilter = "ALL";
       document.getElementById("adminSection").classList.add("hidden");
       document.getElementById("hospitalSection").classList.remove("hidden");
@@ -1461,7 +1887,8 @@
       if (session.role === "associate" && !isAssociateAllowedForHospital(hosp, { sheetColumn: session.sheetColumn, fullName: session.fullName, userId: session.userId })) {
         return alert("Access Denied: You can only open your own assigned hospitals.");
       }
-      window.location.href = `${window.location.href.split("?")[0]}?hosp=${encodeURIComponent(hosp.userId)}`;
+      const mpSuffix = (session.mpUid || session.mpMob) ? `&mp_uid=${encodeURIComponent(session.mpUid)}&mp_mob=${encodeURIComponent(session.mpMob)}` : "";
+      window.location.href = `${window.location.href.split("?")[0]}?hosp=${encodeURIComponent(hosp.userId)}${mpSuffix}`;
       return;
     }
     if (!hosp.password) return alert("Hospital login credentials not generated yet.");
@@ -1470,6 +1897,10 @@
   }
 
   async function returnToAdminDesk() {
+    if (session.mpUid || session.mpMob) {
+      await performMasterHandshake(session.mpUid, session.mpMob);
+      return;
+    }
     if (!session.adminCredentials) return;
     await performLogin(session.adminCredentials.userId, session.adminCredentials.password, true, false);
   }
@@ -1513,7 +1944,7 @@
       timerBox.removeAttribute("data-countdown");
     }
 
-    // Compact Dual Work vs Payment Meter on Hospital Dashboard
+    // Compact Dual Work vs Payment Meter + Other Work on Hospital Dashboard
     const dualBox = document.getElementById("hospDualMeterBox");
     if (dualBox) {
       dualBox.innerHTML = renderCompactDualMeterHtml(h, { showPay: true, compactCard: false });
@@ -1570,7 +2001,7 @@
     document.getElementById("hospProgressBar").style.width = pct + "%";
 
     let anyUnpaidWarning = "";
-    if (payStats.hasSetup && !workInfo.isDropped && workInfo.workPct > payStats.payPct) {
+    if ((payStats.totalFee > 0 || payStats.paidAmount > 0) && !workInfo.isDropped && workInfo.workPct > payStats.payPct) {
       anyUnpaidWarning = `⚠️ Consultancy Fee Due: Work has reached ${workInfo.label} (${workInfo.workPct}%), while fee received is ${payStats.payPct}% (₹${payStats.paidAmount.toLocaleString("en-IN")}${payStats.totalFee ? " / ₹" + payStats.totalFee.toLocaleString("en-IN") : ""}). Balance Due: ₹${payStats.balanceDue.toLocaleString("en-IN")}.`;
     }
     if (payBar && warnBanner) {
@@ -1595,10 +2026,14 @@
 
     container.innerHTML = visibleList.map(nc => {
       const reqM = getRequiredMilestoneForStageOrder(nc.stageOrder);
-      const isStagePaymentDue = payStats.hasSetup && reqM && payStats.payPct < reqM.pct;
+      const isStagePaymentDue = (payStats.totalFee > 0 || payStats.paidAmount > 0) && reqM && payStats.payPct < reqM.pct;
       const isStrictLocked = isStagePaymentDue && (h.paymentLockMode === "STRICT");
       const canRespond = nc.status !== "Approved" && !isStrictLocked;
       const safeJson = JSON.stringify(nc).replace(/'/g, "&#39;");
+
+      const histLinks = (nc.proofHistory && nc.proofHistory.length)
+        ? nc.proofHistory.map((item, i) => `<a href="${item.url}" target="_blank" class="text-xs font-bold text-blue-600 underline mr-2">📑 PDF ${i + 1}</a>`).join("")
+        : (nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold text-blue-600 underline">📑 View Submitted PDF</a>` : `<span class="text-xs text-slate-400">Awaiting response</span>`);
 
       return `
         <div class="bg-white rounded-2xl border ${nc.status === "Rejected" ? "border-red-300" : "border-slate-200"} p-5 shadow-sm space-y-3">
@@ -1614,24 +2049,23 @@
             ${formatNcRichText(nc.correctiveAction)}
             ${nc.adminNote ? `<div class="mt-3 bg-blue-50 border-l-4 border-blue-500 p-2.5 rounded-r-lg text-xs text-blue-900"><strong>Guidance Note:</strong> ${escapeHtml(nc.adminNote)}</div>` : ""}
           </div>
-          ${nc.uploadRemark ? `<div class="bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold p-2.5 rounded-lg">📝 Upload Remark: ${escapeHtml(nc.uploadRemark)}</div>` : ""}
           ${nc.remark ? `<div class="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold p-2.5 rounded-lg">⚠ Admin Remark: ${escapeHtml(nc.remark)}</div>` : ""}
-          ${nc.status === "Unable to Provide" && nc.hospitalResponse ? `<div class="bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold p-2.5 rounded-lg">📝 Your Response: ${escapeHtml(nc.hospitalResponse)}</div>` : ""}
+          ${nc.hospitalResponse ? `<div class="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold p-2.5 rounded-lg">📝 Response / Submission History: ${escapeHtml(nc.hospitalResponse)}</div>` : ""}
           <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-            <div>${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold text-blue-600 underline">📑 View Submitted Merged PDF</a>` : `<span class="text-xs text-slate-400">Awaiting response</span>`}</div>
+            <div>${histLinks}</div>
             ${isStrictLocked
               ? `<span class="text-xs font-bold bg-red-100 text-red-800 px-3 py-2 rounded-xl border border-red-200">🔒 Locked — Clear ${reqM.label}</span>`
               : (canRespond ? `
                 <div class="flex flex-wrap gap-2">
                   <button type="button" onclick='openUnableModal(${safeJson}, "HOSPITAL")' class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300">Unable to Provide</button>
-                  <button type="button" onclick='openEvidenceModal(${safeJson}, "HOSPITAL")' class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow">📸 Capture / Upload Proof</button>
+                  <button type="button" onclick='openEvidenceModal(${safeJson}, "HOSPITAL")' class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow">📸 Upload / Write Remark</button>
                 </div>` : "")}
           </div>
         </div>`;
     }).join("");
   }
 
-  /* ================= EVIDENCE UPLOAD MODAL + SHORT REMARK ================= */
+  /* ================= EVIDENCE UPLOAD MODAL + ENCRYPTED PDF + REMARK ONLY ================= */
 
   function openEvidenceModal(nc, ctx = "HOSPITAL") {
     activeNc = nc;
@@ -1797,10 +2231,48 @@
   function renderQueueUI() {
     document.getElementById("queueCount").innerText = evidenceQueue.length;
     document.getElementById("submitMergedBtn").disabled = evidenceQueue.length === 0;
+    const remarkVal = (document.getElementById("uploadShortRemarkInput")?.value || "").trim();
+    const textOnlyBtn = document.getElementById("submitTextOnlyBtn");
+    if (textOnlyBtn) textOnlyBtn.disabled = remarkVal.length === 0;
+
     const listBox = document.getElementById("evidenceQueueList");
     listBox.innerHTML = evidenceQueue.length
       ? evidenceQueue.map((item, idx) => `<div class="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-200"><span class="truncate font-semibold text-slate-700">${item.type === "pdf" ? "📑" : "🖼️"} ${escapeHtml(item.label)}</span><button type="button" onclick="removeQueueItem(${idx})" class="text-red-600 font-bold px-2">✕</button></div>`).join("")
-      : `<p class="text-slate-400 text-center py-2">No photos or PDFs added yet.</p>`;
+      : `<p class="text-slate-400 text-center py-2">No photos or PDFs attached yet (you can also submit a written remark below).</p>`;
+  }
+
+  async function submitRemarkOnlyWithoutFile() {
+    const remarkText = (document.getElementById("uploadShortRemarkInput")?.value || "").trim();
+    if (!remarkText) return alert("Please enter a written response or remark.");
+
+    const isOpsCtx = activeUploadContext === "OPS_VIEW";
+    const staff = opsUnlockedUser || (session.userId ? { loginId: session.userId, password: session.password } : null);
+    const authUser = isOpsCtx && staff ? staff.loginId : session.userId;
+    const authPass = isOpsCtx && staff ? staff.password : session.password;
+    const targetHospId = isOpsCtx && opsPublicViewData.hospital ? opsPublicViewData.hospital.userId : session.userId;
+
+    const res = await callApi({
+      action: "submitTextOnly",
+      hospId: targetHospId,
+      userId: authUser,
+      password: authPass,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
+      ncId: activeNc.ncId,
+      remarkText
+    }, "Submitting Written Response...");
+
+    if (res && res.status === "ok") {
+      closeEvidenceModal();
+      if (isOpsCtx) {
+        await loadDirectHospitalOpsView(targetHospId);
+      } else {
+        session.ncs = res.ncs;
+        renderHospitalDashboard();
+      }
+    } else if (res && res.message) {
+      alert(res.message);
+    }
   }
 
   async function mergeAndUploadFinalPDF() {
@@ -1817,7 +2289,8 @@
           const page = mergedPdf.addPage([jpgImage.width, jpgImage.height]);
           page.drawImage(jpgImage, { x: 0, y: 0, width: jpgImage.width, height: jpgImage.height });
         } else if (item.type === "pdf") {
-          const srcPdf = await PDFDocument.load(item.arrayBuffer);
+          // Support Encrypted / Owner-locked PDFs safely
+          const srcPdf = await PDFDocument.load(item.arrayBuffer, { ignoreEncryption: true });
           const pages = await mergedPdf.copyPages(srcPdf, srcPdf.getPageIndices());
           pages.forEach(p => mergedPdf.addPage(p));
         }
@@ -1838,6 +2311,8 @@
         hospId: targetHospId,
         userId: authUser,
         password: authPass,
+        mpUid: session.mpUid,
+        mpMob: session.mpMob,
         ncId: activeNc.ncId,
         srNo: activeNc.srNo,
         gps: currentCoords,
@@ -1889,6 +2364,8 @@
       hospId: targetHospId,
       userId: authUser,
       password: authPass,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
       ncId: activeNc.ncId,
       reason
     }, "Submitting Response...");
@@ -1908,7 +2385,10 @@
   /* ================= ADMIN / ASSOCIATE DESK ================= */
 
   async function refreshAdminData() {
-    const res = await callApi({ action: "getAdminData", adminUser: session.userId, adminPass: session.password, forceRefresh: true }, "Refreshing UDCP Data...");
+    const payload = (session.mpUid || session.mpMob)
+      ? { action: "getAdminData", mpUid: session.mpUid, mpMob: session.mpMob, forceRefresh: true }
+      : { action: "getAdminData", adminUser: session.userId, adminPass: session.password, forceRefresh: true };
+    const res = await callApi(payload, "Refreshing UDCP Data...");
     if (res && res.status === "ok") {
       if (session.role === "associate") {
         session.adminData = scopeDataForAssociate(res.data, {
@@ -1924,12 +2404,29 @@
   }
 
   function switchAdminMainTab(tab) {
-    const isAssign = tab === "assign";
-    document.getElementById("mainTabAssign").className = isAssign ? "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm" : "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
-    document.getElementById("mainTabLogins").className = !isAssign ? "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm" : "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700";
-    document.getElementById("adminAssignView").classList.toggle("hidden", !isAssign);
-    document.getElementById("adminLoginsView").classList.toggle("hidden", isAssign);
-    if (!isAssign) renderActiveLoginsDirectory();
+    const tabs = ["assign", "logins", "expenses", "analytics"];
+    tabs.forEach(t => {
+      const btn = document.getElementById("mainTab" + t.charAt(0).toUpperCase() + t.slice(1));
+      if (!btn) return;
+      if (t === tab) {
+        btn.className = t === "analytics"
+          ? "px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-300 shadow-sm ring-2 ring-amber-400"
+          : "px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm";
+      } else {
+        btn.className = t === "analytics"
+          ? "px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-amber-300/80 hover:text-amber-300"
+          : "px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50";
+      }
+    });
+
+    document.getElementById("adminAssignView").classList.toggle("hidden", tab !== "assign");
+    document.getElementById("adminLoginsView").classList.toggle("hidden", tab !== "logins");
+    document.getElementById("adminExpensesView").classList.toggle("hidden", tab !== "expenses");
+    document.getElementById("adminAnalyticsView").classList.toggle("hidden", tab !== "analytics");
+
+    if (tab === "logins") renderActiveLoginsDirectory();
+    if (tab === "expenses") renderExpensesTab();
+    if (tab === "analytics" && session.role === "admin") renderAdminAnalytics();
   }
 
   function switchEntryMode(mode) {
@@ -2063,7 +2560,8 @@
     const box = document.getElementById("adminPendingPaymentsBox");
     if (!box) return;
     const isSuperAdmin = session.role === "admin";
-    const pendingList = (session.adminData && session.adminData.pendingPaymentRequests) || [];
+    const allReqs = (session.adminData && session.adminData.paymentRequests) || [];
+    const pendingList = allReqs.filter(r => r.status === "Pending");
     if (!isSuperAdmin || !pendingList.length) {
       box.classList.add("hidden");
       return;
@@ -2072,19 +2570,23 @@
     box.innerHTML = `
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-black text-amber-950">💰 Pending Associate Payment Approvals (${pendingList.length})</h3>
-        <span class="text-[11px] font-bold text-amber-900">Approve to add into hospital's Paid Fee</span>
+        <span class="text-[11px] font-bold text-amber-900">Consultancy Fee updates main balance • Other Work logs separately</span>
       </div>
       <div class="space-y-2">
         ${pendingList.map(req => `
           <div class="bg-white border border-amber-300 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="space-y-0.5">
-              <div class="font-black text-slate-900">${escapeHtml(req.hospitalName)} <span class="font-mono text-[11px] text-slate-500">(${escapeHtml(req.hospId)})</span></div>
-              <div class="text-slate-700">New Payment: <strong class="text-emerald-700 text-sm">₹${Number(req.amount).toLocaleString("en-IN")}</strong> • Submitted by <strong>${escapeHtml(req.submittedBy)}</strong> (${escapeHtml(req.submittedAt)})</div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-black text-slate-900">${escapeHtml(req.hospitalName)}</span>
+                <span class="font-mono text-[11px] text-slate-500">(${escapeHtml(req.userId)})</span>
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${req.paymentType === "OTHER_WORK" ? "bg-blue-100 text-blue-800" : "bg-emerald-100 text-emerald-800"}">${req.paymentType === "OTHER_WORK" ? "OTHER WORK" : "CONSULTANCY FEE"}</span>
+              </div>
+              <div class="text-slate-700">Amount: <strong class="text-emerald-700 text-sm">₹${Number(req.amount).toLocaleString("en-IN")}</strong> • Submitted by <strong>${escapeHtml(req.associateName)}</strong> (${escapeHtml(req.requestedAt)})</div>
               ${req.note ? `<div class="text-slate-600">Note: <em>${escapeHtml(req.note)}</em></div>` : ""}
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" onclick="reviewPaymentRequest('${req.reqId}', 'APPROVED')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3.5 py-2 rounded-lg shadow">✓ Approve & Add</button>
-              <button type="button" onclick="reviewPaymentRequest('${req.reqId}', 'REJECTED')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-lg">✕ Reject</button>
+              <button type="button" onclick="reviewPaymentRequest('${req.reqId}', 'Approved')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3.5 py-2 rounded-lg shadow">✓ Approve & Add</button>
+              <button type="button" onclick="reviewPaymentRequest('${req.reqId}', 'Rejected')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-lg">✕ Reject</button>
             </div>
           </div>
         `).join("")}
@@ -2094,7 +2596,7 @@
 
   async function reviewPaymentRequest(reqId, decision) {
     let remark = "";
-    if (decision === "REJECTED") {
+    if (decision === "Rejected") {
       remark = prompt("Reason for rejecting payment entry (optional):") || "";
     }
     const res = await callApi({
@@ -2104,7 +2606,7 @@
       reqId,
       decision,
       remark
-    }, decision === "APPROVED" ? "Approving Payment..." : "Rejecting Payment...");
+    }, decision === "Approved" ? "Approving Payment..." : "Rejecting Payment...");
     if (res && res.status === "ok") {
       session.adminData = res.data;
       renderAdminDashboard();
@@ -2152,6 +2654,8 @@
 
     renderAdminTable();
     if (!document.getElementById("adminLoginsView").classList.contains("hidden")) renderActiveLoginsDirectory();
+    if (!document.getElementById("adminExpensesView").classList.contains("hidden")) renderExpensesTab();
+    if (!document.getElementById("adminAnalyticsView").classList.contains("hidden") && session.role === "admin") renderAdminAnalytics();
   }
 
   function onFilterHospChange() {
@@ -2297,7 +2801,7 @@
       if (fHosp !== "ALL" && n.userId !== fHosp) return false;
       if (fStage !== "ALL" && n.stage !== fStage) return false;
       if (fStat !== "ALL" && n.status !== fStat) return false;
-      if (q && !(`${n.hospitalName} ${n.correctiveAction} ${n.userId} ${n.stage} ${n.uploadRemark || ""}`).toLowerCase().includes(q)) return false;
+      if (q && !(`${n.hospitalName} ${n.correctiveAction} ${n.userId} ${n.stage} ${n.hospitalResponse || ""}`).toLowerCase().includes(q)) return false;
       return true;
     });
 
@@ -2307,7 +2811,12 @@
       return;
     }
 
-    container.innerHTML = list.map(nc => `
+    container.innerHTML = list.map(nc => {
+      const histLinks = (nc.proofHistory && nc.proofHistory.length)
+        ? nc.proofHistory.map((item, i) => `<a href="${item.url}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg">PDF ${i + 1}</a>`).join("")
+        : (nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View PDF</a>` : "");
+
+      return `
       <div class="border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div class="space-y-2 flex-1">
           <div class="flex flex-wrap items-center gap-2">
@@ -2323,11 +2832,11 @@
             }">${nc.status}</span>
           </div>
           <div>${formatNcRichText(nc.correctiveAction)}</div>
-          ${nc.uploadRemark ? `<p class="text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded"><strong>📝 Upload Remark:</strong> ${escapeHtml(nc.uploadRemark)}</p>` : ""}
+          ${nc.hospitalResponse ? `<p class="text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded"><strong>📝 Submission / Log:</strong> ${escapeHtml(nc.hospitalResponse)}</p>` : ""}
           ${nc.remark ? `<p class="text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded"><strong>Remark:</strong> ${escapeHtml(nc.remark)}</p>` : ""}
         </div>
         <div class="flex flex-wrap items-center gap-2 shrink-0">
-          ${nc.proofUrl ? `<a href="${nc.proofUrl}" target="_blank" class="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg">View Merged PDF</a>` : ""}
+          ${histLinks}
           ${(isAssociate || isOpsTeam) && nc.userId ? `<a href="?hosp=${encodeURIComponent(nc.userId)}" class="text-xs font-bold bg-red-600 text-white px-3 py-1.5 rounded-lg">📸 Upload / Open</a>` : ""}
           ${canApprove && (nc.status === "Submitted" || nc.status === "Unable to Provide") ? `
             <button type="button" onclick="verifyNC('${nc.userId}', '${nc.ncId}', 'Approved')" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-lg">✓ Approve</button>
@@ -2336,7 +2845,7 @@
           ${isSuperAdmin ? `<button type="button" onclick="deleteNC('${nc.userId}', '${nc.ncId}')" class="text-xs text-slate-400 hover:text-red-600 px-2 py-1.5">🗑</button>` : ""}
         </div>
       </div>
-    `).join("");
+    `}).join("");
   }
 
   async function deleteNC(userId, ncId) {
@@ -2511,9 +3020,11 @@
     }
   }
 
-  async function submitAssociateAddPaymentCard(hospId, hospitalName, inputId, noteId) {
+  async function submitAssociateAddPaymentCard(hospId, hospitalName, typeId, inputId, noteId) {
+    const typeEl = document.getElementById(typeId);
     const amtEl = document.getElementById(inputId);
     const noteEl = document.getElementById(noteId);
+    const paymentType = typeEl ? typeEl.value : "CONSULTANCY";
     const amount = Number(amtEl ? amtEl.value : 0) || 0;
     const note = (noteEl ? noteEl.value : "").trim();
     if (amount <= 0) return alert("Please enter a valid received amount (₹).");
@@ -2522,8 +3033,11 @@
       action: "submitPaymentRequest",
       userId: session.userId,
       password: session.password,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
       hospId,
       hospitalName,
+      paymentType,
       amount,
       note
     }, "Sending Payment for Admin Approval...");
@@ -2531,7 +3045,7 @@
     if (res && res.status === "ok") {
       if (amtEl) amtEl.value = "";
       if (noteEl) noteEl.value = "";
-      alert("✓ Payment entry submitted! It will reflect in the hospital's main Paid meter after Admin approves it.");
+      alert("✓ " + (res.message || "Payment entry submitted for Admin approval!"));
       await refreshAdminData();
     } else if (res && res.message) {
       alert(res.message);
@@ -2541,7 +3055,7 @@
   function isHospitalPaymentDue(h) {
     if (isHospitalDropped(h)) return false;
     const pay = computeHospitalPaymentStats(h);
-    if (!pay.hasSetup) return false;
+    if (pay.totalFee <= 0 && pay.paidAmount <= 0) return false;
     const work = getWorkStepInfo(h);
     return work.workPct > pay.payPct;
   }
@@ -2549,7 +3063,7 @@
   function renderActiveLoginsDirectory() {
     const q = (document.getElementById("directorySearchInput")?.value || "").trim().toLowerCase();
     const assocFilter = document.getElementById("directoryAssocFilter")?.value || "ALL";
-    const { hospitals, associates } = session.adminData;
+    const { hospitals, associates, agreements } = session.adminData;
     const isSuperAdmin = session.role === "admin";
     const isAssociate = session.role === "associate";
     const isOpsTeam = session.role === "ops_team";
@@ -2557,7 +3071,7 @@
 
     document.getElementById("dirSubHeaderText").innerHTML = isSuperAdmin
       ? "Edit hospitals inline and click <strong>Save & Sync All</strong>"
-      : (isAssociate ? "Your assigned hospitals, Dual Work vs Payment Meter & Add Payment requests" : "All hospitals (Fee details hidden for Ops team)");
+      : (isAssociate ? "Your assigned hospitals, Dual Work vs Payment Meter, Agreements & Consultancy/Other Work entry" : "All hospitals (Fee & Agreements hidden for Ops team)");
 
     const batchAssocSel = document.getElementById("batchAssocInput");
     if (batchAssocSel) {
@@ -2675,6 +3189,7 @@
         const stageOpts = stageList.map(st => `<option value="${st}" ${(h.currentStage || "1. Kickoff Docs") === st ? "selected" : ""}>${st}</option>`).join("");
         const metrics = h.stageMetrics || { latestPercent: 0, latestApproved: 0, latestTotal: 0 };
         const payStats = computeHospitalPaymentStats(h);
+        const hospAgreements = (agreements || []).filter(a => (h.userId && normKey(a.userId) === normKey(h.userId)) || normKey(a.hospitalName) === normKey(h.hospitalName));
 
         let statusChipHtml = "";
         if (isSuperAdmin) {
@@ -2691,6 +3206,7 @@
           statusChipHtml = `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-full">✓ Certified</span>`;
         }
 
+        const addTypeId = `assocPayType_${idxOnPage}`;
         const addAmtId = `assocPayAmt_${idxOnPage}`;
         const addNoteId = `assocPayNote_${idxOnPage}`;
 
@@ -2707,7 +3223,7 @@
               <span class="text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">${metrics.latestPercent}% (${metrics.latestApproved}/${metrics.latestTotal})</span>
             </div>
 
-            <!-- Compact Dual Work vs Payment Meter on Card -->
+            <!-- Compact Dual Work vs Payment Meter + Other Work on Card -->
             ${renderCompactDualMeterHtml(h, { showPay: canSeeFee, compactCard: true })}
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
@@ -2732,18 +3248,34 @@
                 </div>
               </div>
               <div class="sm:col-span-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Actual Received / Paid Amount (₹)</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Actual Consultancy Paid Amount (₹)</label>
                 <input type="number" value="${payStats.paidAmount || ""}" placeholder="₹ Actual Paid Amount (e.g. 10000)" oninput='stageHospitalChange(${escName}, "paidAmount", this.value)' class="w-full text-xs font-bold border rounded-lg px-2.5 py-1.5 bg-white" />
               </div>` : ""}
             </div>
+
+            ${(isSuperAdmin || isAssociate) && h.userId ? `
+            <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="font-extrabold text-indigo-950 text-[11px]">📑 Agreements (${hospAgreements.length}):</span>
+                ${hospAgreements.map((a, i) => `<a href="${a.fileUrl}" target="_blank" class="text-[11px] font-bold text-indigo-700 underline">Doc ${hospAgreements.length - i}</a>`).join(" ") || `<span class="text-[11px] text-slate-400">None</span>`}
+              </div>
+              <label class="cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white font-bold px-2.5 py-1 rounded-lg text-[11px]">
+                + Upload Agreement
+                <input type="file" accept="application/pdf,image/*" onchange='uploadAgreementFromCard(event, ${JSON.stringify(h.userId)}, ${escName})' class="hidden" />
+              </label>
+            </div>` : ""}
 
             ${isAssociate ? `
             <div class="bg-amber-50/80 border border-amber-300 rounded-xl p-2.5 space-y-1.5 text-xs">
               <div class="font-extrabold text-amber-950 text-[11px]">💰 Add New Payment Received (Admin Approval Required)</div>
               <div class="flex flex-wrap gap-1.5">
-                <input id="${addAmtId}" type="number" min="1" placeholder="New Amount ₹" class="w-28 px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs font-bold" />
-                <input id="${addNoteId}" type="text" placeholder="Note (UPI/Cash)" class="flex-1 min-w-[100px] px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs" />
-                <button type="button" onclick='submitAssociateAddPaymentCard(${JSON.stringify(h.userId || "")}, ${escName}, "${addAmtId}", "${addNoteId}")' class="bg-slate-900 text-amber-300 font-extrabold px-3 py-1 rounded-lg text-[11px]">+ Submit</button>
+                <select id="${addTypeId}" class="px-2 py-1 rounded-lg border border-amber-300 bg-white text-xs font-extrabold">
+                  <option value="CONSULTANCY">Consultancy</option>
+                  <option value="OTHER_WORK">Other Work</option>
+                </select>
+                <input id="${addAmtId}" type="number" min="1" placeholder="Amount ₹" class="w-24 px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs font-bold" />
+                <input id="${addNoteId}" type="text" placeholder="Note (UPI/Cash)" class="flex-1 min-w-[90px] px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs" />
+                <button type="button" onclick='submitAssociateAddPaymentCard(${JSON.stringify(h.userId || "")}, ${escName}, "${addTypeId}", "${addAmtId}", "${addNoteId}")' class="bg-slate-900 text-amber-300 font-extrabold px-3 py-1 rounded-lg text-[11px]">+ Submit</button>
               </div>
             </div>` : ""}
 
@@ -2761,6 +3293,506 @@
 
     updateStickySaveBar();
     updateAllCountdowns();
+  }
+
+  async function uploadAgreementFromCard(e, hospId, hospitalName) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const note = prompt("Enter Agreement title / note (optional):", file.name) || file.name;
+    const ext = (file.name.split(".").pop() || "pdf").toLowerCase();
+    const b64 = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+    e.target.value = "";
+
+    const res = await callApi({
+      action: "uploadHospitalAgreement",
+      hospId,
+      hospitalName,
+      userId: session.userId,
+      password: session.password,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
+      note,
+      fileExt: ext,
+      fileBase64: b64
+    }, "Uploading Hospital Agreement...");
+
+    if (res && res.status === "ok") {
+      alert("✓ Hospital Agreement uploaded & saved!");
+      await refreshAdminData();
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
+  /* ================= TAB 3: EXPENSES & PERSONAL MONTHLY LEDGER ================= */
+
+  function onExpenseCategoryChange() {
+    const cat = document.getElementById("expCategorySelect").value;
+    document.getElementById("expOtherDetailBox").classList.toggle("hidden", cat !== "Other");
+  }
+
+  function renderExpensesTab() {
+    const isSuperAdmin = session.role === "admin";
+    const { expenses, hospitals } = session.adminData;
+    const expList = expenses || [];
+
+    const dateInp = document.getElementById("expDateInput");
+    if (dateInp && !dateInp.value) {
+      dateInp.value = new Date().toISOString().slice(0, 10);
+    }
+
+    // Category dropdown options based on role
+    const catSel = document.getElementById("expCategorySelect");
+    const prevCat = catSel.value;
+    if (isSuperAdmin) {
+      catSel.innerHTML = `
+        <option value="Travelling">Travelling (Ticket / Conveyance)</option>
+        <option value="Fooding">Fooding (Meals)</option>
+        <option value="Accommodation">Accommodation (Hotel / Stay)</option>
+        <option value="Salary">Salary (Staff Payroll)</option>
+        <option value="Associate Commission">Associate Commission Payout</option>
+        <option value="Other">Other (Specify)</option>
+      `;
+    } else {
+      catSel.innerHTML = `
+        <option value="Travelling">Travelling (Ticket / Conveyance)</option>
+        <option value="Fooding">Fooding (Meals)</option>
+        <option value="Accommodation">Accommodation (Hotel / Stay)</option>
+        <option value="Other">Other (Specify)</option>
+      `;
+    }
+    if (prevCat && Array.from(catSel.options).some(o => o.value === prevCat)) catSel.value = prevCat;
+    onExpenseCategoryChange();
+
+    document.getElementById("expAdminStaffCol").classList.toggle("hidden", !isSuperAdmin);
+    document.getElementById("expFilterPerson").classList.toggle("hidden", !isSuperAdmin);
+
+    // Populate Hospital dropdown
+    const hospSel = document.getElementById("expHospitalSelect");
+    const prevHosp = hospSel.value;
+    hospSel.innerHTML = `<option value="">-- General / Office --</option>` + (hospitals || []).map(h => `<option value="${escapeHtml(h.hospitalName)}">${escapeHtml(h.hospitalName)}</option>`).join("");
+    if (prevHosp) hospSel.value = prevHosp;
+
+    // Populate Month Filter
+    const monthSet = new Set([new Date().toISOString().slice(0, 7)]);
+    expList.forEach(e => { if (e.monthKey) monthSet.add(e.monthKey); });
+    const monthsSorted = Array.from(monthSet).sort().reverse();
+    const monthSel = document.getElementById("expFilterMonth");
+    const prevMonth = monthSel.value;
+    monthSel.innerHTML = `<option value="ALL">All Months</option>` + monthsSorted.map(m => `<option value="${m}">${m}</option>`).join("");
+    if (prevMonth && Array.from(monthSel.options).some(o => o.value === prevMonth)) monthSel.value = prevMonth;
+
+    // Populate Person Filter (Super Admin only)
+    const personSel = document.getElementById("expFilterPerson");
+    if (isSuperAdmin) {
+      const prevPerson = personSel.value;
+      const people = Array.from(new Set(expList.map(e => e.actorName).filter(Boolean))).sort();
+      personSel.innerHTML = `<option value="ALL">All Team Members</option>` + people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+      if (prevPerson && Array.from(personSel.options).some(o => o.value === prevPerson)) personSel.value = prevPerson;
+    }
+
+    const selMonth = monthSel.value;
+    const selCat = document.getElementById("expFilterCategory").value;
+    const selPerson = isSuperAdmin ? personSel.value : "ALL";
+
+    const filtered = expList.filter(e => {
+      if (selMonth !== "ALL" && e.monthKey !== selMonth) return false;
+      if (selCat !== "ALL" && e.category !== selCat) return false;
+      if (isSuperAdmin && selPerson !== "ALL" && e.actorName !== selPerson) return false;
+      return true;
+    });
+
+    const sumByCat = cat => filtered.filter(e => e.category === cat).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+    const totalExp = filtered.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+    const cards = [
+      { label: "Total Expense", val: totalExp, cls: "bg-slate-900 text-amber-300 border-slate-900" },
+      { label: "Travelling", val: sumByCat("Travelling"), cls: "bg-white text-slate-900 border-slate-200" },
+      { label: "Fooding", val: sumByCat("Fooding"), cls: "bg-white text-slate-900 border-slate-200" },
+      { label: "Accommodation", val: sumByCat("Accommodation"), cls: "bg-white text-slate-900 border-slate-200" },
+      { label: "Other", val: sumByCat("Other"), cls: "bg-white text-slate-900 border-slate-200" }
+    ];
+    if (isSuperAdmin) {
+      cards.push({ label: "Salary + Comm.", val: sumByCat("Salary") + sumByCat("Associate Commission"), cls: "bg-red-50 text-red-900 border-red-200" });
+    }
+
+    document.getElementById("expenseSummaryCards").innerHTML = cards.map(c => `
+      <div class="rounded-xl border p-3 ${c.cls}">
+        <div class="text-[10px] font-bold uppercase opacity-75">${c.label}</div>
+        <div class="text-base font-black mt-0.5">₹${c.val.toLocaleString("en-IN")}</div>
+      </div>
+    `).join("");
+
+    const tbody = document.getElementById("expenseLedgerBody");
+    tbody.innerHTML = filtered.length ? filtered.map(e => `
+      <tr class="hover:bg-slate-50">
+        <td class="p-2.5 font-mono text-[11px]">${escapeHtml(e.dateIso)}</td>
+        <td class="p-2.5 font-bold">${escapeHtml(e.actorName)} <span class="text-[10px] text-slate-400">(${escapeHtml(e.actorRole)})</span></td>
+        <td class="p-2.5 font-extrabold">${escapeHtml(e.category)}${e.otherDetail ? ` <span class="text-[11px] font-semibold text-red-700">(${escapeHtml(e.otherDetail)})</span>` : ""}</td>
+        <td class="p-2.5 text-slate-600">${escapeHtml(e.hospitalName || "General")}</td>
+        <td class="p-2.5 text-slate-600">${escapeHtml(e.note || "-")}</td>
+        <td class="p-2.5 text-right font-black text-slate-900">₹${Number(e.amount).toLocaleString("en-IN")}</td>
+        <td class="p-2.5 text-center">${isSuperAdmin ? `<button type="button" onclick="deleteExpenseEntry('${e.expenseId}')" class="text-red-600 hover:underline font-bold">🗑</button>` : "-"}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="7" class="p-6 text-center text-slate-400">No expenses recorded for this filter.</td></tr>`;
+  }
+
+  async function submitNewExpense() {
+    const date = document.getElementById("expDateInput").value;
+    const category = document.getElementById("expCategorySelect").value;
+    const otherDetail = (document.getElementById("expOtherDetailInput").value || "").trim();
+    const amount = Number(document.getElementById("expAmountInput").value) || 0;
+    const hospitalName = document.getElementById("expHospitalSelect").value;
+    const associateName = (document.getElementById("expAssocNameInput")?.value || "").trim();
+    const note = (document.getElementById("expNoteInput").value || "").trim();
+
+    if (amount <= 0) return alert("Please enter a valid expense amount.");
+    if (category === "Other" && !otherDetail) return alert("Please specify what the 'Other' expense is for.");
+
+    const res = await callApi({
+      action: "addExpense",
+      userId: session.userId,
+      password: session.password,
+      mpUid: session.mpUid,
+      mpMob: session.mpMob,
+      date,
+      category,
+      otherDetail,
+      amount,
+      hospitalName,
+      associateName,
+      note
+    }, "Saving Expense...");
+
+    if (res && res.status === "ok") {
+      document.getElementById("expAmountInput").value = "";
+      document.getElementById("expOtherDetailInput").value = "";
+      document.getElementById("expNoteInput").value = "";
+      if (res.data && res.data.hospitals) {
+        session.adminData = res.data;
+      } else if (res.data && res.data.expenses) {
+        session.adminData.expenses = res.data.expenses;
+      }
+      renderExpensesTab();
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
+  async function deleteExpenseEntry(expenseId) {
+    if (!confirm("Delete this expense record?")) return;
+    const res = await callApi({
+      action: "deleteExpense",
+      adminUser: session.userId,
+      adminPass: session.password,
+      expenseId
+    }, "Deleting Expense...");
+    if (res && res.status === "ok") {
+      session.adminData = res.data;
+      renderAdminDashboard();
+    }
+  }
+
+  /* ================= TAB 4: SUPER ADMIN BUSINESS ANALYTICS & ROI SUITE ================= */
+
+  function resetAnalyticsFilters() {
+    document.getElementById("anaFromDate").value = "";
+    document.getElementById("anaToDate").value = "";
+    document.getElementById("anaHospFilter").value = "ALL";
+    document.getElementById("anaAssocFilter").value = "ALL";
+    document.getElementById("anaStageFilter").value = "ALL";
+    document.getElementById("anaPayStatusFilter").value = "ALL";
+    renderAdminAnalytics();
+  }
+
+  async function updateAssociateCommissionRate(assocName, newPct) {
+    const pct = Math.min(50, Math.max(0, Number(newPct) || 0));
+    const res = await callApi({
+      action: "saveAssociateCommission",
+      adminUser: session.userId,
+      adminPass: session.password,
+      associate: assocName,
+      commissionPct: pct
+    }, `Updating ${assocName} Commission to ${pct}%...`);
+    if (res && res.status === "ok") {
+      session.adminData = res.data;
+      renderAdminAnalytics();
+    } else if (res && res.message) {
+      alert(res.message);
+    }
+  }
+
+  function renderAdminAnalytics() {
+    if (session.role !== "admin") return;
+    const { hospitals, otherPayments, expenses, associates, commissions } = session.adminData;
+
+    // Populate filter dropdowns
+    const hSel = document.getElementById("anaHospFilter");
+    const prevH = hSel.value;
+    hSel.innerHTML = `<option value="ALL">All Hospitals</option>` + (hospitals || []).map(h => `<option value="${escapeHtml(h.hospitalName)}">${escapeHtml(h.hospitalName)}</option>`).join("");
+    if (prevH && Array.from(hSel.options).some(o => o.value === prevH)) hSel.value = prevH;
+
+    const aSel = document.getElementById("anaAssocFilter");
+    const prevA = aSel.value;
+    aSel.innerHTML = `<option value="ALL">All Associates</option>` + (associates || []).map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+    if (prevA && Array.from(aSel.options).some(o => o.value === prevA)) aSel.value = prevA;
+
+    const fromDate = document.getElementById("anaFromDate").value;
+    const toDate = document.getElementById("anaToDate").value;
+    const fHosp = hSel.value;
+    const fAssoc = aSel.value;
+    const fStage = document.getElementById("anaStageFilter").value;
+    const fPay = document.getElementById("anaPayStatusFilter").value;
+
+    const filteredHosp = (hospitals || []).filter(h => {
+      if (fHosp !== "ALL" && h.hospitalName !== fHosp) return false;
+      if (fAssoc !== "ALL" && !String(h.associate || "").toUpperCase().includes(fAssoc.toUpperCase())) return false;
+      if (fStage !== "ALL" && getHospitalResolvedStage(h) !== fStage) return false;
+      const p = computeHospitalPaymentStats(h);
+      if (fPay === "BEHIND" && !isHospitalPaymentDue(h)) return false;
+      if (fPay === "DUE" && p.balanceDue <= 0) return false;
+      if (fPay === "FULL" && (p.totalFee <= 0 || p.payPct < 100)) return false;
+      return true;
+    });
+
+    const allowedHospNames = new Set(filteredHosp.map(h => normKey(h.hospitalName)));
+
+    const filteredOther = (otherPayments || []).filter(op => {
+      if (fHosp !== "ALL" && normKey(op.hospitalName) !== normKey(fHosp)) return false;
+      if ((fAssoc !== "ALL" || fStage !== "ALL" || fPay !== "ALL") && !allowedHospNames.has(normKey(op.hospitalName))) return false;
+      return true;
+    });
+
+    const filteredExp = (expenses || []).filter(ex => {
+      if (fromDate && ex.dateIso && ex.dateIso < fromDate) return false;
+      if (toDate && ex.dateIso && ex.dateIso > toDate) return false;
+      if (fHosp !== "ALL" && normKey(ex.hospitalName) !== normKey(fHosp)) return false;
+      if (fAssoc !== "ALL" && normKey(ex.actorName).indexOf(normKey(fAssoc)) === -1 && normKey(ex.associateName).indexOf(normKey(fAssoc)) === -1) return false;
+      return true;
+    });
+
+    const totalContractConsultancy = filteredHosp.reduce((s, h) => s + (Number(h.totalFee) || 0), 0);
+    const receivedConsultancy = filteredHosp.reduce((s, h) => s + computeHospitalPaymentStats(h).paidAmount, 0);
+    const balanceDueConsultancy = filteredHosp.reduce((s, h) => s + computeHospitalPaymentStats(h).balanceDue, 0);
+    const receivedOtherWork = filteredOther.reduce((s, op) => s + (Number(op.amount) || 0), 0);
+    const totalRevenue = receivedConsultancy + receivedOtherWork;
+
+    // Accrued Associate Commission (0-50% on Consultancy Fee ONLY)
+    let accruedCommission = 0;
+    const assocNames = Array.from(new Set([...(associates || []), ...filteredHosp.map(h => h.associate).filter(Boolean)]));
+    const assocRowsHtml = assocNames.map(ag => {
+      const agHosp = filteredHosp.filter(h => normKey(h.associate) === normKey(ag));
+      const agConsultPaid = agHosp.reduce((s, h) => s + computeHospitalPaymentStats(h).paidAmount, 0);
+      const agConsultDue = agHosp.reduce((s, h) => s + computeHospitalPaymentStats(h).balanceDue, 0);
+      const ratePct = Number((commissions || {})[normKey(ag)]) || 0;
+      const earnedComm = Math.round((agConsultPaid * ratePct) / 100);
+      accruedCommission += earnedComm;
+
+      const agDirectExp = filteredExp
+        .filter(ex => ex.category !== "Associate Commission" && (normKey(ex.actorName).indexOf(normKey(ag)) !== -1 || normKey(ex.associateName).indexOf(normKey(ag)) !== -1))
+        .reduce((s, x) => s + (Number(x.amount) || 0), 0);
+      const netContrib = agConsultPaid - earnedComm - agDirectExp;
+      const escAg = JSON.stringify(ag).replace(/'/g, "&#39;");
+
+      return `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 font-black text-slate-900">${escapeHtml(ag)}</td>
+          <td class="p-2.5 text-center font-bold">${agHosp.length}</td>
+          <td class="p-2.5 text-right font-bold text-emerald-700">₹${agConsultPaid.toLocaleString("en-IN")}</td>
+          <td class="p-2.5 text-right font-bold text-red-700">₹${agConsultDue.toLocaleString("en-IN")}</td>
+          <td class="p-2.5 text-center">
+            <input type="number" min="0" max="50" value="${ratePct}" onchange='updateAssociateCommissionRate(${escAg}, this.value)'
+              class="w-16 text-center font-extrabold border border-slate-300 rounded-lg py-1 px-1.5 bg-amber-50" /> %
+          </td>
+          <td class="p-2.5 text-right font-extrabold text-amber-800">₹${earnedComm.toLocaleString("en-IN")}</td>
+          <td class="p-2.5 text-right text-slate-700">₹${agDirectExp.toLocaleString("en-IN")}</td>
+          <td class="p-2.5 text-right font-black ${netContrib >= 0 ? "text-emerald-700" : "text-red-700"}">₹${netContrib.toLocaleString("en-IN")}</td>
+        </tr>
+      `;
+    }).join("");
+    document.getElementById("associateAnalyticsTableBody").innerHTML = assocRowsHtml || `<tr><td colspan="8" class="p-6 text-center text-slate-400">No associates found.</td></tr>`;
+
+    const loggedNonCommExp = filteredExp.filter(ex => ex.category !== "Associate Commission").reduce((s, x) => s + (Number(x.amount) || 0), 0);
+    const loggedCommExp = filteredExp.filter(ex => ex.category === "Associate Commission").reduce((s, x) => s + (Number(x.amount) || 0), 0);
+    const effectiveCommCost = Math.max(accruedCommission, loggedCommExp);
+    const totalExpenses = loggedNonCommExp + effectiveCommCost;
+
+    const netProfit = totalRevenue - totalExpenses;
+    const roiPct = totalExpenses > 0 ? Math.round((netProfit / totalExpenses) * 100) : (totalRevenue > 0 ? 100 : 0);
+    const netMarginPct = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
+
+    const directProjectExp = filteredExp.filter(ex => ["Travelling", "Fooding", "Accommodation"].includes(ex.category)).reduce((s, x) => s + (Number(x.amount) || 0), 0) + effectiveCommCost;
+    const grossProfit = totalRevenue - directProjectExp;
+    const grossMarginPct = totalRevenue > 0 ? Math.round((grossProfit / totalRevenue) * 100) : 0;
+
+    // Break-Even Point (Fixed Salary / Contribution Ratio)
+    const salaryFixedCost = filteredExp.filter(ex => ex.category === "Salary").reduce((s, x) => s + (Number(x.amount) || 0), 0);
+    const contribRatio = totalRevenue > 0 ? Math.max(0.1, grossProfit / totalRevenue) : 0.65;
+    const breakEvenRevenue = salaryFixedCost > 0 ? Math.round(salaryFixedCost / contribRatio) : totalExpenses;
+    const breakEvenReachedPct = breakEvenRevenue > 0 ? Math.min(100, Math.round((totalRevenue / breakEvenRevenue) * 100)) : 100;
+
+    // Collection Efficiency % (Cash Collected vs Work Value Delivered)
+    const expectedWorkValue = filteredHosp.reduce((s, h) => {
+      const w = getWorkStepInfo(h);
+      return s + Math.round(((Number(h.totalFee) || 0) * w.workPct) / 100);
+    }, 0);
+    const collectionEfficiencyPct = expectedWorkValue > 0 ? Math.min(100, Math.round((receivedConsultancy / expectedWorkValue) * 100)) : 100;
+
+    // Receivable Ageing (Behind Work vs Standard Due)
+    const behindWorkDue = filteredHosp.filter(h => isHospitalPaymentDue(h)).reduce((s, h) => s + computeHospitalPaymentStats(h).balanceDue, 0);
+    const regularDue = Math.max(0, balanceDueConsultancy - behindWorkDue);
+
+    const fmt = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+
+    document.getElementById("analyticsPrimaryKpis").innerHTML = `
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="text-[11px] font-bold text-slate-500 uppercase">Total Cash In (Consultancy + Other)</div>
+        <div class="text-2xl font-black text-emerald-700 mt-1">${fmt(totalRevenue)}</div>
+        <div class="text-[11px] text-slate-600 mt-1">Consultancy: <strong>${fmt(receivedConsultancy)}</strong> • Other: <strong>${fmt(receivedOtherWork)}</strong></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="text-[11px] font-bold text-slate-500 uppercase">Total Expenses (Incl. Comm. & Salary)</div>
+        <div class="text-2xl font-black text-red-700 mt-1">${fmt(totalExpenses)}</div>
+        <div class="text-[11px] text-slate-600 mt-1">Ops/Salary: <strong>${fmt(loggedNonCommExp)}</strong> • Comm.: <strong>${fmt(effectiveCommCost)}</strong></div>
+      </div>
+      <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-sm">
+        <div class="text-[11px] font-bold text-amber-300 uppercase">Net Profit & ROI %</div>
+        <div class="text-2xl font-black ${netProfit >= 0 ? "text-emerald-400" : "text-red-400"} mt-1">${fmt(netProfit)} <span class="text-sm font-extrabold">(${roiPct}% ROI)</span></div>
+        <div class="text-[11px] text-slate-300 mt-1">Gross Margin: <strong>${grossMarginPct}%</strong> • Net Margin: <strong>${netMarginPct}%</strong></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="text-[11px] font-bold text-slate-500 uppercase">Consultancy Receivables Due</div>
+        <div class="text-2xl font-black text-amber-700 mt-1">${fmt(balanceDueConsultancy)}</div>
+        <div class="text-[11px] text-red-700 font-bold mt-1">Overdue (Behind Work): ${fmt(behindWorkDue)}</div>
+      </div>
+    `;
+
+    document.getElementById("analyticsAdvancedKpis").innerHTML = `
+      <div class="bg-blue-50/70 rounded-2xl border border-blue-200 p-4">
+        <div class="text-[11px] font-extrabold text-blue-950 uppercase">⚖️ Break-Even Point</div>
+        <div class="text-lg font-black text-blue-900 mt-1">${fmt(breakEvenRevenue)} <span class="text-xs font-bold">(${breakEvenReachedPct}% Reached)</span></div>
+        <div class="w-full bg-blue-200 h-1.5 rounded-full overflow-hidden mt-2"><div class="bg-blue-700 h-full" style="width:${breakEvenReachedPct}%"></div></div>
+      </div>
+      <div class="bg-emerald-50/70 rounded-2xl border border-emerald-200 p-4">
+        <div class="text-[11px] font-extrabold text-emerald-950 uppercase">🎯 Collection Efficiency</div>
+        <div class="text-lg font-black text-emerald-900 mt-1">${collectionEfficiencyPct}% <span class="text-xs font-semibold">of Work Value</span></div>
+        <div class="text-[11px] text-emerald-800 mt-1">Collected ${fmt(receivedConsultancy)} vs ${fmt(expectedWorkValue)} Work</div>
+      </div>
+      <div class="bg-amber-50/70 rounded-2xl border border-amber-200 p-4">
+        <div class="text-[11px] font-extrabold text-amber-950 uppercase">⏳ Receivable Ageing Split</div>
+        <div class="text-xs font-bold text-slate-800 mt-1.5 space-y-0.5">
+          <div class="text-red-700">Critical (Behind Work): <strong>${fmt(behindWorkDue)}</strong></div>
+          <div class="text-slate-600">Upcoming Stages Due: <strong>${fmt(regularDue)}</strong></div>
+        </div>
+      </div>
+      <div class="bg-purple-50/70 rounded-2xl border border-purple-200 p-4">
+        <div class="text-[11px] font-extrabold text-purple-950 uppercase">🔥 Burn & Contract Pipeline</div>
+        <div class="text-xs font-bold text-slate-800 mt-1.5 space-y-0.5">
+          <div>Total Contract Book: <strong>${fmt(totalContractConsultancy)}</strong></div>
+          <div>Net Cash Flow: <strong class="${netProfit >= 0 ? "text-emerald-700" : "text-red-700"}">${fmt(netProfit)}</strong></div>
+        </div>
+      </div>
+    `;
+
+    // Render Chart.js Graphs
+    renderAnalyticsCharts({
+      receivedConsultancy,
+      receivedOtherWork,
+      totalRevenue,
+      totalExpenses,
+      netProfit,
+      filteredExp,
+      effectiveCommCost
+    });
+  }
+
+  function renderAnalyticsCharts(metrics) {
+    if (typeof Chart === "undefined") return;
+    Object.values(analyticsCharts).forEach(ch => { try { ch.destroy(); } catch (e) {} });
+    analyticsCharts = {};
+
+    const c1 = document.getElementById("chartRevExpProfit");
+    if (c1) {
+      analyticsCharts.c1 = new Chart(c1, {
+        type: "bar",
+        data: {
+          labels: ["Total Cash In", "Total Expenses", "Net Profit"],
+          datasets: [{
+            label: "Amount (₹)",
+            data: [metrics.totalRevenue, metrics.totalExpenses, metrics.netProfit],
+            backgroundColor: ["#059669", "#dc2626", metrics.netProfit >= 0 ? "#0f172a" : "#e11d48"],
+            borderRadius: 8
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+
+    const c2 = document.getElementById("chartRevenueMix");
+    if (c2) {
+      analyticsCharts.c2 = new Chart(c2, {
+        type: "doughnut",
+        data: {
+          labels: ["Consultancy Fee Paid", "Other Work Payments"],
+          datasets: [{
+            data: [metrics.receivedConsultancy, metrics.receivedOtherWork],
+            backgroundColor: ["#dc2626", "#2563eb"]
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    const catNames = ["Travelling", "Fooding", "Accommodation", "Salary", "Associate Commission", "Other"];
+    const catVals = catNames.map(cat => {
+      if (cat === "Associate Commission") return metrics.effectiveCommCost;
+      return metrics.filteredExp.filter(e => e.category === cat).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+    });
+    const c3 = document.getElementById("chartExpenseCat");
+    if (c3) {
+      analyticsCharts.c3 = new Chart(c3, {
+        type: "bar",
+        data: {
+          labels: catNames,
+          datasets: [{
+            label: "Expense (₹)",
+            data: catVals,
+            backgroundColor: ["#f59e0b", "#10b981", "#6366f1", "#0f172a", "#dc2626", "#64748b"],
+            borderRadius: 6
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+
+    // Month-on-Month Expense & Net Trend
+    const monthMap = {};
+    metrics.filteredExp.forEach(e => {
+      const m = e.monthKey || "2026-11";
+      monthMap[m] = (monthMap[m] || 0) + (Number(e.amount) || 0);
+    });
+    const months = Object.keys(monthMap).sort();
+    const mLabels = months.length ? months : [new Date().toISOString().slice(0, 7)];
+    const mExpData = mLabels.map(m => monthMap[m] || 0);
+
+    const c4 = document.getElementById("chartMomTrend");
+    if (c4) {
+      analyticsCharts.c4 = new Chart(c4, {
+        type: "line",
+        data: {
+          labels: mLabels,
+          datasets: [{
+            label: "Monthly Expenses (₹)",
+            data: mExpData,
+            borderColor: "#dc2626",
+            backgroundColor: "rgba(220, 38, 38, 0.12)",
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
   }
 </script>
 </body>
